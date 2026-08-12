@@ -9,7 +9,11 @@ import dev.theo.beaconpack.core.PackStats;
 import dev.theo.beaconpack.core.PackTierDef;
 import dev.theo.beaconpack.item.BeaconPackItem;
 import dev.theo.beaconpack.registry.BPLookups;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
@@ -84,36 +88,52 @@ public final class PackTicker {
         PackState state = PackResolver.sanitize(
                 BeaconPackItem.stateOf(pack), stats, effectLookup, tier.level());
 
-        List<EffectSlotConfig> paidFor = new ArrayList<>(state.effects().size());
+        List<EffectSlotConfig> toApply = new ArrayList<>(state.effects().size());
         double owed = 0.0;
         for (EffectSlotConfig slot : state.effects()) {
             if (!slot.enabled()) {
                 continue;
             }
             if (isCoveredByRealBeacon(player, slot, effectLookup)) {
-                paidFor.add(slot);
+                // Skipped entirely, not just made free. Re-applying over the beacon's instance
+                // would replace an ambient effect with a non-ambient one, the coverage check would
+                // fail on the next tick, and the pack would start charging again - flipping between
+                // free and paid every two seconds.
                 continue;
             }
             owed += PackResolver.fuelPerSecond(slot, stats, effectLookup) * stats.fuelMultiplier();
-            paidFor.add(slot);
+            toApply.add(slot);
         }
 
         int cost = (int) Math.ceil(owed * SECONDS_PER_INTERVAL);
         if (BPConfig.INSTANCE.requireFuel.get() && cost > 0) {
             state = refuel(pack, state, stats, cost, player.level().registryAccess());
             if (state.fuel() < cost) {
-                // Out of fuel: switch off rather than silently applying nothing, so the item's
-                // fuel bar and the GUI agree on why the effects stopped.
-                BeaconPackItem.setState(pack, state.withActive(false));
+                runDry(player, pack, state);
                 return;
             }
             state = state.withFuel(state.fuel() - cost);
         }
 
         BeaconPackItem.setState(pack, state);
-        for (EffectSlotConfig slot : paidFor) {
+        for (EffectSlotConfig slot : toApply) {
             apply(player, slot, stats, effectLookup);
         }
+    }
+
+    /**
+     * Switches the pack off and says so.
+     *
+     * <p>Effects stopping with no explanation reads as a bug. This fires once by construction: an
+     * inactive pack is not ticked again until the player turns it back on.
+     */
+    private static void runDry(Player player, ItemStack pack, PackState state) {
+        BeaconPackItem.setState(pack, state.withActive(false));
+        player.displayClientMessage(
+                Component.translatable("beaconpack.msg.out_of_fuel").withStyle(ChatFormatting.RED),
+                true);
+        player.level().playSound(null, player.blockPosition(),
+                SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.5F, 1.0F);
     }
 
     /**
