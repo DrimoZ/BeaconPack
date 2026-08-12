@@ -142,6 +142,22 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     private List<ResourceKey<BeaconEffectDef>> allKeysCache;
     private List<ResourceKey<BeaconEffectDef>> rowsCache;
     private String rowsCacheKey;
+    /** Cleared at the top of every frame; see {@link #stats()}. */
+    private PackStats frameStats;
+
+    /**
+     * The pack's resolved stats, computed at most once per frame.
+     *
+     * <p>Each call walks the augment slots through a capability lookup and re-applies every
+     * operation. Rendering asked for it around six times a frame - the labels, the drawer, the
+     * cases, and several tooltip branches - which is six times more often than it can change.
+     */
+    private PackStats stats() {
+        if (frameStats == null) {
+            frameStats = menu.stats();
+        }
+        return frameStats;
+    }
 
     public BeaconPackScreen(BeaconPackMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
@@ -168,6 +184,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        frameStats = null;
         super.render(graphics, mouseX, mouseY, partialTick);
         if (selectorOpen) {
             renderSelectorTooltip(graphics, mouseX, mouseY);
@@ -192,7 +209,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         int localY = mouseY - topPos;
 
         PackState state = menu.state();
-        PackStats stats = menu.stats();
+        PackStats stats = stats();
 
         graphics.drawString(font, Component.translatable("beaconpack.gui.effects"),
                 CONTENT_LEFT, CASE_Y - 12, TEXT, false);
@@ -800,7 +817,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         }
 
         List<Component> lines = new ArrayList<>(getTooltipFromContainerItem(stack));
-        PackStats stats = menu.stats();
+        PackStats stats = stats();
         double perSecond = PackResolver.fuelPerSecond(menu.state(), stats, effectLookup());
         if (perSecond > 0.0) {
             lines.add(Component.translatable("beaconpack.tip.fuel_worth",
@@ -882,7 +899,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         }
         if (BPConfig.fuelEnabled() && drawer == Drawer.FUEL
                 && within(x, y, GAUGE_X, GAUGE_Y, GAUGE_W, GAUGE_H)) {
-            PackStats stats = menu.stats();
+            PackStats stats = stats();
             double perSecond = PackResolver.fuelPerSecond(menu.state(), stats, effectLookup());
             return List.of(
                     Component.translatable("beaconpack.gui.fuel"),
@@ -898,7 +915,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
             return caseTip;
         }
         if (drawer == Drawer.AUGMENTS) {
-            for (int i = menu.stats().augmentSlots(); i < BeaconPackItem.AUGMENT_SLOTS; i++) {
+            for (int i = stats().augmentSlots(); i < BeaconPackItem.AUGMENT_SLOTS; i++) {
                 if (within(x, y, AUGMENT_SLOT_X + i * SLOT_SIZE, AUGMENT_SLOT_Y,
                         SLOT_SIZE, SLOT_SIZE)) {
                     return List.of(Component.translatable("beaconpack.tip.augment_locked"));
@@ -926,11 +943,11 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     }
 
     private List<Component> caseTooltip(int x, int y) {
-        for (int i = 0; i < visibleCases(menu.stats()); i++) {
+        for (int i = 0; i < visibleCases(stats()); i++) {
             if (!within(x, y, CASE_X + i * CASE_SPACING, CASE_Y, CASE_SIZE, CASE_SIZE)) {
                 continue;
             }
-            if (i >= menu.stats().effectSlots()) {
+            if (i >= stats().effectSlots()) {
                 return List.of(Component.translatable("beaconpack.tip.case_locked"));
             }
             List<EffectSlotConfig> effects = menu.state().effects();
@@ -981,11 +998,11 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     }
 
     private boolean handleCaseClick(int x, int y, int button) {
-        for (int i = 0; i < visibleCases(menu.stats()); i++) {
+        for (int i = 0; i < visibleCases(stats()); i++) {
             if (!within(x, y, CASE_X + i * CASE_SPACING, CASE_Y, CASE_SIZE, CASE_SIZE)) {
                 continue;
             }
-            if (i >= menu.stats().effectSlots()) {
+            if (i >= stats().effectSlots()) {
                 return true;
             }
             focusedCase = i;
@@ -1179,7 +1196,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     }
 
     private String totalRuntime() {
-        double perSecond = PackResolver.fuelPerSecond(menu.state(), menu.stats(), effectLookup());
+        double perSecond = PackResolver.fuelPerSecond(menu.state(), stats(), effectLookup());
         return atCurrentDraw(menu.state().fuel() + reserveUnits(), perSecond);
     }
 
