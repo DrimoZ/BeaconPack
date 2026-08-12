@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [" A ", "AMA", " A "],
+  "key": {
+    "A": { "item": "minecraft:amethyst_shard" },
+    "M": { "item": "minecraft:redstone_block" }
+  },
+  "result": {
+    "id": "beaconpack:augment",
+    "count": 1,
+    "components": {
+      "beaconpack:augment": { "type": "beaconpack:efficiency", "tier": 1 }
+    }
+  }
+}
