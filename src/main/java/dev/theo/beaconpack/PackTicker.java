@@ -3,6 +3,7 @@ package dev.theo.beaconpack;
 import dev.theo.beaconpack.core.AuraMode;
 import dev.theo.beaconpack.core.BeaconEffectDef;
 import dev.theo.beaconpack.core.EffectSlotConfig;
+import dev.theo.beaconpack.core.FuelBudget;
 import dev.theo.beaconpack.core.PackResolver;
 import dev.theo.beaconpack.core.PackState;
 import dev.theo.beaconpack.core.PackStats;
@@ -105,7 +106,7 @@ public final class PackTicker {
             toApply.add(slot);
         }
 
-        int cost = (int) Math.ceil(owed * SECONDS_PER_INTERVAL);
+        int cost = FuelBudget.costFor(owed, SECONDS_PER_INTERVAL);
         if (BPConfig.INSTANCE.requireFuel.get() && cost > 0) {
             state = refuel(pack, state, stats, cost, player.level().registryAccess());
             if (state.fuel() < cost) {
@@ -155,11 +156,7 @@ public final class PackTicker {
             return state;
         }
         int units = BPLookups.fuelValue(access, fuel.getItem());
-        if (units <= 0 || state.fuel() + units > stats.fuelCapacity()) {
-            // Never burn an item the buffer cannot hold in full - clamping the overflow away would
-            // silently destroy most of a netherite ingot. It waits instead, which is also what
-            // gives the Capacity augment and the higher tiers a reason to exist: they are what
-            // unlock the denser fuels.
+        if (!FuelBudget.accepts(state.fuel(), units, stats.fuelCapacity())) {
             return state;
         }
         handler.extractItem(BeaconPackItem.FUEL_SLOT, 1, false);
