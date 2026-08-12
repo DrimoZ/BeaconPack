@@ -1,4 +1,6 @@
 {
+  "itemGroup.beaconpack": "BeaconPack",
+
   "item.beaconpack.beacon_pack_i": "Beacon Pack I",
   "item.beaconpack.beacon_pack_ii": "Beacon Pack II",
   "item.beaconpack.beacon_pack_iii": "Beacon Pack III",

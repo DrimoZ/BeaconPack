@@ -4,6 +4,7 @@ import dev.theo.beaconpack.BeaconPack;
 import dev.theo.beaconpack.core.AugmentInstance;
 import dev.theo.beaconpack.core.PackState;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.registries.Registries;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -15,7 +16,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 public final class BPComponents {
 
     public static final DeferredRegister.DataComponents REGISTRAR =
-            DeferredRegister.createDataComponents(BeaconPack.MOD_ID);
+            DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, BeaconPack.MOD_ID);
 
     /** Everything a pack remembers: effect slots, fuel buffer, master switch. */
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<PackState>> PACK =
