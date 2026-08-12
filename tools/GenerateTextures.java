@@ -15,6 +15,8 @@ public final class GenerateTextures {
 
     private static final String GUI_DIR = "src/main/resources/assets/beaconpack/textures/gui";
     private static final String ITEM_DIR = "src/main/resources/assets/beaconpack/textures/item";
+    /** The mod list logo lives at the jar root, not under assets/. */
+    private static final String ROOT_DIR = "src/main/resources";
 
     // Vanilla container palette, so the panel does not clash with the player inventory below it.
     private static final int FACE = 0xFFC6C6C6;
@@ -33,6 +35,7 @@ public final class GenerateTextures {
 
         writeGui();
         writeItems();
+        writeLogo();
         System.out.println("Textures written.");
     }
 
@@ -87,6 +90,36 @@ public final class GenerateTextures {
             ImageIO.write(augmentIcon(glyph), "PNG",
                     new File(ITEM_DIR + "/augment_" + glyph + ".png"));
         }
+    }
+
+    /**
+     * The mod list logo: the tier IV icon, scaled up whole pixels onto a dark plate.
+     *
+     * <p>Nearest-neighbour by construction rather than by a scaling hint, and paired with
+     * {@code logoBlur = false} in the mods.toml, because the interpolated version of a 16px icon
+     * is mush. The plate exists because the icon is drawn for a grey slot; the mod list background
+     * is dark and the outline would disappear into it.
+     */
+    private static void writeLogo() throws IOException {
+        int scale = 6;
+        int size = 128;
+        BufferedImage image = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+
+        fill(image, 0, 0, size, size, 0xFF23252E);
+        fill(image, 0, 0, size, 2, 0xFF34384A);
+        fill(image, 0, size - 2, size, 2, 0xFF15161C);
+
+        BufferedImage icon = packIcon(0xFFE0C24A, 4);
+        int origin = (size - icon.getWidth() * scale) / 2;
+        for (int x = 0; x < icon.getWidth(); x++) {
+            for (int y = 0; y < icon.getHeight(); y++) {
+                int argb = icon.getRGB(x, y);
+                if ((argb >>> 24) != 0) {
+                    fill(image, origin + x * scale, origin + y * scale, scale, scale, argb);
+                }
+            }
+        }
+        ImageIO.write(image, "PNG", new File(ROOT_DIR + "/logo.png"));
     }
 
     /**
