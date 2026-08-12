@@ -31,7 +31,7 @@ import java.util.Optional;
  * The pack's container menu.
  *
  * <p>Effect slots are deliberately not {@link Slot}s: they hold data, not stacks, so they are drawn
- * by the screen and mutated through {@link #clickMenuButton}. Only augments and fuel are real slots.
+ * by the screen and mutated through {@link #applyAction}. Only augments and fuel are real slots.
  */
 public class BeaconPackMenu extends AbstractContainerMenu {
 
@@ -43,15 +43,16 @@ public class BeaconPackMenu extends AbstractContainerMenu {
     public static final int ACTION_CYCLE_AURA = 5;
 
     private static final int FIRST_AUGMENT_SLOT_X = 35;
-    private static final int SLOT_Y = 112;
+    private static final int SLOT_Y = 131;
     private static final int FUEL_SLOT_X = 140;
     private static final int INVENTORY_X = 34;
-    private static final int INVENTORY_Y = 150;
-    private static final int HOTBAR_Y = 208;
+    private static final int INVENTORY_Y = 168;
+    private static final int HOTBAR_Y = 226;
 
     private final Player player;
     private final int packSlotIndex;
-    private final ItemStack pack;
+    /** Only used to back the augment and fuel slots; never read for state - see {@link #pack()}. */
+    private final ItemStack slotBackingStack;
 
     public BeaconPackMenu(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buf) {
         this(containerId, playerInventory, buf.readVarInt());
@@ -61,9 +62,9 @@ public class BeaconPackMenu extends AbstractContainerMenu {
         super(BPMenus.BEACON_PACK.get(), containerId);
         this.player = playerInventory.player;
         this.packSlotIndex = packSlotIndex;
-        this.pack = playerInventory.getItem(packSlotIndex);
+        this.slotBackingStack = playerInventory.getItem(packSlotIndex);
 
-        IItemHandler handler = pack.getCapability(Capabilities.ItemHandler.ITEM);
+        IItemHandler handler = slotBackingStack.getCapability(Capabilities.ItemHandler.ITEM);
         if (handler != null) {
             for (int i = 0; i < BeaconPackItem.AUGMENT_SLOTS; i++) {
                 addSlot(new AugmentSlot(handler, i, FIRST_AUGMENT_SLOT_X + i * 18, SLOT_Y));
@@ -104,12 +105,19 @@ public class BeaconPackMenu extends AbstractContainerMenu {
         return new Slot(inventory, index, x, y);
     }
 
+    /**
+     * Resolved from the inventory on every call rather than cached.
+     *
+     * <p>Syncing a slot replaces the client's {@link ItemStack} instance, so a cached reference goes
+     * stale the moment the server answers - which shows up as a screen that only refreshes when it
+     * is closed and reopened.
+     */
     public ItemStack pack() {
-        return pack;
+        return player.getInventory().getItem(packSlotIndex);
     }
 
     public PackState state() {
-        return BeaconPackItem.stateOf(pack);
+        return BeaconPackItem.stateOf(pack());
     }
 
     /**
@@ -123,11 +131,11 @@ public class BeaconPackMenu extends AbstractContainerMenu {
             return new PackStats(0, 0, 0.0, 0, 0, 1.0, java.util.EnumSet.of(AuraMode.SELF));
         }
         return PackResolver.resolve(
-                tier, BPLookups.installedAugments(pack), BPLookups.augments(access));
+                tier, BPLookups.installedAugments(pack()), BPLookups.augments(access));
     }
 
     public PackTierDef tierDef() {
-        if (!(pack.getItem() instanceof BeaconPackItem item)) {
+        if (!(pack().getItem() instanceof BeaconPackItem item)) {
             return null;
         }
         return BPLookups.tier(player.level().registryAccess(), item);
@@ -135,18 +143,19 @@ public class BeaconPackMenu extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(Player who) {
-        // Identity, not equality: a same-looking pack moved into the slot is not this pack.
+        // Compared against the instance captured at open time: a same-looking pack swapped into the
+        // slot is not this pack. The server never replaces the instance, it mutates it in place.
         return who == player
                 && packSlotIndex < who.getInventory().getContainerSize()
-                && who.getInventory().getItem(packSlotIndex) == pack;
+                && who.getInventory().getItem(packSlotIndex) == slotBackingStack;
     }
 
-    @Override
-    public boolean clickMenuButton(Player who, int id) {
-        int action = id >> 20 & 0xF;
-        int slotIndex = id >> 16 & 0xF;
-        int value = id & 0xFFFF;
-
+    /**
+     * Applies one configuration change. Called from {@code PackActionPayload} rather than
+     * {@code clickMenuButton}, whose id is a single byte on the wire.
+     */
+    public boolean applyAction(int action, int slotIndex, int value) {
+        Player who = player;
         PackStats stats = stats();
         PackTierDef tier = tierDef();
         if (tier == null) {
@@ -179,7 +188,7 @@ public class BeaconPackMenu extends AbstractContainerMenu {
         if (updated == null) {
             return false;
         }
-        BeaconPackItem.setState(pack, PackResolver.sanitize(updated, stats, lookup, tier.level()));
+        BeaconPackItem.setState(pack(), PackResolver.sanitize(updated, stats, lookup, tier.level()));
         broadcastChanges();
         return true;
     }
@@ -284,7 +293,7 @@ public class BeaconPackMenu extends AbstractContainerMenu {
             if (getSlotIndex() >= stats().augmentSlots()) {
                 return false;
             }
-            return BPLookups.installedAugments(pack).stream()
+            return BPLookups.installedAugments(pack()).stream()
                     .noneMatch(other -> other.type().equals(instance.type()));
         }
     }

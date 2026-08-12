@@ -7,7 +7,9 @@ import dev.theo.beaconpack.core.PackState;
 import dev.theo.beaconpack.core.PackStats;
 import dev.theo.beaconpack.core.PackTierDef;
 import dev.theo.beaconpack.menu.BeaconPackMenu;
+import dev.theo.beaconpack.net.PackActionPayload;
 import dev.theo.beaconpack.registry.BPLookups;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -42,6 +44,12 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     private static final int INFO_X = 30;
     private static final int INFO_Y = 58;
     private static final int INFO_W = 170;
+    /** Row of the "change effect" button; the settings row sits below it. */
+    private static final int INFO_ROW_CHANGE = INFO_Y + 27;
+    private static final int INFO_ROW_SETTINGS = INFO_Y + 45;
+
+    private static final int GAUGE_X = 162;
+    private static final int GAUGE_Y = 133;
 
     private static final int TOGGLE_X = 165;
     private static final int TOGGLE_Y = 5;
@@ -69,8 +77,8 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     public BeaconPackScreen(BeaconPackMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
         this.imageWidth = 230;
-        this.imageHeight = 232;
-        this.inventoryLabelY = 139;
+        this.imageHeight = 250;
+        this.inventoryLabelY = 157;
         this.titleLabelY = 6;
     }
 
@@ -84,9 +92,62 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
-        if (!selectorOpen) {
-            renderTooltip(graphics, mouseX, mouseY);
+        if (selectorOpen) {
+            return;
         }
+        List<Component> tooltip = tooltipAt(mouseX - leftPos, mouseY - topPos);
+        if (tooltip.isEmpty()) {
+            renderTooltip(graphics, mouseX, mouseY);
+        } else {
+            graphics.renderComponentTooltip(font, tooltip, mouseX, mouseY);
+        }
+    }
+
+    /** Nothing on this screen is self-explanatory without these. */
+    private List<Component> tooltipAt(int x, int y) {
+        if (within(x, y, TOGGLE_X, TOGGLE_Y, TOGGLE_W, TOGGLE_H)) {
+            return List.of(Component.translatable("beaconpack.tip.master"));
+        }
+        if (within(x, y, GAUGE_X, GAUGE_Y, 60, 14)) {
+            PackStats stats = menu.stats();
+            return List.of(
+                    Component.translatable("beaconpack.gui.fuel"),
+                    Component.translatable("beaconpack.tip.fuel",
+                            menu.state().fuel(), stats.fuelCapacity()));
+        }
+        for (int i = 0; i < MAX_CASES; i++) {
+            if (!within(x, y, CASE_X + i * CASE_SPACING, CASE_Y, CASE_SIZE, CASE_SIZE)) {
+                continue;
+            }
+            PackStats stats = menu.stats();
+            if (i >= stats.effectSlots()) {
+                return List.of(Component.translatable("beaconpack.tip.case_locked"));
+            }
+            List<EffectSlotConfig> effects = menu.state().effects();
+            if (i >= effects.size()) {
+                return List.of(Component.translatable("beaconpack.gui.empty_slot"));
+            }
+            EffectSlotConfig slot = effects.get(i);
+            return effectLookup().get(slot.effect())
+                    .<List<Component>>map(def -> List.of(
+                            def.effect().value().getDisplayName(),
+                            Component.translatable("beaconpack.tip.case_clear")))
+                    .orElse(List.of());
+        }
+        int buttons = INFO_ROW_SETTINGS;
+        if (within(x, y, INFO_X + 4, INFO_ROW_CHANGE, INFO_W - 8, TOGGLE_H)) {
+            return List.of(Component.translatable("beaconpack.tip.change_effect"));
+        }
+        if (within(x, y, INFO_X + 4, buttons, 44, TOGGLE_H)) {
+            return List.of(Component.translatable("beaconpack.tip.level"));
+        }
+        if (within(x, y, INFO_X + 52, buttons, 48, TOGGLE_H)) {
+            return List.of(Component.translatable("beaconpack.tip.effect_toggle"));
+        }
+        if (within(x, y, INFO_X + 104, buttons, 60, TOGGLE_H)) {
+            return List.of(Component.translatable("beaconpack.tip.aura"));
+        }
+        return List.of();
     }
 
     @Override
@@ -98,6 +159,15 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
 
         PackState state = menu.state();
         PackStats stats = menu.stats();
+
+        // Section labels: without them nothing on this screen says what the three groups of boxes
+        // are for.
+        graphics.drawString(font, Component.translatable("beaconpack.gui.effects"),
+                CASE_X, CASE_Y - 10, TEXT, false);
+        graphics.drawString(font, Component.translatable("beaconpack.gui.augments"),
+                34, 122, TEXT, false);
+        graphics.drawString(font, Component.translatable("beaconpack.gui.fuel"),
+                139, 122, TEXT, false);
 
         drawToggle(graphics, state, localX, localY);
         drawCases(graphics, state, stats, localX, localY);
@@ -181,7 +251,14 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
                         : "—");
         graphics.drawString(font, detail, INFO_X + 6, INFO_Y + 17, TEXT_DIM, false);
 
-        int y = INFO_Y + 29;
+        // Explicit rather than "click the case again": re-clicking the case is how you focus it,
+        // and overloading that click with "open the selector" made every attempt to read a second
+        // effect's details pop the picker instead.
+        drawButton(graphics, INFO_X + 4, INFO_ROW_CHANGE, INFO_W - 8, TOGGLE_H,
+                Component.translatable("beaconpack.gui.change_effect"),
+                within(mouseX, mouseY, INFO_X + 4, INFO_ROW_CHANGE, INFO_W - 8, TOGGLE_H), true);
+
+        int y = INFO_ROW_SETTINGS;
         drawButton(graphics, INFO_X + 4, y, 44, TOGGLE_H,
                 Component.literal("‹ " + roman(slot.amplifier() + 1) + " ›"),
                 within(mouseX, mouseY, INFO_X + 4, y, 44, TOGGLE_H),
@@ -199,13 +276,13 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     private void drawFuel(GuiGraphics graphics, PackState state, PackStats stats) {
         int capacity = Math.max(1, stats.fuelCapacity());
         int filled = (int) (56.0 * Math.min(1.0, state.fuel() / (double) capacity));
-        graphics.fill(164, 115, 164 + filled, 125, 0xFF3FA34D);
+        graphics.fill(GAUGE_X + 2, GAUGE_Y + 2, GAUGE_X + 2 + filled, GAUGE_Y + 12, 0xFF3FA34D);
 
         double perSecond = PackResolver.fuelPerSecond(state, stats, effectLookup());
         String autonomy = perSecond <= 0.0
                 ? "∞"
                 : formatDuration((int) (state.fuel() / perSecond));
-        graphics.drawString(font, state.fuel() + " u  ·  " + autonomy, 164, 131, TEXT_DIM, false);
+        graphics.drawString(font, state.fuel() + " u  ·  " + autonomy, GAUGE_X + 2, GAUGE_Y + 16, TEXT_DIM, false);
     }
 
     private void drawSelector(GuiGraphics graphics, PackStats stats, int mouseX, int mouseY) {
@@ -238,8 +315,6 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
             }
 
             drawEffectIcon(graphics, key, SELECTOR_X + 2, y + 1);
-            graphics.drawString(font, def.effect().value().getDisplayName(),
-                    SELECTOR_X + 22, y + 5, locked ? 0xFF888888 : 0xFFFFFFFF, false);
             String right = locked
                     ? Component.translatable("beaconpack.gui.locked_tier",
                             roman(def.minTier())).getString()
@@ -247,6 +322,14 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
             graphics.drawString(font, right,
                     SELECTOR_X + SELECTOR_W - font.width(right) - 4, y + 5,
                     locked ? 0xFFAA5555 : 0xFFBBBBBB, false);
+
+            // Truncated against the space the cost leaves, otherwise long effect names run
+            // straight through it.
+            int available = SELECTOR_W - 22 - font.width(right) - 10;
+            String name = font.plainSubstrByWidth(
+                    def.effect().value().getDisplayName().getString(), available);
+            graphics.drawString(font, name,
+                    SELECTOR_X + 22, y + 5, locked ? 0xFF888888 : 0xFFFFFFFF, false);
         }
     }
 
@@ -301,11 +384,10 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
             focusedCase = i;
             if (button == 1) {
                 send(BeaconPackMenu.ACTION_CLEAR_EFFECT, i, 0);
-            } else {
-                selectorOpen = true;
-                selectorSlot = i;
-                scroll = 0;
-                search = "";
+            } else if (i >= menu.state().effects().size()) {
+                // An empty case has nothing to inspect, so clicking it goes straight to the picker.
+                // A filled one only takes focus, and is changed from the info panel below.
+                openSelector(i);
             }
             return true;
         }
@@ -316,7 +398,11 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         if (focusedCase >= menu.state().effects().size()) {
             return false;
         }
-        int y0 = INFO_Y + 29;
+        if (within(x, y, INFO_X + 4, INFO_ROW_CHANGE, INFO_W - 8, TOGGLE_H)) {
+            openSelector(focusedCase);
+            return true;
+        }
+        int y0 = INFO_ROW_SETTINGS;
         if (within(x, y, INFO_X + 4, y0, 44, TOGGLE_H)) {
             send(BeaconPackMenu.ACTION_CYCLE_AMPLIFIER, focusedCase, 0);
             return true;
@@ -330,6 +416,13 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
             return true;
         }
         return false;
+    }
+
+    private void openSelector(int caseIndex) {
+        selectorOpen = true;
+        selectorSlot = caseIndex;
+        scroll = 0;
+        search = "";
     }
 
     private void handleSelectorClick(int x, int y) {
@@ -394,8 +487,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     // ------------------------------------------------------------------ helpers
 
     private void send(int action, int slot, int value) {
-        int id = (action & 0xF) << 20 | (slot & 0xF) << 16 | (value & 0xFFFF);
-        Minecraft.getInstance().gameMode.handleInventoryButtonClick(menu.containerId, id);
+        PacketDistributor.sendToServer(new PackActionPayload(action, slot, value));
     }
 
     private PackResolver.Lookup<BeaconEffectDef> effectLookup() {
