@@ -4,6 +4,7 @@ import dev.theo.beaconpack.core.BPRegistryKeys;
 import dev.theo.beaconpack.registry.BPComponents;
 import dev.theo.beaconpack.registry.BPCreativeTabs;
 import dev.theo.beaconpack.registry.BPItems;
+import dev.theo.beaconpack.registry.BPMenus;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -18,6 +19,7 @@ public class BeaconPack {
         BPComponents.REGISTRAR.register(modEventBus);
         BPItems.ITEMS.register(modEventBus);
         BPCreativeTabs.TABS.register(modEventBus);
+        BPMenus.MENUS.register(modEventBus);
 
         modContainer.registerConfig(ModConfig.Type.SERVER, BPConfig.SPEC);
     }
