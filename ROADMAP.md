@@ -1,7 +1,6 @@
 # Roadmap to release
 
-State at the time of writing: 46 commits on `feat/foundation`, nothing merged into `main`, nothing
-pushed. `mod_version=0.1.0`. NeoForge 1.21.1 only.
+Merged into `main` and pushed. `mod_version=0.1.0`. NeoForge 1.21.1 only.
 
 Ordered by what blocks a release, not by effort.
 
@@ -9,41 +8,39 @@ Ordered by what blocks a release, not by effort.
 
 ## P0 — blocks publishing
 
-These are cheap and every one of them is visible to a player or a reviewer.
-
-| Item | Why |
+| Item | State |
 |---|---|
-| `issueTrackerURL` points at `github.com/theo/BeaconPack` | The repo is `DrimoZ/BeaconPack`. Every bug report link 404s. |
-| No `logoFile` and no `logo.png` | The mod is a blank card in the in-game mod list, which is the first screen anyone judges it on. |
-| No `displayURL` | No way from the mod list to the project page. |
-| No `pack.mcmeta` in `src/main/resources` | Works today because NeoForge supplies a default; make the pack format explicit rather than inherited. |
-| Version still `0.1.0` | Tag `1.0.0` at release; the version string is baked into the jar name and both platforms key updates off it. |
-| Dedicated-server run never tested | The whole effect loop is server-side and the menu syncs across the wire. Single-player uses an integrated server, which hides a class of client/server-split bugs. Untested is the honest word here. |
-| Multiplayer aura never tested | `AuraMode.ALLIES/TEAM/ALLIES_AND_PETS` has never had a second player in front of it. Team lookup and pet ownership are exactly where this breaks. |
+| `issueTrackerURL` pointed at a repo that does not exist | Done — every bug report link 404d. |
+| No `logoFile` / `logo.png` / `displayURL` | Done — generated from the same script as the item icons. |
+| No `pack.mcmeta` | Done. |
+| Package and author said `theo` | Done — `dev.drimoz`, author `DrimoZ`. |
+| Version still `0.1.0` | Bump to `1.0.0` at publish time; both platforms key updates off it. |
+| **Dedicated-server run never tested** | Open. Needs `run/eula.txt`. The whole effect loop is server-side; single-player runs an integrated server, which hides a class of client/server-split bugs. |
+| **Multiplayer aura never tested** | Open. `AuraMode.ALLIES/TEAM/ALLIES_AND_PETS` has never had a second player in front of it, and team lookup and pet ownership are exactly where this breaks. Needs two clients. |
 
 ## P1 — should ship in 1.0
 
-**Curios slot type.** The integration works, but the mod declares no slot type, so out of the box
-nobody can actually put a pack in a curio slot without a modpack author writing the config. Ship a
-`charm` slot registration (still soft) or the feature reads as broken.
+**Curios slot type.** Done. Packs bind to the `charm` slot through a shipped tag; both files are
+additive so a datapack can still move them.
 
-**Server-side action validation is untested.** `BeaconPackMenu#applyAction` does validate against
-tier and stats — a modified client cannot trivially grant itself a tier IV aura. But it is the
-largest untested surface in the mod and the one where a bug is an exploit on a public server.
-Worth a test class that drives `applyAction` with hostile inputs: out-of-range slot indices,
-effects the tier's pool rejects, amplifiers above the cap, aura modes above the tier.
+**Server-side action validation.** Partly done. Auditing it found a real hole: `slot` and `value`
+are var-ints, so a modified client could send `-1`, and every existing check was an upper bound —
+the negative index reached `List.set` / `List.remove` and threw on the server thread. Fixed at the
+entry point. The rest of the validation (tier, pool, amplifier cap, aura mode) was already correct.
+It is still not *covered*, which is what the game tests below are for.
 
-**Game tests.** `neoforge.enabledGameTestNamespaces` is already set to the mod id and there is not a
-single game test behind it. One test that places a player, gives them a pack, ticks, and asserts the
-effect landed would cover the integration seam that unit tests structurally cannot reach.
+**Game tests.** `neoforge.enabledGameTestNamespaces` is set to the mod id with nothing behind it.
+The natural first two: give a player a pack, tick, assert the effect landed; and drive
+`applyAction` with hostile inputs. This is the integration seam unit tests structurally cannot
+reach.
 
-**Data component migration.** `PackState`'s codec has no version field. The first time a released
-pack's serialization changes, every pack in every existing world becomes an item with a component
-that no longer parses. Decide now: either freeze the codec shape, or add a version int before
-anyone has a world to lose.
+**Data component migration.** Decided: no version field. Every field on `PackState` is
+optional-with-default, so additions and removals already migrate themselves and the absence of a
+field is the version. The rule is now documented on the record: never change what a field means,
+add a new one.
 
-**Datapack removal.** `sanitize` handles a pack whose effects exceed its stats. It does not obviously
-handle a datapack that *removes* a tier or effect a saved pack still references. Worth a test.
+**Datapack removal.** Done — `sanitize` already dropped an effect whose entry has gone; there is
+now a test proving it.
 
 ## P2 — after 1.0, driven by feedback
 
