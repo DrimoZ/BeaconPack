@@ -42,6 +42,17 @@
   "beaconpack.tip.aura": "Qui reçoit cet effet. Partager coûte plus cher.",
   "beaconpack.gui.change_effect": "Changer d'effet",
   "beaconpack.tip.change_effect": "Choisir un autre effet pour cette case",
+  "beaconpack.gui.slots": "Cases : %s / %s",
+  "beaconpack.tip.hold_shift": "Maintenir [Maj] pour les détails",
+  "beaconpack.tip.augment_rule": "Un seul augment de chaque type par pack",
+  "beaconpack.tip.pack_tier": "Tier %s · %s cases d’effet · %s slots d’augment",
+  "beaconpack.tip.fuel_short": "Carburant : %s unités",
+  "beaconpack.op.add_range": "Portée +%s m",
+  "beaconpack.op.add_effect_slot": "+%s case d’effet",
+  "beaconpack.op.add_amplifier": "+%s niveau d’effet",
+  "beaconpack.op.mul_fuel": "Coût en carburant x%s",
+  "beaconpack.op.mul_capacity": "Capacité x%s",
+  "beaconpack.op.unlock_aura": "Débloque des modes de partage plus larges",
   "beaconpack.gui.active": "Actif",
   "beaconpack.gui.inactive": "Éteint"
 }

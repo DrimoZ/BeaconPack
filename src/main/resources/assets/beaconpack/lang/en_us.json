@@ -42,6 +42,17 @@
   "beaconpack.tip.aura": "Who this effect reaches. Sharing costs more fuel.",
   "beaconpack.gui.change_effect": "Change effect",
   "beaconpack.tip.change_effect": "Pick a different effect for this slot",
+  "beaconpack.gui.slots": "Slots: %s / %s",
+  "beaconpack.tip.hold_shift": "Hold [Shift] for details",
+  "beaconpack.tip.augment_rule": "One augment of each type per pack",
+  "beaconpack.tip.pack_tier": "Tier %s · %s effect slots · %s augment slots",
+  "beaconpack.tip.fuel_short": "Fuel: %s units",
+  "beaconpack.op.add_range": "Range +%s m",
+  "beaconpack.op.add_effect_slot": "+%s effect slot",
+  "beaconpack.op.add_amplifier": "+%s effect level",
+  "beaconpack.op.mul_fuel": "Fuel cost x%s",
+  "beaconpack.op.mul_capacity": "Fuel capacity x%s",
+  "beaconpack.op.unlock_aura": "Unlocks wider sharing modes",
   "beaconpack.gui.active": "Active",
   "beaconpack.gui.inactive": "Inactive"
 }
