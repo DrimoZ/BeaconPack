@@ -19,6 +19,7 @@ public final class BPConfig {
     public final ModConfigSpec.BooleanValue requireFuel;
     public final ModConfigSpec.BooleanValue auraAffectsNonTeamPlayers;
     public final ModConfigSpec.BooleanValue freeWhileNearBeacon;
+    public final ModConfigSpec.BooleanValue requireBeaconToConfigure;
 
     private BPConfig(ModConfigSpec.Builder builder) {
         builder.push("gameplay");
@@ -35,6 +36,12 @@ public final class BPConfig {
         freeWhileNearBeacon = builder
                 .comment("Stop charging for an effect a real beacon is already providing.")
                 .define("free_while_near_beacon", true);
+
+        requireBeaconToConfigure = builder
+                .comment("Require a lit beacon within 16 blocks to change a pack's effects.",
+                        "Off by default: the beacon block is already on the crafting path of every",
+                        "tier. Turn it on for a pack that wants the stricter progression.")
+                .define("require_beacon_to_configure", false);
 
         builder.pop();
     }

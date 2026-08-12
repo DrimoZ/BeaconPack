@@ -1,5 +1,7 @@
 package dev.theo.beaconpack.menu;
 
+import dev.theo.beaconpack.BPConfig;
+import dev.theo.beaconpack.BeaconProximity;
 import dev.theo.beaconpack.core.AuraMode;
 import dev.theo.beaconpack.core.BeaconEffectDef;
 import dev.theo.beaconpack.core.EffectSlotConfig;
@@ -13,6 +15,9 @@ import dev.theo.beaconpack.registry.BPLookups;
 import dev.theo.beaconpack.registry.BPMenus;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -161,6 +166,11 @@ public class BeaconPackMenu extends AbstractContainerMenu {
         if (tier == null) {
             return false;
         }
+        if (isReconfiguration(action) && !canReconfigure()) {
+            who.displayClientMessage(
+                    Component.translatable("beaconpack.msg.needs_beacon"), true);
+            return false;
+        }
         PackResolver.Lookup<BeaconEffectDef> lookup =
                 BPLookups.effects(who.level().registryAccess());
 
@@ -189,8 +199,30 @@ public class BeaconPackMenu extends AbstractContainerMenu {
             return false;
         }
         BeaconPackItem.setState(pack(), PackResolver.sanitize(updated, stats, lookup, tier.level()));
+        if (action == ACTION_TOGGLE_ACTIVE) {
+            // Audible confirmation, because the only other signal is a small label changing colour.
+            who.level().playSound(null, who.blockPosition(),
+                    state().active() ? SoundEvents.BEACON_ACTIVATE : SoundEvents.BEACON_DEACTIVATE,
+                    SoundSource.PLAYERS, 0.4F, 1.0F);
+        }
         broadcastChanges();
         return true;
+    }
+
+    /**
+     * Turning the pack or a single effect off must always work - a player caught out in the field
+     * has to be able to stop the drain. Only changes to what the pack projects are gated.
+     */
+    private static boolean isReconfiguration(int action) {
+        return action == ACTION_SET_EFFECT
+                || action == ACTION_CLEAR_EFFECT
+                || action == ACTION_CYCLE_AMPLIFIER
+                || action == ACTION_CYCLE_AURA;
+    }
+
+    private boolean canReconfigure() {
+        return !BPConfig.INSTANCE.requireBeaconToConfigure.get()
+                || BeaconProximity.activeBeaconNear(player);
     }
 
     private List<EffectSlotConfig> setEffect(List<EffectSlotConfig> effects, int slotIndex,
