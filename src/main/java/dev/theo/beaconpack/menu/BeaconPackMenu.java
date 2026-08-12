@@ -59,6 +59,8 @@ public class BeaconPackMenu extends AbstractContainerMenu {
     private final int packSlotIndex;
     /** Only used to back the augment and fuel slots; never read for state - see {@link #pack()}. */
     private final ItemStack slotBackingStack;
+    /** Varies with the fuel config, so shift-clicking cannot assume a fixed boundary. */
+    private final int packSlotCount;
 
     public BeaconPackMenu(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buf) {
         this(containerId, playerInventory, buf.readVarInt());
@@ -74,7 +76,12 @@ public class BeaconPackMenu extends AbstractContainerMenu {
         for (int i = 0; i < BeaconPackItem.AUGMENT_SLOTS; i++) {
             addSlot(new AugmentSlot(handler, i, FIRST_AUGMENT_SLOT_X + i * 18, SLOT_Y));
         }
-        addSlot(new FuelSlot(handler, BeaconPackItem.FUEL_SLOT, FUEL_SLOT_X, SLOT_Y));
+        // No fuel slot at all when fuel is switched off, rather than a slot that refuses
+        // everything. Both sides read the same synced config, so the slot counts agree.
+        if (BPConfig.fuelEnabled()) {
+            addSlot(new FuelSlot(handler, BeaconPackItem.FUEL_SLOT, FUEL_SLOT_X, SLOT_Y));
+        }
+        this.packSlotCount = slots.size();
 
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
@@ -291,7 +298,7 @@ public class BeaconPackMenu extends AbstractContainerMenu {
         }
         ItemStack stack = slot.getItem();
         ItemStack original = stack.copy();
-        int packSlots = BeaconPackItem.CONTAINER_SIZE;
+        int packSlots = packSlotCount;
 
         if (index < packSlots) {
             if (!moveItemStackTo(stack, packSlots, slots.size(), true)) {

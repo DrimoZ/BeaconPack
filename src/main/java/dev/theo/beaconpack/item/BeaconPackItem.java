@@ -1,5 +1,6 @@
 package dev.theo.beaconpack.item;
 
+import dev.theo.beaconpack.BPConfig;
 import dev.theo.beaconpack.core.AugmentInstance;
 import dev.theo.beaconpack.core.BPRegistryKeys;
 import dev.theo.beaconpack.core.PackResolver;
@@ -127,7 +128,7 @@ public class BeaconPackItem extends Item {
     private void appendRuntime(ItemStack stack, TooltipContext context, PackState state,
                                List<Component> tooltip) {
         HolderLookup.Provider registries = context.registries();
-        if (registries == null || state.fuel() <= 0) {
+        if (registries == null || state.fuel() <= 0 || !BPConfig.fuelEnabled()) {
             return;
         }
         PackTierDef tierDef = lookup(registries, BPRegistryKeys.TIER, tier);

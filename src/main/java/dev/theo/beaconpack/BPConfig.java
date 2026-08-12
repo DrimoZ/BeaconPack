@@ -16,6 +16,17 @@ public final class BPConfig {
         SPEC = pair.getRight();
     }
 
+    /**
+     * Whether fuel exists at all, from either side.
+     *
+     * <p>Server configs are synced, but the menu is also built during login before that lands, so
+     * an unloaded spec answers "yes" rather than throwing. The GUI hides every trace of fuel when
+     * this is off - a gauge that never moves and a slot that accepts nothing are worse than absent.
+     */
+    public static boolean fuelEnabled() {
+        return !SPEC.isLoaded() || INSTANCE.requireFuel.get();
+    }
+
     public final ModConfigSpec.BooleanValue requireFuel;
     public final ModConfigSpec.BooleanValue auraAffectsNonTeamPlayers;
     public final ModConfigSpec.BooleanValue freeWhileNearBeacon;

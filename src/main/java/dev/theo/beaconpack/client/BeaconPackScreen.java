@@ -1,5 +1,6 @@
 package dev.theo.beaconpack.client;
 
+import dev.theo.beaconpack.BPConfig;
 import dev.theo.beaconpack.core.BeaconEffectDef;
 import dev.theo.beaconpack.core.EffectSlotConfig;
 import dev.theo.beaconpack.core.PackResolver;
@@ -54,10 +55,15 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     private static final int CONTENT_LEFT = 28;
     private static final int CONTENT_RIGHT = 220;
 
-    private static final int TOGGLE_W = 64;
-    private static final int TOGGLE_H = 18;
-    private static final int TOGGLE_X = CONTENT_RIGHT - TOGGLE_W;
-    private static final int TOGGLE_Y = 6;
+    /**
+     * The power switch lives on the frame's edge rather than inside it, the way Mekanism and
+     * Thermal put their side tabs: the one control that decides whether the whole thing runs should
+     * not compete for attention with the settings it governs.
+     */
+    private static final int POWER_W = 24;
+    private static final int POWER_H = 26;
+    private static final int POWER_X = IMAGE_W - 1;
+    private static final int POWER_Y = 30;
 
     private static final int CASE_X = CONTENT_LEFT;
     private static final int CASE_Y = 44;
@@ -167,13 +173,20 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
                 CONTENT_LEFT, CASE_Y - 12, TEXT, false);
         graphics.drawString(font, Component.translatable("beaconpack.gui.augments"),
                 CONTENT_LEFT, SECTION_LABEL_Y, TEXT, false);
-        graphics.drawString(font, Component.translatable("beaconpack.gui.fuel"),
-                FUEL_SLOT_X, SECTION_LABEL_Y, TEXT, false);
+        if (BPConfig.fuelEnabled()) {
+            graphics.drawString(font, Component.translatable("beaconpack.gui.fuel"),
+                    FUEL_SLOT_X, SECTION_LABEL_Y, TEXT, false);
+            drawFuel(graphics, state, stats);
+        } else {
+            // The background texture is fixed, so the unused recesses are painted over rather than
+            // left as empty holes the player would read as broken slots.
+            graphics.fill(FUEL_SLOT_X - 2, SLOT_ROW_Y - 2, CONTENT_RIGHT, SLOT_ROW_Y + SLOT_SIZE + 1,
+                    0xFFC6C6C6);
+        }
 
-        drawToggle(graphics, state, localX, localY);
+        drawPowerTab(graphics, state, localX, localY);
         drawCases(graphics, state, stats, localX, localY);
         drawSummary(graphics, state, stats);
-        drawFuel(graphics, state, stats);
         drawAugmentSlotHints(graphics, stats);
 
         if (selectorOpen) {
@@ -183,12 +196,27 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         }
     }
 
-    private void drawToggle(GuiGraphics graphics, PackState state, int mouseX, int mouseY) {
-        boolean hovered = within(mouseX, mouseY, TOGGLE_X, TOGGLE_Y, TOGGLE_W, TOGGLE_H);
-        Component label = Component.translatable(
-                state.active() ? "beaconpack.gui.active" : "beaconpack.gui.inactive");
-        drawButton(graphics, TOGGLE_X, TOGGLE_Y, TOGGLE_W, TOGGLE_H, label, hovered, true,
-                state.active());
+    private void drawPowerTab(GuiGraphics graphics, PackState state, int mouseX, int mouseY) {
+        boolean hovered = within(mouseX, mouseY, POWER_X, POWER_Y, POWER_W, POWER_H);
+        boolean on = state.active();
+        int face = on
+                ? (hovered ? 0xFF57A268 : 0xFF3E7A4B)
+                : (hovered ? 0xFF9A5252 : 0xFF7A3E3E);
+
+        graphics.fill(POWER_X, POWER_Y - 1, POWER_X + POWER_W + 1, POWER_Y + POWER_H + 1, 0xFF1B1B1B);
+        graphics.fill(POWER_X, POWER_Y, POWER_X + POWER_W, POWER_Y + POWER_H, face);
+        graphics.fill(POWER_X, POWER_Y + 1, POWER_X + POWER_W - 1, POWER_Y + 2, 0x33FFFFFF);
+        drawPowerGlyph(graphics, POWER_X + POWER_W / 2 + 1, POWER_Y + POWER_H / 2, 0xFFEDEDED);
+    }
+
+    /** The universal power mark: a broken ring with a stroke through the gap. */
+    private static void drawPowerGlyph(GuiGraphics graphics, int cx, int cy, int colour) {
+        graphics.fill(cx - 1, cy - 6, cx + 1, cy, colour);
+        graphics.fill(cx - 5, cy - 3, cx - 3, cy + 3, colour);
+        graphics.fill(cx + 3, cy - 3, cx + 5, cy + 3, colour);
+        graphics.fill(cx - 4, cy + 3, cx + 4, cy + 5, colour);
+        graphics.fill(cx - 5, cy - 4, cx - 2, cy - 2, colour);
+        graphics.fill(cx + 2, cy - 4, cx + 5, cy - 2, colour);
     }
 
     private void drawCases(GuiGraphics graphics, PackState state, PackStats stats,
@@ -234,8 +262,12 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     private void drawSummary(GuiGraphics graphics, PackState state, PackStats stats) {
         drawRightAligned(graphics, Component.translatable("beaconpack.gui.range",
                 String.format(Locale.ROOT, "%.0f", stats.range())), CASE_Y + 2);
-        drawRightAligned(graphics, Component.translatable("beaconpack.gui.runtime", totalRuntime()),
-                CASE_Y + 14);
+        // Runtime is meaningless when nothing is being consumed, so the line goes away with fuel
+        // rather than sitting there as a permanent dash.
+        if (BPConfig.fuelEnabled()) {
+            drawRightAligned(graphics,
+                    Component.translatable("beaconpack.gui.runtime", totalRuntime()), CASE_Y + 14);
+        }
         drawRightAligned(graphics, Component.translatable("beaconpack.gui.slots",
                 state.effects().size(), stats.effectSlots()), CASE_Y + 26);
     }
@@ -595,10 +627,14 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
 
     /** Nothing on this screen is self-explanatory without these. */
     private List<Component> tooltipAt(int x, int y) {
-        if (within(x, y, TOGGLE_X, TOGGLE_Y, TOGGLE_W, TOGGLE_H)) {
-            return List.of(Component.translatable("beaconpack.tip.master"));
+        if (within(x, y, POWER_X, POWER_Y, POWER_W, POWER_H)) {
+            return List.of(
+                    Component.translatable(menu.state().active()
+                            ? "beaconpack.gui.active" : "beaconpack.gui.inactive"),
+                    Component.translatable("beaconpack.tip.master")
+                            .withStyle(ChatFormatting.GRAY));
         }
-        if (within(x, y, GAUGE_X, GAUGE_Y, GAUGE_W, GAUGE_H)) {
+        if (BPConfig.fuelEnabled() && within(x, y, GAUGE_X, GAUGE_Y, GAUGE_W, GAUGE_H)) {
             PackStats stats = menu.stats();
             double perSecond = PackResolver.fuelPerSecond(menu.state(), stats, effectLookup());
             return List.of(
@@ -672,7 +708,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
             handleSelectorClick(x, y);
             return true;
         }
-        if (within(x, y, TOGGLE_X, TOGGLE_Y, TOGGLE_W, TOGGLE_H)) {
+        if (within(x, y, POWER_X, POWER_Y, POWER_W, POWER_H)) {
             send(BeaconPackMenu.ACTION_TOGGLE_ACTIVE, 0, 0);
             return true;
         }
