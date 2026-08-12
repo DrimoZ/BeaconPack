@@ -33,6 +33,15 @@
   "beaconpack.gui.range": "Range: %s m",
   "beaconpack.gui.cost": "Cost: %s u/s",
   "beaconpack.gui.autonomy": "~%s remaining",
+  "beaconpack.tip.master": "Master switch. Nothing is applied and no fuel is spent while off.",
+  "beaconpack.tip.fuel": "%s of %s units stored",
+  "beaconpack.tip.case_locked": "Unlocked by a higher tier or a Focus augment",
+  "beaconpack.tip.case_clear": "Left click to change · Right click to clear",
+  "beaconpack.tip.level": "Effect level. Capped by the effect and by Amplification.",
+  "beaconpack.tip.effect_toggle": "Turn this effect off without losing its settings",
+  "beaconpack.tip.aura": "Who this effect reaches. Sharing costs more fuel.",
+  "beaconpack.gui.change_effect": "Change effect",
+  "beaconpack.tip.change_effect": "Pick a different effect for this slot",
   "beaconpack.gui.active": "Active",
   "beaconpack.gui.inactive": "Inactive"
 }

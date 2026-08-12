@@ -11,6 +11,8 @@ import dev.theo.beaconpack.registry.BPItems;
 import dev.theo.beaconpack.registry.BPMenus;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.item.ItemProperties;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -52,14 +54,36 @@ public final class BPClientEvents {
         @SubscribeEvent
         public static void registerColours(RegisterColorHandlersEvent.Item event) {
             event.register((stack, tintIndex) -> {
-                AugmentInstance instance = AugmentItem.instanceOf(stack);
-                if (instance == null || Minecraft.getInstance().level == null) {
-                    return 0xFFFFFF;
-                }
-                AugmentDef def = Minecraft.getInstance().level.registryAccess()
-                        .registryOrThrow(BPRegistryKeys.AUGMENT).get(instance.type());
-                return def == null ? 0xFFFFFF : def.color();
+                AugmentDef def = definitionOf(stack);
+                // The alpha channel is honoured when tinting, so a plain 0xRRGGBB from the JSON
+                // renders the item fully transparent. Force it opaque.
+                return 0xFF000000 | (def == null ? 0xFFFFFF : def.color());
             }, BPItems.AUGMENT.get());
+        }
+
+        /**
+         * Exposes the augment's model_data as a model predicate, so each type gets its own glyph
+         * without needing a component on the stack - which would mean repeating the value in every
+         * recipe result as well as in the registry entry.
+         */
+        @SubscribeEvent
+        public static void registerModelProperties(FMLClientSetupEvent event) {
+            event.enqueueWork(() -> ItemProperties.register(
+                    BPItems.AUGMENT.get(),
+                    BPRegistryKeys.id("augment_type"),
+                    (stack, level, entity, seed) -> {
+                        AugmentDef def = definitionOf(stack);
+                        return def == null ? 0.0F : def.modelData();
+                    }));
+        }
+
+        private static AugmentDef definitionOf(net.minecraft.world.item.ItemStack stack) {
+            AugmentInstance instance = AugmentItem.instanceOf(stack);
+            if (instance == null || Minecraft.getInstance().level == null) {
+                return null;
+            }
+            return Minecraft.getInstance().level.registryAccess()
+                    .registryOrThrow(BPRegistryKeys.AUGMENT).get(instance.type());
         }
 
         private ModBus() {}

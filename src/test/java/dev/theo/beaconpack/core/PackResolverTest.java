@@ -23,9 +23,9 @@ class PackResolverTest {
     private static final ResourceKey<AugmentDef> RANGE = augmentKey("range");
     private static final ResourceKey<AugmentDef> FOCUS = augmentKey("focus");
 
-    private static final AugmentDef RANGE_DEF = new AugmentDef(3, 0, List.of(
+    private static final AugmentDef RANGE_DEF = new AugmentDef(3, 0, 0, List.of(
             new AugmentDef.Operation(AugmentDef.Type.ADD_RANGE, List.of(4.0, 8.0, 12.0))));
-    private static final AugmentDef FOCUS_DEF = new AugmentDef(1, 0, List.of(
+    private static final AugmentDef FOCUS_DEF = new AugmentDef(1, 0, 0, List.of(
             new AugmentDef.Operation(AugmentDef.Type.ADD_EFFECT_SLOT, List.of(1.0))));
 
     private static final PackResolver.Lookup<AugmentDef> AUGMENTS = lookup(Map.of(

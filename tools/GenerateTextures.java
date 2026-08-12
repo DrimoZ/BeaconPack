@@ -23,7 +23,7 @@ public final class GenerateTextures {
     private static final int SLOT = 0xFF8B8B8B;
 
     private static final int WIDTH = 230;
-    private static final int HEIGHT = 232;
+    private static final int HEIGHT = 250;
 
     public static void main(String[] args) throws IOException {
         new File(GUI_DIR).mkdirs();
@@ -44,23 +44,23 @@ public final class GenerateTextures {
             recess(image, 35 + i * 28, 28, 24, 24);
         }
         // Info panel.
-        recess(image, 30, 58, 170, 46);
+        recess(image, 30, 58, 170, 62);
         // Augment slots + fuel slot, matching BeaconPackMenu's coordinates minus the 1px border.
         for (int i = 0; i < 3; i++) {
-            recess(image, 34 + i * 18, 111, 18, 18);
+            recess(image, 34 + i * 18, 130, 18, 18);
         }
-        recess(image, 139, 111, 18, 18);
+        recess(image, 139, 130, 18, 18);
         // Fuel gauge.
-        recess(image, 162, 113, 60, 14);
+        recess(image, 162, 133, 60, 14);
 
         // Player inventory + hotbar.
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                recess(image, 33 + col * 18, 149 + row * 18, 18, 18);
+                recess(image, 33 + col * 18, 167 + row * 18, 18, 18);
             }
         }
         for (int col = 0; col < 9; col++) {
-            recess(image, 33 + col * 18, 207, 18, 18);
+            recess(image, 33 + col * 18, 225, 18, 18);
         }
 
         ImageIO.write(image, "PNG", new File(GUI_DIR + "/beacon_pack.png"));
@@ -73,7 +73,15 @@ public final class GenerateTextures {
             ImageIO.write(packIcon(tierColours[i]), "PNG", new File(ITEM_DIR + "/" + names[i] + ".png"));
         }
         // Greyscale on purpose: the augment item is tinted at render time from its registry entry.
-        ImageIO.write(augmentIcon(), "PNG", new File(ITEM_DIR + "/augment.png"));
+        ImageIO.write(augmentIcon(null), "PNG", new File(ITEM_DIR + "/augment.png"));
+
+        // One glyph per built-in augment, selected by a model override. A datapack-added augment
+        // declares no model_data and falls back to the plain gem above.
+        String[] glyphs = {"range", "focus", "amplification", "efficiency", "capacity", "attunement"};
+        for (String glyph : glyphs) {
+            ImageIO.write(augmentIcon(glyph), "PNG",
+                    new File(ITEM_DIR + "/augment_" + glyph + ".png"));
+        }
     }
 
     private static BufferedImage packIcon(int accent) {
@@ -86,12 +94,62 @@ public final class GenerateTextures {
         return image;
     }
 
-    private static BufferedImage augmentIcon() {
+    /** Gem body plus an optional glyph. Everything stays greyscale so the tint does the colouring. */
+    private static BufferedImage augmentIcon(String glyph) {
         BufferedImage image = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-        fill(image, 6, 3, 4, 2, 0xFF9E9E9E);
-        fill(image, 4, 5, 8, 6, 0xFFFFFFFF);
-        fill(image, 5, 6, 6, 4, 0xFFD0D0D0);
-        fill(image, 6, 11, 4, 2, 0xFF9E9E9E);
+        fill(image, 5, 2, 6, 1, 0xFF7A7A7A);
+        fill(image, 4, 3, 8, 10, 0xFF7A7A7A);
+        fill(image, 5, 3, 6, 9, 0xFFD8D8D8);
+        fill(image, 5, 13, 6, 1, 0xFF7A7A7A);
+        if (glyph == null) {
+            return image;
+        }
+
+        int ink = 0xFF3A3A3A;
+        switch (glyph) {
+            // Outward arrow: reach.
+            case "range" -> {
+                fill(image, 6, 7, 5, 2, ink);
+                fill(image, 9, 5, 2, 2, ink);
+                fill(image, 9, 9, 2, 2, ink);
+            }
+            // Plus: one more effect slot.
+            case "focus" -> {
+                fill(image, 7, 5, 2, 6, ink);
+                fill(image, 5, 7, 6, 2, ink);
+            }
+            // Chevron up: stronger.
+            case "amplification" -> {
+                fill(image, 7, 4, 2, 2, ink);
+                fill(image, 5, 6, 2, 2, ink);
+                fill(image, 9, 6, 2, 2, ink);
+                fill(image, 7, 8, 2, 3, ink);
+            }
+            // Chevron down: less fuel.
+            case "efficiency" -> {
+                fill(image, 7, 5, 2, 3, ink);
+                fill(image, 5, 8, 2, 2, ink);
+                fill(image, 9, 8, 2, 2, ink);
+                fill(image, 7, 10, 2, 2, ink);
+            }
+            // Battery bars: buffer size.
+            case "capacity" -> {
+                fill(image, 5, 5, 6, 2, ink);
+                fill(image, 5, 8, 6, 2, ink);
+                fill(image, 5, 11, 6, 1, ink);
+            }
+            // Two linked rings: who the aura reaches.
+            case "attunement" -> {
+                fill(image, 5, 6, 3, 1, ink);
+                fill(image, 5, 9, 3, 1, ink);
+                fill(image, 5, 7, 1, 2, ink);
+                fill(image, 8, 7, 1, 2, ink);
+                fill(image, 8, 6, 3, 1, ink);
+                fill(image, 8, 9, 3, 1, ink);
+                fill(image, 10, 7, 1, 2, ink);
+            }
+            default -> { }
+        }
         return image;
     }
 

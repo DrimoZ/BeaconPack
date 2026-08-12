@@ -33,6 +33,15 @@
   "beaconpack.gui.range": "Portée : %s m",
   "beaconpack.gui.cost": "Coût : %s u/s",
   "beaconpack.gui.autonomy": "~%s restantes",
+  "beaconpack.tip.master": "Interrupteur général. À l'arrêt, rien n'est appliqué et rien n'est consommé.",
+  "beaconpack.tip.fuel": "%s unités sur %s",
+  "beaconpack.tip.case_locked": "Débloqué par un tier supérieur ou un augment Focus",
+  "beaconpack.tip.case_clear": "Clic gauche pour changer · Clic droit pour vider",
+  "beaconpack.tip.level": "Niveau de l'effet. Plafonné par l'effet et par Amplification.",
+  "beaconpack.tip.effect_toggle": "Éteindre cet effet sans perdre son réglage",
+  "beaconpack.tip.aura": "Qui reçoit cet effet. Partager coûte plus cher.",
+  "beaconpack.gui.change_effect": "Changer d'effet",
+  "beaconpack.tip.change_effect": "Choisir un autre effet pour cette case",
   "beaconpack.gui.active": "Actif",
   "beaconpack.gui.inactive": "Éteint"
 }

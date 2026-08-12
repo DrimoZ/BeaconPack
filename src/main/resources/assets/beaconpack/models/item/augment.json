@@ -1,1 +1,12 @@
-{ "parent": "minecraft:item/generated", "textures": { "layer0": "beaconpack:item/augment" } }
+{
+  "parent": "minecraft:item/generated",
+  "textures": { "layer0": "beaconpack:item/augment" },
+  "overrides": [
+    { "predicate": { "beaconpack:augment_type": 1 }, "model": "beaconpack:item/augment_range" },
+    { "predicate": { "beaconpack:augment_type": 2 }, "model": "beaconpack:item/augment_focus" },
+    { "predicate": { "beaconpack:augment_type": 3 }, "model": "beaconpack:item/augment_amplification" },
+    { "predicate": { "beaconpack:augment_type": 4 }, "model": "beaconpack:item/augment_efficiency" },
+    { "predicate": { "beaconpack:augment_type": 5 }, "model": "beaconpack:item/augment_capacity" },
+    { "predicate": { "beaconpack:augment_type": 6 }, "model": "beaconpack:item/augment_attunement" }
+  ]
+}
