@@ -48,12 +48,12 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
             ResourceLocation.fromNamespaceAndPath("beaconpack", "textures/gui/beacon_pack.png");
     private static final int TEXTURE_SIZE = 512;
 
-    static final int IMAGE_W = 248;
+    static final int IMAGE_W = 194;
     static final int IMAGE_H = 292;
 
     /** The single column everything aligns to. */
-    private static final int CONTENT_LEFT = 28;
-    private static final int CONTENT_RIGHT = 220;
+    private static final int CONTENT_LEFT = 16;
+    private static final int CONTENT_RIGHT = 178;
 
     /**
      * The power switch lives on the frame's edge rather than inside it, the way Mekanism and
@@ -87,8 +87,8 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     private static final int SLOT_ROW_Y = 166;
     private static final int SLOT_SIZE = 18;
     private static final int AUGMENT_SLOT_X = CONTENT_LEFT;
-    private static final int FUEL_SLOT_X = 120;
-    private static final int GAUGE_X = 142;
+    private static final int FUEL_SLOT_X = 86;
+    private static final int GAUGE_X = 108;
     private static final int GAUGE_Y = 168;
     private static final int GAUGE_W = CONTENT_RIGHT - GAUGE_X - 6;
     private static final int GAUGE_H = 14;
@@ -130,7 +130,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         this.imageHeight = IMAGE_H;
         this.titleLabelX = CONTENT_LEFT;
         this.titleLabelY = 10;
-        this.inventoryLabelX = 43;
+        this.inventoryLabelX = CONTENT_LEFT;
         this.inventoryLabelY = 196;
     }
 
@@ -260,16 +260,31 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
      * rate in points per second is not something a player can act on. Time is.
      */
     private void drawSummary(GuiGraphics graphics, PackState state, PackStats stats) {
-        drawRightAligned(graphics, Component.translatable("beaconpack.gui.range",
-                String.format(Locale.ROOT, "%.0f", stats.range())), CASE_Y + 2);
+        // Values without labels: the units already say what each one is, and a translated label
+        // ("Autonomie :") is wider than the whole column. The legend is one hover away.
+        drawRightAligned(graphics, Component.literal(
+                String.format(Locale.ROOT, "%.0f m", stats.range())), CASE_Y + 2);
         // Runtime is meaningless when nothing is being consumed, so the line goes away with fuel
         // rather than sitting there as a permanent dash.
         if (BPConfig.fuelEnabled()) {
-            drawRightAligned(graphics,
-                    Component.translatable("beaconpack.gui.runtime", totalRuntime()), CASE_Y + 14);
+            drawRightAligned(graphics, Component.literal(totalRuntime()), CASE_Y + 14);
         }
-        drawRightAligned(graphics, Component.translatable("beaconpack.gui.slots",
-                state.effects().size(), stats.effectSlots()), CASE_Y + 26);
+        drawRightAligned(graphics, Component.literal(
+                state.effects().size() + " / " + stats.effectSlots()), CASE_Y + 26);
+    }
+
+    private List<Component> summaryTooltip(PackState state, PackStats stats) {
+        List<Component> lines = new ArrayList<>(3);
+        lines.add(Component.translatable("beaconpack.gui.range",
+                String.format(Locale.ROOT, "%.0f", stats.range())));
+        if (BPConfig.fuelEnabled()) {
+            lines.add(Component.translatable("beaconpack.gui.runtime", totalRuntime())
+                    .withStyle(ChatFormatting.GRAY));
+        }
+        lines.add(Component.translatable("beaconpack.gui.slots",
+                        state.effects().size(), stats.effectSlots())
+                .withStyle(ChatFormatting.GRAY));
+        return lines;
     }
 
     private void drawRightAligned(GuiGraphics graphics, Component text, int y) {
@@ -650,6 +665,10 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         if (!caseTip.isEmpty()) {
             return caseTip;
         }
+        if (within(x, y, CASE_X + MAX_CASES * CASE_SPACING, CASE_Y, CONTENT_RIGHT - CASE_X
+                - MAX_CASES * CASE_SPACING, 36)) {
+            return summaryTooltip(menu.state(), menu.stats());
+        }
         for (int i = menu.stats().augmentSlots(); i < BeaconPackItem.AUGMENT_SLOTS; i++) {
             if (within(x, y, AUGMENT_SLOT_X + i * SLOT_SIZE, SLOT_ROW_Y, SLOT_SIZE, SLOT_SIZE)) {
                 return List.of(Component.translatable("beaconpack.tip.augment_locked"));
@@ -863,17 +882,37 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         return BPLookups.effects(Minecraft.getInstance().level.registryAccess());
     }
 
+    /**
+     * The whole registry, in the order both sides agree on.
+     *
+     * <p>This is what the wire index refers to, so it must never be filtered - the server resolves
+     * the index against the same unfiltered list.
+     */
     private List<ResourceKey<BeaconEffectDef>> allKeys() {
         return BPLookups.sortedEffectKeys(Minecraft.getInstance().level.registryAccess());
+    }
+
+    /**
+     * Only what this pack could ever project.
+     *
+     * <p>A themed pack listing the standard beacon effects it will never accept would be a list of
+     * dead ends, so the pool filters the picker rather than greying rows out.
+     */
+    private List<ResourceKey<BeaconEffectDef>> poolKeys() {
+        PackTierDef tier = menu.tierDef();
+        if (tier == null) {
+            return allKeys();
+        }
+        return allKeys().stream().filter(tier::allows).toList();
     }
 
     /** Filtered by the search box, but locked entries are kept so progress stays visible. */
     private List<ResourceKey<BeaconEffectDef>> visibleRows() {
         if (search.isEmpty()) {
-            return allKeys();
+            return poolKeys();
         }
         String needle = search.toLowerCase(Locale.ROOT);
-        return allKeys().stream()
+        return poolKeys().stream()
                 .filter(key -> effectLookup().get(key)
                         .map(def -> def.effect().value().getDisplayName().getString()
                                 .toLowerCase(Locale.ROOT).contains(needle))

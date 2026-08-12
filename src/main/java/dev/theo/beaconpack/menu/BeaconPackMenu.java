@@ -48,10 +48,10 @@ public class BeaconPackMenu extends AbstractContainerMenu {
     public static final int ACTION_TOGGLE_EFFECT = 4;
     public static final int ACTION_CYCLE_AURA = 5;
 
-    private static final int FIRST_AUGMENT_SLOT_X = 29;
+    private static final int FIRST_AUGMENT_SLOT_X = 17;
     private static final int SLOT_Y = 167;
-    private static final int FUEL_SLOT_X = 121;
-    private static final int INVENTORY_X = 44;
+    private static final int FUEL_SLOT_X = 87;
+    private static final int INVENTORY_X = 17;
     private static final int INVENTORY_Y = 209;
     private static final int HOTBAR_Y = 267;
 
@@ -204,7 +204,7 @@ public class BeaconPackMenu extends AbstractContainerMenu {
         if (updated == null) {
             return false;
         }
-        BeaconPackItem.setState(pack(), PackResolver.sanitize(updated, stats, lookup, tier.level()));
+        BeaconPackItem.setState(pack(), PackResolver.sanitize(updated, stats, lookup, tier));
         if (action == ACTION_TOGGLE_ACTIVE) {
             // Audible confirmation, because the only other signal is a small label changing colour.
             who.level().playSound(null, who.blockPosition(),
@@ -247,7 +247,7 @@ public class BeaconPackMenu extends AbstractContainerMenu {
         Optional<BeaconEffectDef> def = lookup.get(key);
         // Every one of these is re-checked here even though the GUI greys them out: the button id
         // arrives from the client and cannot be trusted on its own.
-        if (def.isEmpty() || def.get().minTier() > tier.level()) {
+        if (def.isEmpty() || def.get().minTier() > tier.level() || !tier.allows(key)) {
             return effects;
         }
         if (effects.stream().anyMatch(slot -> slot.effect().equals(key))) {

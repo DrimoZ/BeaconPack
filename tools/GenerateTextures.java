@@ -24,7 +24,7 @@ public final class GenerateTextures {
     private static final int SLOT_SHADE = 0xFF373737;
     private static final int OUTLINE = 0xFF1B1B1B;
 
-    private static final int WIDTH = 248;
+    private static final int WIDTH = 194;
     private static final int HEIGHT = 292;
 
     public static void main(String[] args) throws IOException {
@@ -43,32 +43,32 @@ public final class GenerateTextures {
 
         // Effect cases: 24x24 so the level indicator has room in the corner.
         for (int i = 0; i < 3; i++) {
-            recess(image, 28 + i * 30, 44, 26, 26);
+            recess(image, 16 + i * 30, 44, 26, 26);
         }
         // Info panel.
-        recess(image, 28, 78, 192, 68);
+        recess(image, 16, 78, 162, 68);
         // Augment slots + fuel slot, matching BeaconPackMenu's coordinates minus the 1px border.
         for (int i = 0; i < 3; i++) {
-            recess(image, 28 + i * 18, 166, 18, 18);
+            recess(image, 16 + i * 18, 166, 18, 18);
         }
-        recess(image, 120, 166, 18, 18);
+        recess(image, 86, 166, 18, 18);
         // Fuel gauge.
-        recess(image, 142, 168, 72, 14);
+        recess(image, 108, 168, 64, 14);
 
         // Player inventory + hotbar.
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                recess(image, 43 + col * 18, 208 + row * 18, 18, 18);
+                recess(image, 16 + col * 18, 208 + row * 18, 18, 18);
             }
         }
         for (int col = 0; col < 9; col++) {
-            recess(image, 43 + col * 18, 266, 18, 18);
+            recess(image, 16 + col * 18, 266, 18, 18);
         }
 
         // Rules between groups: the header, the pack's own controls, and the player's inventory are
         // three different things and were previously separated only by whitespace.
-        separator(image, 28, 28, 192);
-        separator(image, 28, 190, 192);
+        separator(image, 16, 28, 162);
+        separator(image, 16, 190, 162);
 
         ImageIO.write(image, "PNG", new File(GUI_DIR + "/beacon_pack.png"));
     }
@@ -80,6 +80,15 @@ public final class GenerateTextures {
             ImageIO.write(packIcon(tierColours[i], i + 1), "PNG",
                     new File(ITEM_DIR + "/" + names[i] + ".png"));
         }
+
+        // Themed packs share the silhouette but take a saturated core and a marked casing, so they
+        // read as siblings of the numbered packs rather than as a separate family.
+        ImageIO.write(themedPackIcon(0xFFE0603A, 0xFF4A2A26), "PNG",
+                new File(ITEM_DIR + "/nether_pack.png"));
+        ImageIO.write(themedPackIcon(0xFFC48CE0, 0xFF2E2740), "PNG",
+                new File(ITEM_DIR + "/end_pack.png"));
+        ImageIO.write(themedPackIcon(0xFF3FB6D8, 0xFF20404C), "PNG",
+                new File(ITEM_DIR + "/tidal_pack.png"));
         // Greyscale on purpose: the augment item is tinted at render time from its registry entry.
         ImageIO.write(augmentIcon(null), "PNG", new File(ITEM_DIR + "/augment.png"));
 
@@ -124,6 +133,31 @@ public final class GenerateTextures {
             fill(image, 4 + pip * 2, 11, 1, 1, 0xFFF2F2F2);
         }
         return image;
+    }
+
+    /** Same shape as a numbered pack, with a themed casing and no tier pips. */
+    private static BufferedImage themedPackIcon(int accent, int body) {
+        BufferedImage image = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
+        int outline = 0xFF15161C;
+        fill(image, 2, 3, 12, 11, outline);
+        fill(image, 5, 1, 6, 2, outline);
+        fill(image, 3, 4, 10, 9, body);
+        fill(image, 6, 2, 4, 2, accent);
+        fill(image, 3, 4, 10, 1, lighten(body));
+        fill(image, 3, 4, 1, 9, lighten(body));
+
+        fill(image, 5, 5, 6, 5, outline);
+        fill(image, 6, 6, 4, 3, accent);
+        fill(image, 6, 6, 2, 1, 0xFFFFFFFF);
+        fill(image, 5, 11, 6, 1, accent);
+        return image;
+    }
+
+    private static int lighten(int argb) {
+        int r = Math.min(255, (argb >> 16 & 0xFF) + 28);
+        int g = Math.min(255, (argb >> 8 & 0xFF) + 28);
+        int b = Math.min(255, (argb & 0xFF) + 28);
+        return 0xFF000000 | r << 16 | g << 8 | b;
     }
 
     /**
