@@ -35,6 +35,21 @@ comes from a datapack registry entry, so a pack can add new ones without any cod
 | Efficiency | −25 / −40 / −55 % fuel |
 | Capacity | fuel buffer ×2 / ×3 / ×4 |
 | Attunement | unlocks wider sharing modes |
+| Discretion | hides effect particles, and the status icon at tier II |
+
+### Themed packs
+
+Cinder, Void and Tidal packs sit alongside tier III with narrower pools drawn from effects the
+beacon never offered. Carrying one instead of a tier IV is a trade, not a downgrade.
+
+| Pack | Pool | Edge |
+|---|---|---|
+| Cinder | Fire Resistance, Strength, Haste, Resistance | level II allowed |
+| Void | Slow Falling, Speed, Jump Boost, Night Vision | longest reach, 14 blocks |
+| Tidal | Water Breathing, Conduit Power, Dolphin's Grace, Night Vision | the only aquatic pool |
+
+They needed no new mechanics: a tier entry declares which effects it accepts, so a themed pack is
+a data file plus an item — and a datapack can add more the same way.
 
 ### Fuel
 
@@ -44,7 +59,19 @@ fuel slot. Sharing an effect with allies costs more than keeping it to yourself,
 main decision the mod asks you to make.
 
 A master switch stops all consumption instantly, and each effect can be turned off individually
-without losing its settings. An effect a real beacon is already providing is free.
+without losing its settings. An effect a real beacon is already providing is free, and the pack
+refuses fuel its buffer cannot hold whole rather than burning most of a netherite ingot for
+nothing — which is what gives Capacity and the higher tiers a purpose.
+
+Turning `require_fuel` off removes fuel from the game rather than leaving it inert: no fuel slot,
+no gauge, no runtime figures.
+
+### The screen
+
+Effects, their settings and the player's inventory are all the main panel carries. Stats, augments
+and fuel live in side tabs, because they are configured once and then left alone. Effects are
+picked from a searchable list filtered to what the pack accepts, with arrow-key navigation and a
+four-segment meter comparing fuel costs.
 
 ---
 
