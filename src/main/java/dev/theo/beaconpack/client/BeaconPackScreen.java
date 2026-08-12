@@ -68,12 +68,15 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     private static final int TAB_W = 24;
     private static final int TAB_H = 24;
     private static final int POWER_TAB_Y = 16;
-    private static final int AUGMENT_TAB_Y = 44;
-    private static final int FUEL_TAB_Y = 96;
+    private static final int STATS_TAB_Y = 44;
+    private static final int AUGMENT_TAB_Y = 72;
+    private static final int FUEL_TAB_Y = 100;
 
     private static final int DRAWER_X = BeaconPackMenu.DRAWER_X;
-    private static final int DRAWER_W = 108;
+    private static final int DRAWER_W = 122;
     private static final int DRAWER_H = 46;
+    private static final int STATS_DRAWER_Y = STATS_TAB_Y;
+    private static final int STATS_DRAWER_H = 62;
     private static final int AUGMENT_DRAWER_Y = BeaconPackMenu.AUGMENT_DRAWER_Y;
     private static final int FUEL_DRAWER_Y = BeaconPackMenu.FUEL_DRAWER_Y;
     private static final int SLOT_SIZE = 18;
@@ -82,7 +85,11 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     private static final int CASE_Y = 44;
     private static final int CASE_SIZE = 26;
     private static final int CASE_SPACING = 30;
-    private static final int MAX_CASES = 3;
+    /**
+     * Five, now that the stats moved to a drawer and freed the whole row. The pack itself still
+     * decides how many are unlocked; this is only how many the screen can lay out.
+     */
+    private static final int MAX_CASES = 5;
 
     private static final int INFO_X = CONTENT_LEFT;
     private static final int INFO_Y = 78;
@@ -147,7 +154,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     }
 
     /** Only one drawer at a time, so the side of the screen never becomes a second panel. */
-    private enum Drawer { NONE, AUGMENTS, FUEL }
+    private enum Drawer { NONE, STATS, AUGMENTS, FUEL }
 
     private Drawer drawer = Drawer.AUGMENTS;
 
@@ -163,6 +170,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
         if (selectorOpen) {
+            renderSelectorTooltip(graphics, mouseX, mouseY);
             return;
         }
         if (renderFuelSlotTooltip(graphics, mouseX, mouseY)) {
@@ -192,7 +200,6 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         drawTabs(graphics, state, localX, localY);
         drawDrawer(graphics, state, stats, localX, localY);
         drawCases(graphics, state, stats, localX, localY);
-        drawSummary(graphics, state, stats);
 
         if (selectorOpen) {
             drawSelector(graphics, localX, localY);
@@ -209,6 +216,10 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         // shouting louder than everything else on the screen.
         graphics.fill(TAB_X + 4, POWER_TAB_Y + TAB_H - 6, TAB_X + TAB_W - 4, POWER_TAB_Y + TAB_H - 3,
                 state.active() ? 0xFF4BC46A : 0xFFB84B4B);
+
+        drawTab(graphics, STATS_TAB_Y, drawer == Drawer.STATS,
+                within(mouseX, mouseY, TAB_X, STATS_TAB_Y, TAB_W, TAB_H));
+        drawTabBars(graphics, TAB_X + TAB_W / 2, STATS_TAB_Y + TAB_H / 2);
 
         drawTab(graphics, AUGMENT_TAB_Y, drawer == Drawer.AUGMENTS,
                 within(mouseX, mouseY, TAB_X, AUGMENT_TAB_Y, TAB_W, TAB_H));
@@ -228,6 +239,12 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         graphics.fill(TAB_X, y, TAB_X + TAB_W, y + TAB_H, face);
         graphics.fill(TAB_X, y, TAB_X + TAB_W - 1, y + 1, 0xFFFFFFFF);
         graphics.fill(TAB_X, y + TAB_H - 1, TAB_X + TAB_W, y + TAB_H, 0xFF555555);
+    }
+
+    private static void drawTabBars(GuiGraphics graphics, int cx, int cy) {
+        graphics.fill(cx - 5, cy + 1, cx - 2, cy + 5, 0xFF3A3A3A);
+        graphics.fill(cx - 1, cy - 2, cx + 2, cy + 5, 0xFF3A3A3A);
+        graphics.fill(cx + 3, cy - 5, cx + 6, cy + 5, 0xFF3A3A3A);
     }
 
     private static void drawTabGem(GuiGraphics graphics, int cx, int cy) {
@@ -255,6 +272,10 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         if (drawer == Drawer.NONE || (drawer == Drawer.FUEL && !BPConfig.fuelEnabled())) {
             return;
         }
+        if (drawer == Drawer.STATS) {
+            drawStatsDrawer(graphics, state, stats);
+            return;
+        }
         int y = drawer == Drawer.AUGMENTS ? AUGMENT_DRAWER_Y : FUEL_DRAWER_Y;
         panel(graphics, DRAWER_X, y, DRAWER_W, DRAWER_H);
         graphics.drawString(font, Component.translatable(drawer == Drawer.AUGMENTS
@@ -279,6 +300,25 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
             graphics.fill(GAUGE_X, GAUGE_Y, GAUGE_X + GAUGE_W, GAUGE_Y + GAUGE_H, 0xFF8B8B8B);
             graphics.renderOutline(GAUGE_X, GAUGE_Y, GAUGE_W, GAUGE_H, 0xFF373737);
             drawFuel(graphics, state, stats);
+        }
+    }
+
+    /**
+     * The pack's figures, moved off the main panel.
+     *
+     * <p>They were three lines of small text wedged beside the effect cases, competing with them
+     * for the same row. In a drawer they get labels, room to breathe, and the case row gets the
+     * whole width back.
+     */
+    private void drawStatsDrawer(GuiGraphics graphics, PackState state, PackStats stats) {
+        panel(graphics, DRAWER_X, STATS_DRAWER_Y, DRAWER_W, STATS_DRAWER_H);
+        graphics.drawString(font, Component.translatable("beaconpack.gui.stats"),
+                DRAWER_X + 7, STATS_DRAWER_Y + 6, TEXT, false);
+
+        int y = STATS_DRAWER_Y + 20;
+        for (Component line : summaryTooltip(state, stats)) {
+            graphics.drawString(font, line, DRAWER_X + 7, y, TEXT_DIM, false);
+            y += 11;
         }
     }
 
@@ -350,20 +390,6 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
      * frame. No fuel units either - they are an implementation detail of the datapack format, and a
      * rate in points per second is not something a player can act on. Time is.
      */
-    private void drawSummary(GuiGraphics graphics, PackState state, PackStats stats) {
-        // Values without labels: the units already say what each one is, and a translated label
-        // ("Autonomie :") is wider than the whole column. The legend is one hover away.
-        drawRightAligned(graphics, Component.literal(
-                String.format(Locale.ROOT, "%.0f m", stats.range())), CASE_Y + 2);
-        // Runtime is meaningless when nothing is being consumed, so the line goes away with fuel
-        // rather than sitting there as a permanent dash.
-        if (BPConfig.fuelEnabled()) {
-            drawRightAligned(graphics, Component.literal(totalRuntime()), CASE_Y + 14);
-        }
-        drawRightAligned(graphics, Component.literal(
-                state.effects().size() + " / " + stats.effectSlots()), CASE_Y + 26);
-    }
-
     private List<Component> summaryTooltip(PackState state, PackStats stats) {
         List<Component> lines = new ArrayList<>(3);
         lines.add(Component.translatable("beaconpack.gui.range",
@@ -376,10 +402,6 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
                         state.effects().size(), stats.effectSlots())
                 .withStyle(ChatFormatting.GRAY));
         return lines;
-    }
-
-    private void drawRightAligned(GuiGraphics graphics, Component text, int y) {
-        graphics.drawString(font, text, CONTENT_RIGHT - font.width(text), y, TEXT_DIM, false);
     }
 
     private void drawInfoPanel(GuiGraphics graphics, PackState state, PackStats stats,
@@ -463,6 +485,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     private void setDrawer(Drawer next) {
         drawer = next;
         menu.setVisibleDrawer(switch (next) {
+            case STATS -> BeaconPackMenu.DRAWER_NONE;
             case AUGMENTS -> BeaconPackMenu.DRAWER_AUGMENTS;
             case FUEL -> BeaconPackMenu.DRAWER_FUEL;
             case NONE -> BeaconPackMenu.DRAWER_NONE;
@@ -733,6 +756,50 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         return true;
     }
 
+    /**
+     * Explains the four-segment meter on the hovered row.
+     *
+     * <p>The meter compares effects at a glance, but nothing on screen said what it measured - a
+     * row of bars with no legend is a puzzle, not information.
+     */
+    private void renderSelectorTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
+        int x = mouseX - leftPos;
+        int y = mouseY - topPos;
+        List<ResourceKey<BeaconEffectDef>> rows = visibleRows();
+        for (int i = 0; i < VISIBLE_ROWS && i + scroll < rows.size(); i++) {
+            int rowY = selectorY + SEARCH_H + i * ROW_H;
+            if (!within(x, y, selectorX, rowY, SELECTOR_W, ROW_H)) {
+                continue;
+            }
+            effectLookup().get(rows.get(i + scroll)).ifPresent(def -> {
+                List<Component> lines = new ArrayList<>(3);
+                lines.add(def.effect().value().getDisplayName());
+                if (def.minTier() > tierLevel()) {
+                    lines.add(Component.translatable("beaconpack.gui.locked_tier",
+                            roman(def.minTier())).withStyle(ChatFormatting.RED));
+                } else {
+                    lines.add(Component.translatable("beaconpack.tip.cost_meter",
+                                    Component.translatable("beaconpack.cost." + costBand(def)))
+                            .withStyle(ChatFormatting.GRAY));
+                }
+                graphics.renderComponentTooltip(font, lines, mouseX, mouseY);
+            });
+            return;
+        }
+    }
+
+    private String costBand(BeaconEffectDef def) {
+        double max = visibleRows().stream()
+                .map(key -> effectLookup().get(key).map(BeaconEffectDef::cost).orElse(0.0))
+                .max(Double::compare).orElse(1.0);
+        return switch (Mth.clamp((int) Math.ceil(def.cost() / max * 4), 1, 4)) {
+            case 1 -> "very_low";
+            case 2 -> "low";
+            case 3 -> "moderate";
+            default -> "high";
+        };
+    }
+
     /** Nothing on this screen is self-explanatory without these. */
     private List<Component> tooltipAt(int x, int y) {
         if (within(x, y, TAB_X, POWER_TAB_Y, TAB_W, TAB_H)) {
@@ -741,6 +808,9 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
                             ? "beaconpack.gui.active" : "beaconpack.gui.inactive"),
                     Component.translatable("beaconpack.tip.master")
                             .withStyle(ChatFormatting.GRAY));
+        }
+        if (within(x, y, TAB_X, STATS_TAB_Y, TAB_W, TAB_H)) {
+            return List.of(Component.translatable("beaconpack.gui.stats"));
         }
         if (within(x, y, TAB_X, AUGMENT_TAB_Y, TAB_W, TAB_H)) {
             return List.of(Component.translatable("beaconpack.gui.augments"));
@@ -764,10 +834,6 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         List<Component> caseTip = caseTooltip(x, y);
         if (!caseTip.isEmpty()) {
             return caseTip;
-        }
-        if (within(x, y, CASE_X + MAX_CASES * CASE_SPACING, CASE_Y, CONTENT_RIGHT - CASE_X
-                - MAX_CASES * CASE_SPACING, 36)) {
-            return summaryTooltip(menu.state(), menu.stats());
         }
         if (drawer == Drawer.AUGMENTS) {
             for (int i = menu.stats().augmentSlots(); i < BeaconPackItem.AUGMENT_SLOTS; i++) {
@@ -832,6 +898,10 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         }
         if (within(x, y, TAB_X, POWER_TAB_Y, TAB_W, TAB_H)) {
             send(BeaconPackMenu.ACTION_TOGGLE_ACTIVE, 0, 0);
+            return true;
+        }
+        if (within(x, y, TAB_X, STATS_TAB_Y, TAB_W, TAB_H)) {
+            setDrawer(drawer == Drawer.STATS ? Drawer.NONE : Drawer.STATS);
             return true;
         }
         if (within(x, y, TAB_X, AUGMENT_TAB_Y, TAB_W, TAB_H)) {

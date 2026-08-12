@@ -56,8 +56,8 @@ public class BeaconPackMenu extends AbstractContainerMenu {
      * hit-testing instead.
      */
     public static final int DRAWER_X = 217;
-    public static final int AUGMENT_DRAWER_Y = 44;
-    public static final int FUEL_DRAWER_Y = 96;
+    public static final int AUGMENT_DRAWER_Y = 72;
+    public static final int FUEL_DRAWER_Y = 100;
 
     private static final int FIRST_AUGMENT_SLOT_X = DRAWER_X + 9;
     private static final int AUGMENT_SLOT_Y = AUGMENT_DRAWER_Y + 21;
@@ -163,7 +163,8 @@ public class BeaconPackMenu extends AbstractContainerMenu {
         RegistryAccess access = player.level().registryAccess();
         PackTierDef tier = tierDef();
         if (tier == null) {
-            return new PackStats(0, 0, 0.0, 0, 0, 1.0, java.util.EnumSet.of(AuraMode.SELF));
+            return new PackStats(0, 0, 0.0, 0, 0, 1.0,
+                    java.util.EnumSet.of(AuraMode.SELF), false, false);
         }
         return PackResolver.resolve(
                 tier, BPLookups.installedAugments(pack()), BPLookups.augments(access));

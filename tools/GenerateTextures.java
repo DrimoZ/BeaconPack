@@ -57,11 +57,6 @@ public final class GenerateTextures {
             recess(image, 16 + col * 18, 230, 18, 18);
         }
 
-        // Rules between groups: the header, the pack's own controls, and the player's inventory are
-        // three different things and were previously separated only by whitespace.
-        separator(image, 16, 28, 162);
-        separator(image, 16, 154, 162);
-
         ImageIO.write(image, "PNG", new File(GUI_DIR + "/beacon_pack.png"));
     }
 
@@ -86,7 +81,8 @@ public final class GenerateTextures {
 
         // One glyph per built-in augment, selected by a model override. A datapack-added augment
         // declares no model_data and falls back to the plain gem above.
-        String[] glyphs = {"range", "focus", "amplification", "efficiency", "capacity", "attunement"};
+        String[] glyphs = {"range", "focus", "amplification", "efficiency", "capacity", "attunement",
+                "discretion"};
         for (String glyph : glyphs) {
             ImageIO.write(augmentIcon(glyph), "PNG",
                     new File(ITEM_DIR + "/augment_" + glyph + ".png"));
@@ -212,6 +208,15 @@ public final class GenerateTextures {
                 fill(image, 8, 6, 3, 1, ink);
                 fill(image, 8, 9, 3, 1, ink);
                 fill(image, 10, 7, 1, 2, ink);
+            }
+            // A closed eye: the effects are still there, they simply stop announcing themselves.
+            case "discretion" -> {
+                fill(image, 4, 7, 8, 1, ink);
+                fill(image, 5, 8, 6, 1, ink);
+                fill(image, 6, 9, 4, 1, ink);
+                fill(image, 7, 5, 2, 1, ink);
+                fill(image, 4, 5, 2, 1, ink);
+                fill(image, 10, 5, 2, 1, ink);
             }
             default -> { }
         }

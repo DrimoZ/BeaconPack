@@ -85,7 +85,14 @@ public record AugmentDef(int maxTier, int color, int modelData, List<Operation> 
         MUL_FUEL("mul_fuel"),
         MUL_CAPACITY("mul_capacity"),
         /** Unlocks aura modes whose {@code minTier} the pack alone would not satisfy. */
-        UNLOCK_AURA("unlock_aura");
+        UNLOCK_AURA("unlock_aura"),
+        /**
+         * Hides the swirl at 1, and the status icon as well at 2.
+         *
+         * <p>The first operation that is not an amount: the value picks a behaviour rather than
+         * scaling one, which is why the resolver reads it as a threshold.
+         */
+        HIDE_EFFECTS("hide_effects");
 
         public static final Codec<Type> CODEC = StringRepresentable.fromEnum(Type::values);
 

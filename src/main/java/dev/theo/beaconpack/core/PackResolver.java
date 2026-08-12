@@ -37,6 +37,7 @@ public final class PackResolver {
         int maxAmplifier = tier.maxAmplifier();
         double fuelMultiplier = 1.0;
         int auraTierBonus = 0;
+        int concealment = 0;
 
         for (AugmentInstance instance : dedupeByType(augments)) {
             Optional<AugmentDef> maybeDef = augmentLookup.get(instance.type());
@@ -55,6 +56,9 @@ public final class PackResolver {
                     case MUL_FUEL -> fuelMultiplier *= value;
                     case MUL_CAPACITY -> capacityMultiplier *= value;
                     case UNLOCK_AURA -> auraTierBonus += (int) value;
+                    // Highest wins rather than summing: this value names a behaviour, so adding
+                    // two of them would be meaningless.
+                    case HIDE_EFFECTS -> concealment = Math.max(concealment, (int) value);
                 }
             }
         }
@@ -74,7 +78,9 @@ public final class PackResolver {
                 (int) Math.round(tier.fuelCapacity() * capacityMultiplier),
                 Math.clamp(maxAmplifier, 0, 3),
                 Math.max(0.0, fuelMultiplier),
-                auraModes);
+                auraModes,
+                concealment >= 1,
+                concealment >= 2);
     }
 
     /**

@@ -22,7 +22,9 @@ public record PackStats(
         int fuelCapacity,
         int maxAmplifier,
         double fuelMultiplier,
-        Set<AuraMode> allowedAuraModes
+        Set<AuraMode> allowedAuraModes,
+        boolean hideParticles,
+        boolean hideIcon
 ) {
     public boolean allows(AuraMode mode) {
         return allowedAuraModes.contains(mode);

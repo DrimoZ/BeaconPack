@@ -196,8 +196,8 @@ public final class PackTicker {
         for (LivingEntity target : targets(carrier, slot.aura(), stats.range())) {
             // Not ambient on purpose: that flag is what lets isCoveredByRealBeacon tell a genuine
             // beacon apart from our own effect a tick later.
-            target.addEffect(new MobEffectInstance(
-                    def.effect(), EFFECT_DURATION, slot.amplifier(), false, true, true));
+            target.addEffect(new MobEffectInstance(def.effect(), EFFECT_DURATION, slot.amplifier(),
+                    false, !stats.hideParticles(), !stats.hideIcon()));
         }
     }
 
