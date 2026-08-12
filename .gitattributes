@@ -1,0 +1,7 @@
+* text=auto eol=lf
+
+# The Gradle wrapper script breaks on Windows checkouts if it gets CRLF endings.
+gradlew text eol=lf
+gradlew.bat text eol=crlf
+*.jar binary
+*.png binary
