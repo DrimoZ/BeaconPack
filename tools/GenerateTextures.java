@@ -23,7 +23,7 @@ public final class GenerateTextures {
     private static final int SLOT = 0xFF8B8B8B;
 
     private static final int WIDTH = 248;
-    private static final int HEIGHT = 290;
+    private static final int HEIGHT = 294;
 
     public static void main(String[] args) throws IOException {
         new File(GUI_DIR).mkdirs();
@@ -41,26 +41,26 @@ public final class GenerateTextures {
 
         // Effect cases: 24x24 so the level indicator has room in the corner.
         for (int i = 0; i < 3; i++) {
-            recess(image, 36 + i * 32, 38, 26, 26);
+            recess(image, 28 + i * 30, 38, 26, 26);
         }
         // Info panel.
-        recess(image, 28, 72, 192, 76);
+        recess(image, 28, 76, 192, 76);
         // Augment slots + fuel slot, matching BeaconPackMenu's coordinates minus the 1px border.
         for (int i = 0; i < 3; i++) {
-            recess(image, 36 + i * 18, 168, 18, 18);
+            recess(image, 28 + i * 18, 172, 18, 18);
         }
-        recess(image, 150, 168, 18, 18);
+        recess(image, 120, 172, 18, 18);
         // Fuel gauge.
-        recess(image, 172, 170, 64, 14);
+        recess(image, 142, 174, 72, 14);
 
         // Player inventory + hotbar.
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                recess(image, 43 + col * 18, 206 + row * 18, 18, 18);
+                recess(image, 43 + col * 18, 210 + row * 18, 18, 18);
             }
         }
         for (int col = 0; col < 9; col++) {
-            recess(image, 43 + col * 18, 264, 18, 18);
+            recess(image, 43 + col * 18, 268, 18, 18);
         }
 
         ImageIO.write(image, "PNG", new File(GUI_DIR + "/beacon_pack.png"));

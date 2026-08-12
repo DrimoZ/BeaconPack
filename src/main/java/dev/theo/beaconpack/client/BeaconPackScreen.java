@@ -1,12 +1,12 @@
 package dev.theo.beaconpack.client;
 
 import dev.theo.beaconpack.core.BeaconEffectDef;
-import dev.theo.beaconpack.item.BeaconPackItem;
 import dev.theo.beaconpack.core.EffectSlotConfig;
 import dev.theo.beaconpack.core.PackResolver;
 import dev.theo.beaconpack.core.PackState;
 import dev.theo.beaconpack.core.PackStats;
 import dev.theo.beaconpack.core.PackTierDef;
+import dev.theo.beaconpack.item.BeaconPackItem;
 import dev.theo.beaconpack.menu.BeaconPackMenu;
 import dev.theo.beaconpack.net.PackActionPayload;
 import dev.theo.beaconpack.registry.BPLookups;
@@ -18,11 +18,12 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.SlotItemHandler;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +36,10 @@ import java.util.Optional;
  * <p>Everything is drawn by hand instead of using vanilla widgets. The effect selector is an
  * overlay, and vanilla widgets always render underneath {@code renderLabels}, so a mixed approach
  * would put the search field behind the panel it belongs to.
+ *
+ * <p>Layout rule: every panel spans the same {@link #CONTENT_LEFT}..{@link #CONTENT_RIGHT} column
+ * and every button row is divided into equal thirds. Text is measured against the space it has
+ * rather than assumed to fit — a long translation used to run under the frame.
  */
 public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
 
@@ -43,73 +48,78 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     private static final int TEXTURE_SIZE = 512;
 
     static final int IMAGE_W = 248;
-    static final int IMAGE_H = 290;
+    static final int IMAGE_H = 294;
 
-    private static final int TOGGLE_X = 176;
-    private static final int TOGGLE_Y = 6;
+    /** The single column everything aligns to. */
+    private static final int CONTENT_LEFT = 28;
+    private static final int CONTENT_RIGHT = 220;
+
     private static final int TOGGLE_W = 64;
     private static final int TOGGLE_H = 18;
+    private static final int TOGGLE_X = CONTENT_RIGHT - TOGGLE_W;
+    private static final int TOGGLE_Y = 6;
 
-    private static final int CASE_X = 36;
+    private static final int CASE_X = CONTENT_LEFT;
     private static final int CASE_Y = 38;
     private static final int CASE_SIZE = 26;
-    private static final int CASE_SPACING = 32;
+    private static final int CASE_SPACING = 30;
     private static final int MAX_CASES = 3;
 
-    /** Right of the effect cases: what the pack as a whole currently is. */
-    private static final int SUMMARY_X = 150;
-    private static final int SUMMARY_Y = 40;
+    private static final int INFO_X = CONTENT_LEFT;
+    private static final int INFO_Y = 76;
+    private static final int INFO_W = CONTENT_RIGHT - CONTENT_LEFT;
 
-    private static final int INFO_X = 28;
-    private static final int INFO_Y = 72;
-    private static final int INFO_W = 192;
-    private static final int INFO_H = 76;
     private static final int BTN_H = 16;
+    private static final int BTN_GAP = 3;
+    private static final int ROW_X = INFO_X + 6;
+    private static final int ROW_W = INFO_W - 12;
+    private static final int BTN_W = (ROW_W - 2 * BTN_GAP) / 3;
     private static final int ROW_CHANGE = INFO_Y + 36;
     private static final int ROW_SETTINGS = INFO_Y + 56;
 
-    private static final int LEVEL_X = INFO_X + 6;
-    private static final int LEVEL_W = 50;
-    private static final int ENABLED_X = INFO_X + 62;
-    private static final int ENABLED_W = 54;
-    private static final int AURA_X = INFO_X + 120;
-    private static final int AURA_W = 70;
-    /** Spans exactly the settings row below it, so the two rows line up on both edges. */
-    private static final int ROW_W = AURA_X + AURA_W - LEVEL_X;
-
-    private static final int SECTION_LABEL_Y = 156;
-    /** Top-left of the slot frames, one pixel outside the item positions used by the menu. */
-    private static final int AUGMENT_SLOT_X = 36;
-    private static final int SLOT_ROW_Y = 168;
+    private static final int SECTION_LABEL_Y = 160;
+    private static final int SLOT_ROW_Y = 172;
     private static final int SLOT_SIZE = 18;
-    private static final int GAUGE_X = 172;
-    private static final int GAUGE_Y = 170;
-    private static final int GAUGE_W = 64;
+    private static final int AUGMENT_SLOT_X = CONTENT_LEFT;
+    private static final int FUEL_SLOT_X = 120;
+    private static final int GAUGE_X = 142;
+    private static final int GAUGE_Y = 174;
+    private static final int GAUGE_W = CONTENT_RIGHT - GAUGE_X - 6;
     private static final int GAUGE_H = 14;
 
-    private static final int SELECTOR_X = 40;
-    private static final int SELECTOR_Y = 34;
-    private static final int SELECTOR_W = 168;
-    private static final int SELECTOR_H = 140;
+    private static final int SELECTOR_W = 152;
+    private static final int SEARCH_H = 22;
     private static final int ROW_H = 20;
     private static final int VISIBLE_ROWS = 6;
+    private static final int FOOTER_H = 14;
+    private static final int SELECTOR_H = SEARCH_H + VISIBLE_ROWS * ROW_H + FOOTER_H;
 
     private static final int TEXT = 0x404040;
     private static final int TEXT_DIM = 0x707070;
+    private static final int PANEL = 0xFF313131;
+    private static final int PANEL_EDGE = 0xFF1B1B1B;
+    private static final int PANEL_HEADER = 0xFF262626;
+    private static final int ROW_ALT = 0xFF383838;
+    private static final int ROW_FOCUS = 0xFF3E6899;
 
     private int focusedCase = 0;
     private boolean selectorOpen;
     private int selectorSlot;
+    private int selectorX;
+    private int selectorY;
     private int scroll;
+    /** Index into the filtered rows; driven by both the mouse and the arrow keys. */
+    private int highlighted;
     private String search = "";
 
     public BeaconPackScreen(BeaconPackMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
         this.imageWidth = IMAGE_W;
         this.imageHeight = IMAGE_H;
-        this.titleLabelY = 8;
+        this.titleLabelX = CONTENT_LEFT;
+        this.titleLabelY = 10;
         this.inventoryLabelX = 43;
-        this.inventoryLabelY = 194;
+        this.inventoryLabelY = 198;
     }
 
     // ------------------------------------------------------------------ rendering
@@ -137,44 +147,6 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         }
     }
 
-    /**
-     * Appends what the held fuel is actually worth to its normal tooltip.
-     *
-     * <p>"Diamond" says nothing about whether it is a good thing to burn here; "8 minutes at the
-     * current draw" does.
-     */
-    private boolean renderFuelSlotTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
-        if (!(hoveredSlot instanceof SlotItemHandler handler)
-                || handler.getSlotIndex() != BeaconPackItem.FUEL_SLOT
-                || !hoveredSlot.hasItem()) {
-            return false;
-        }
-        ItemStack stack = hoveredSlot.getItem();
-        int perItem = BPLookups.fuelValue(
-                Minecraft.getInstance().level.registryAccess(), stack.getItem());
-        if (perItem <= 0) {
-            return false;
-        }
-
-        List<Component> lines = new ArrayList<>(getTooltipFromContainerItem(stack));
-        PackStats stats = menu.stats();
-        double perSecond = PackResolver.fuelPerSecond(menu.state(), stats, effectLookup());
-        if (perSecond > 0.0) {
-            lines.add(Component.translatable("beaconpack.tip.fuel_worth",
-                            formatDuration((int) (perItem / perSecond)),
-                            formatDuration((int) (perItem * stack.getCount() / perSecond)))
-                    .withStyle(ChatFormatting.GRAY));
-        }
-        // A denser fuel than the buffer can hold is never consumed, and that would otherwise look
-        // like the pack ignoring it for no reason.
-        if (perItem > stats.fuelCapacity()) {
-            lines.add(Component.translatable("beaconpack.tip.fuel_too_dense")
-                    .withStyle(ChatFormatting.RED));
-        }
-        graphics.renderComponentTooltip(font, lines, mouseX, mouseY);
-        return true;
-    }
-
     @Override
     protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
         super.renderLabels(graphics, mouseX, mouseY);
@@ -186,11 +158,11 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         PackStats stats = menu.stats();
 
         graphics.drawString(font, Component.translatable("beaconpack.gui.effects"),
-                CASE_X, CASE_Y - 12, TEXT, false);
+                CONTENT_LEFT, CASE_Y - 12, TEXT, false);
         graphics.drawString(font, Component.translatable("beaconpack.gui.augments"),
-                CASE_X, SECTION_LABEL_Y, TEXT, false);
+                CONTENT_LEFT, SECTION_LABEL_Y, TEXT, false);
         graphics.drawString(font, Component.translatable("beaconpack.gui.fuel"),
-                150, SECTION_LABEL_Y, TEXT, false);
+                FUEL_SLOT_X, SECTION_LABEL_Y, TEXT, false);
 
         drawToggle(graphics, state, localX, localY);
         drawCases(graphics, state, stats, localX, localY);
@@ -246,33 +218,23 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     }
 
     /**
-     * The pack-wide figures, so the effect of an augment is visible without opening anything.
+     * The pack-wide figures, right-aligned to the content column.
      *
-     * <p>No fuel units anywhere: they are an implementation detail of the datapack format, and a
-     * rate in points per second tells a player nothing they can act on. Time does.
+     * <p>Right-aligned rather than placed at a fixed x: a longer translation used to run under the
+     * frame. No fuel units either - they are an implementation detail of the datapack format, and a
+     * rate in points per second is not something a player can act on. Time is.
      */
     private void drawSummary(GuiGraphics graphics, PackState state, PackStats stats) {
-        graphics.drawString(font, Component.translatable("beaconpack.gui.range",
-                        String.format(Locale.ROOT, "%.0f", stats.range())),
-                SUMMARY_X, SUMMARY_Y, TEXT_DIM, false);
-        graphics.drawString(font, Component.translatable("beaconpack.gui.runtime", totalRuntime()),
-                SUMMARY_X, SUMMARY_Y + 12, TEXT_DIM, false);
-        graphics.drawString(font, Component.translatable("beaconpack.gui.slots",
-                        state.effects().size(), stats.effectSlots()),
-                SUMMARY_X, SUMMARY_Y + 24, TEXT_DIM, false);
+        drawRightAligned(graphics, Component.translatable("beaconpack.gui.range",
+                String.format(Locale.ROOT, "%.0f", stats.range())), CASE_Y + 2);
+        drawRightAligned(graphics, Component.translatable("beaconpack.gui.runtime", totalRuntime()),
+                CASE_Y + 14);
+        drawRightAligned(graphics, Component.translatable("beaconpack.gui.slots",
+                state.effects().size(), stats.effectSlots()), CASE_Y + 26);
     }
 
-    private static String atCurrentDraw(int units, double perSecond) {
-        return perSecond <= 0.0 ? "-" : formatDuration((int) (units / perSecond));
-    }
-
-    /** Buffer plus what is still waiting in the fuel slot, at the current draw. */
-    private String totalRuntime() {
-        double perSecond = PackResolver.fuelPerSecond(menu.state(), menu.stats(), effectLookup());
-        if (perSecond <= 0.0) {
-            return "-";
-        }
-        return formatDuration((int) ((menu.state().fuel() + reserveUnits()) / perSecond));
+    private void drawRightAligned(GuiGraphics graphics, Component text, int y) {
+        graphics.drawString(font, text, CONTENT_RIGHT - font.width(text), y, TEXT_DIM, false);
     }
 
     private void drawInfoPanel(GuiGraphics graphics, PackState state, PackStats stats,
@@ -301,59 +263,49 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         double cost = PackResolver.fuelPerSecond(slot, stats, effectLookup()) * stats.fuelMultiplier();
         double total = PackResolver.fuelPerSecond(state, stats, effectLookup());
         int share = total <= 0.0 ? 0 : (int) Math.round(cost / total * 100.0);
-        graphics.drawString(font, Component.translatable("beaconpack.gui.share", share)
-                        .getString() + "  ·  " + (slot.aura().isAura()
-                        ? String.format(Locale.ROOT, "%.0f m", stats.range())
-                        : Component.translatable("beaconpack.aura.self").getString()),
+        String reach = slot.aura().isAura()
+                ? String.format(Locale.ROOT, "%.0f m", stats.range())
+                : Component.translatable("beaconpack.aura.self").getString();
+        graphics.drawString(font,
+                Component.translatable("beaconpack.gui.share", share).getString() + "  ·  " + reach,
                 INFO_X + 8, INFO_Y + 21, TEXT_DIM, false);
 
         // Explicit rather than "click the case again": re-clicking the case is how you focus it,
         // and overloading that click with "open the picker" made every attempt to read a second
         // effect's details pop the selector instead.
-        drawButton(graphics, LEVEL_X, ROW_CHANGE, ROW_W, BTN_H,
+        drawButton(graphics, ROW_X, ROW_CHANGE, ROW_W, BTN_H,
                 Component.translatable("beaconpack.gui.change_effect"),
-                within(mouseX, mouseY, LEVEL_X, ROW_CHANGE, ROW_W, BTN_H), true);
+                within(mouseX, mouseY, ROW_X, ROW_CHANGE, ROW_W, BTN_H), true);
 
-        drawButton(graphics, LEVEL_X, ROW_SETTINGS, LEVEL_W, BTN_H,
+        drawButton(graphics, buttonX(0), ROW_SETTINGS, BTN_W, BTN_H,
                 Component.literal("< " + roman(slot.amplifier() + 1) + " >"),
-                within(mouseX, mouseY, LEVEL_X, ROW_SETTINGS, LEVEL_W, BTN_H),
+                within(mouseX, mouseY, buttonX(0), ROW_SETTINGS, BTN_W, BTN_H),
                 canAmplify(def, stats));
-        drawButton(graphics, ENABLED_X, ROW_SETTINGS, ENABLED_W, BTN_H,
+        drawButton(graphics, buttonX(1), ROW_SETTINGS, BTN_W, BTN_H,
                 Component.translatable(slot.enabled()
                         ? "beaconpack.gui.active" : "beaconpack.gui.inactive"),
-                within(mouseX, mouseY, ENABLED_X, ROW_SETTINGS, ENABLED_W, BTN_H), slot.enabled());
-        drawButton(graphics, AURA_X, ROW_SETTINGS, AURA_W, BTN_H,
+                within(mouseX, mouseY, buttonX(1), ROW_SETTINGS, BTN_W, BTN_H), slot.enabled());
+        drawButton(graphics, buttonX(2), ROW_SETTINGS, BTN_W, BTN_H,
                 Component.translatable("beaconpack.aura." + slot.aura().getSerializedName()),
-                within(mouseX, mouseY, AURA_X, ROW_SETTINGS, AURA_W, BTN_H),
+                within(mouseX, mouseY, buttonX(2), ROW_SETTINGS, BTN_W, BTN_H),
                 stats.allowedAuraModes().size() > 1);
     }
 
-    /**
-     * Shows how long the pack will keep running, not how many points it holds.
-     *
-     * <p>Unit counts mean nothing without doing the division yourself, and the number that actually
-     * drives a decision is the time - including what is still waiting in the fuel slot.
-     */
+    private static int buttonX(int index) {
+        return ROW_X + index * (BTN_W + BTN_GAP);
+    }
+
     private void drawFuel(GuiGraphics graphics, PackState state, PackStats stats) {
         int capacity = Math.max(1, stats.fuelCapacity());
         int filled = (int) ((GAUGE_W - 4) * Math.min(1.0, state.fuel() / (double) capacity));
         graphics.fill(GAUGE_X + 2, GAUGE_Y + 2, GAUGE_X + 2 + filled, GAUGE_Y + GAUGE_H - 2,
                 0xFF3FA34D);
 
-        double perSecond = PackResolver.fuelPerSecond(state, stats, effectLookup());
-        String label = perSecond <= 0.0
-                ? "-"
-                : formatDuration((int) ((state.fuel() + reserveUnits()) / perSecond));
+        String label = totalRuntime();
         graphics.drawString(font, label,
                 GAUGE_X + (GAUGE_W - font.width(label)) / 2, GAUGE_Y + 4, 0xFFFFFFFF, true);
     }
 
-    /**
-     * Marks augment slots the tier has not unlocked.
-     *
-     * <p>They silently refused anything dropped on them before, which is indistinguishable from an
-     * augment that does not work.
-     */
     private void drawLockedAugmentSlots(GuiGraphics graphics, PackStats stats) {
         for (int i = stats.augmentSlots(); i < BeaconPackItem.AUGMENT_SLOTS; i++) {
             int x = AUGMENT_SLOT_X + i * SLOT_SIZE;
@@ -363,71 +315,140 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         }
     }
 
-    /** Fuel units still sitting in the fuel slot, not yet drawn into the buffer. */
-    private int reserveUnits() {
-        ItemStack fuel = fuelSlotStack();
-        if (fuel.isEmpty()) {
-            return 0;
-        }
-        int perItem = BPLookups.fuelValue(
-                Minecraft.getInstance().level.registryAccess(), fuel.getItem());
-        return perItem * fuel.getCount();
-    }
+    // ------------------------------------------------------------------ effect selector
 
-    private ItemStack fuelSlotStack() {
-        for (Slot slot : menu.slots) {
-            if (slot instanceof SlotItemHandler handler
-                    && handler.getSlotIndex() == BeaconPackItem.FUEL_SLOT) {
-                return slot.getItem();
-            }
-        }
-        return ItemStack.EMPTY;
+    /**
+     * Anchored to the top-right corner of the case it belongs to, then clamped inside the screen.
+     *
+     * <p>Anchoring ties the popup to what opened it instead of dropping it in the middle of the
+     * panel; clamping is what keeps the rightmost case from opening a list half off the frame.
+     */
+    private void openSelector(int caseIndex) {
+        selectorOpen = true;
+        selectorSlot = caseIndex;
+        scroll = 0;
+        highlighted = 0;
+        search = "";
+
+        int anchorX = CASE_X + caseIndex * CASE_SPACING + CASE_SIZE;
+        selectorX = Mth.clamp(anchorX, 4, IMAGE_W - SELECTOR_W - 4);
+        selectorY = Mth.clamp(CASE_Y, 4, IMAGE_H - SELECTOR_H - 4);
     }
 
     private void drawSelector(GuiGraphics graphics, int mouseX, int mouseY) {
-        graphics.fill(SELECTOR_X - 3, SELECTOR_Y - 3,
-                SELECTOR_X + SELECTOR_W + 3, SELECTOR_Y + SELECTOR_H + 3, 0xFF1F1F1F);
-        graphics.fill(SELECTOR_X, SELECTOR_Y, SELECTOR_X + SELECTOR_W, SELECTOR_Y + SELECTOR_H,
-                0xFF3C3C3C);
-        graphics.fill(SELECTOR_X, SELECTOR_Y, SELECTOR_X + SELECTOR_W, SELECTOR_Y + 20, 0xFF2E2E2E);
+        int x = selectorX;
+        int y = selectorY;
+        graphics.fill(x - 1, y - 1, x + SELECTOR_W + 1, y + SELECTOR_H + 1, PANEL_EDGE);
+        graphics.fill(x, y, x + SELECTOR_W, y + SELECTOR_H, PANEL);
+        graphics.fill(x, y, x + SELECTOR_W, y + SEARCH_H, PANEL_HEADER);
 
-        graphics.drawString(font, search.isEmpty()
-                        ? Component.translatable("beaconpack.gui.search").getString() + "..."
-                        : search + "_",
-                SELECTOR_X + 6, SELECTOR_Y + 6, search.isEmpty() ? 0xFF777777 : 0xFFFFFFFF, false);
+        drawSearchField(graphics, x, y);
 
         List<ResourceKey<BeaconEffectDef>> rows = visibleRows();
+        if (rows.isEmpty()) {
+            graphics.drawCenteredString(font,
+                    Component.translatable("beaconpack.gui.no_results"),
+                    x + SELECTOR_W / 2, y + SEARCH_H + 16, 0xFF999999);
+            return;
+        }
+
+        highlighted = Mth.clamp(highlighted, 0, rows.size() - 1);
         int tierLevel = tierLevel();
+        double maxCost = rows.stream()
+                .map(key -> effectLookup().get(key).map(BeaconEffectDef::cost).orElse(0.0))
+                .max(Double::compare).orElse(1.0);
+
         for (int i = 0; i < VISIBLE_ROWS && i + scroll < rows.size(); i++) {
-            ResourceKey<BeaconEffectDef> key = rows.get(i + scroll);
+            int index = i + scroll;
+            ResourceKey<BeaconEffectDef> key = rows.get(index);
             Optional<BeaconEffectDef> maybeDef = effectLookup().get(key);
             if (maybeDef.isEmpty()) {
                 continue;
             }
             BeaconEffectDef def = maybeDef.get();
-            int y = SELECTOR_Y + 22 + i * ROW_H;
+            int rowY = y + SEARCH_H + i * ROW_H;
             boolean locked = def.minTier() > tierLevel;
-            if (within(mouseX, mouseY, SELECTOR_X, y, SELECTOR_W, ROW_H)) {
-                graphics.fill(SELECTOR_X, y, SELECTOR_X + SELECTOR_W, y + ROW_H, 0xFF555555);
+
+            if (within(mouseX, mouseY, x, rowY, SELECTOR_W, ROW_H)) {
+                // Hover drives the same highlight the arrow keys do, so mouse and keyboard never
+                // disagree about what Enter would pick.
+                highlighted = index;
+            }
+            if (index == highlighted) {
+                graphics.fill(x, rowY, x + SELECTOR_W, rowY + ROW_H, locked ? ROW_ALT : ROW_FOCUS);
+            } else if (index % 2 == 1) {
+                graphics.fill(x, rowY, x + SELECTOR_W, rowY + ROW_H, ROW_ALT);
             }
 
-            drawEffectIcon(graphics, key, SELECTOR_X + 3, y + 2);
-            String right = locked
-                    ? Component.translatable("beaconpack.gui.locked_tier",
-                            roman(def.minTier())).getString()
-                    : String.format(Locale.ROOT, "%.1f u/s", def.cost());
-            graphics.drawString(font, right,
-                    SELECTOR_X + SELECTOR_W - font.width(right) - 6, y + 6,
-                    locked ? 0xFFAA5555 : 0xFFBBBBBB, false);
+            drawEffectIcon(graphics, key, x + 4, rowY + 2);
 
-            // Truncated against the space the cost leaves, otherwise long effect names run
-            // straight through it.
-            int available = SELECTOR_W - 24 - font.width(right) - 12;
-            String name = font.plainSubstrByWidth(
-                    def.effect().value().getDisplayName().getString(), available);
-            graphics.drawString(font, name,
-                    SELECTOR_X + 24, y + 6, locked ? 0xFF888888 : 0xFFFFFFFF, false);
+            if (locked) {
+                String tag = Component.translatable("beaconpack.gui.locked_tier",
+                        roman(def.minTier())).getString();
+                graphics.drawString(font, tag, x + SELECTOR_W - font.width(tag) - 5, rowY + 6,
+                        0xFFAA5555, false);
+                drawName(graphics, def, x, rowY, font.width(tag) + 10, 0xFF888888);
+            } else {
+                drawCostMeter(graphics, x + SELECTOR_W - 30, rowY + 7, def.cost() / maxCost);
+                drawName(graphics, def, x, rowY, 36, 0xFFFFFFFF);
+            }
         }
+
+        drawScrollbar(graphics, x, y, rows.size());
+        String count = Component.translatable("beaconpack.gui.result_count", rows.size()).getString();
+        graphics.drawString(font, count, x + 5, y + SELECTOR_H - 11, 0xFF888888, false);
+    }
+
+    /** Truncated against whatever the right-hand column leaves, never assumed to fit. */
+    private void drawName(GuiGraphics graphics, BeaconEffectDef def, int x, int rowY,
+                          int reserved, int colour) {
+        int available = SELECTOR_W - 24 - reserved;
+        String name = font.plainSubstrByWidth(
+                def.effect().value().getDisplayName().getString(), available);
+        graphics.drawString(font, name, x + 24, rowY + 6, colour, false);
+    }
+
+    /**
+     * Relative cost as four segments instead of a number.
+     *
+     * <p>The player never needs the absolute figure here - only whether this effect is cheaper than
+     * that one - and a comparison is what a meter reads as at a glance.
+     */
+    private void drawCostMeter(GuiGraphics graphics, int x, int y, double ratio) {
+        int lit = Mth.clamp((int) Math.ceil(ratio * 4), 1, 4);
+        for (int i = 0; i < 4; i++) {
+            int colour = i < lit ? (lit >= 4 ? 0xFFD86A5A : lit >= 3 ? 0xFFD8B45A : 0xFF6ABF6A)
+                    : 0xFF555555;
+            graphics.fill(x + i * 6, y - i, x + i * 6 + 4, y + 6, colour);
+        }
+    }
+
+    private void drawSearchField(GuiGraphics graphics, int x, int y) {
+        graphics.fill(x + 4, y + 4, x + SELECTOR_W - 4, y + SEARCH_H - 4, 0xFF1A1A1A);
+        boolean empty = search.isEmpty();
+        String shown = empty
+                ? Component.translatable("beaconpack.gui.search").getString()
+                : search;
+        graphics.drawString(font, shown, x + 8, y + 8, empty ? 0xFF6A6A6A : 0xFFFFFFFF, false);
+        if (!empty || (System.currentTimeMillis() / 500) % 2 == 0) {
+            int caret = x + 8 + (empty ? 0 : font.width(search));
+            graphics.fill(caret + 1, y + 7, caret + 2, y + 16, 0xFFCCCCCC);
+        }
+    }
+
+    private void drawScrollbar(GuiGraphics graphics, int x, int y, int total) {
+        if (total <= VISIBLE_ROWS) {
+            return;
+        }
+        int trackTop = y + SEARCH_H;
+        int trackHeight = VISIBLE_ROWS * ROW_H;
+        int thumbHeight = Math.max(12, trackHeight * VISIBLE_ROWS / total);
+        int travel = trackHeight - thumbHeight;
+        int thumbTop = trackTop + travel * scroll / Math.max(1, total - VISIBLE_ROWS);
+        graphics.fill(x + SELECTOR_W - 3, trackTop, x + SELECTOR_W - 1, trackTop + trackHeight,
+                0xFF262626);
+        graphics.fill(x + SELECTOR_W - 3, thumbTop, x + SELECTOR_W - 1, thumbTop + thumbHeight,
+                0xFF7A7A7A);
     }
 
     private void drawEffectIcon(GuiGraphics graphics, ResourceKey<BeaconEffectDef> key, int x, int y) {
@@ -445,10 +466,46 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         int background = !lit ? 0xFF5A5A5A : hovered ? 0xFF7FA7D8 : 0xFF6E6E6E;
         graphics.fill(x, y, x + w, y + h, background);
         graphics.renderOutline(x, y, w, h, 0xFF2B2B2B);
-        graphics.drawCenteredString(font, label, x + w / 2, y + (h - 8) / 2, 0xFFFFFFFF);
+        // Truncated defensively: a translated label that overflows used to run past the button and
+        // under the frame.
+        String text = font.plainSubstrByWidth(label.getString(), w - 6);
+        graphics.drawString(font, text, x + (w - font.width(text)) / 2, y + (h - 8) / 2,
+                0xFFFFFFFF, false);
     }
 
     // ------------------------------------------------------------------ tooltips
+
+    private boolean renderFuelSlotTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
+        if (!(hoveredSlot instanceof SlotItemHandler handler)
+                || handler.getSlotIndex() != BeaconPackItem.FUEL_SLOT
+                || !hoveredSlot.hasItem()) {
+            return false;
+        }
+        ItemStack stack = hoveredSlot.getItem();
+        int perItem = BPLookups.fuelValue(
+                Minecraft.getInstance().level.registryAccess(), stack.getItem());
+        if (perItem <= 0) {
+            return false;
+        }
+
+        List<Component> lines = new ArrayList<>(getTooltipFromContainerItem(stack));
+        PackStats stats = menu.stats();
+        double perSecond = PackResolver.fuelPerSecond(menu.state(), stats, effectLookup());
+        if (perSecond > 0.0) {
+            lines.add(Component.translatable("beaconpack.tip.fuel_worth",
+                            formatDuration((int) (perItem / perSecond)),
+                            formatDuration((int) (perItem * stack.getCount() / perSecond)))
+                    .withStyle(ChatFormatting.GRAY));
+        }
+        // A denser fuel than the buffer can hold is never consumed, and that would otherwise look
+        // like the pack ignoring it for no reason.
+        if (perItem > stats.fuelCapacity()) {
+            lines.add(Component.translatable("beaconpack.tip.fuel_too_dense")
+                    .withStyle(ChatFormatting.RED));
+        }
+        graphics.renderComponentTooltip(font, lines, mouseX, mouseY);
+        return true;
+    }
 
     /** Nothing on this screen is self-explanatory without these. */
     private List<Component> tooltipAt(int x, int y) {
@@ -467,30 +524,30 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
                             atCurrentDraw(reserveUnits(), perSecond))
                             .withStyle(ChatFormatting.GRAY));
         }
+        List<Component> caseTip = caseTooltip(x, y);
+        if (!caseTip.isEmpty()) {
+            return caseTip;
+        }
         for (int i = menu.stats().augmentSlots(); i < BeaconPackItem.AUGMENT_SLOTS; i++) {
             if (within(x, y, AUGMENT_SLOT_X + i * SLOT_SIZE, SLOT_ROW_Y, SLOT_SIZE, SLOT_SIZE)) {
                 return List.of(Component.translatable("beaconpack.tip.augment_locked"));
             }
-        }
-        List<Component> caseTip = caseTooltip(x, y);
-        if (!caseTip.isEmpty()) {
-            return caseTip;
         }
         // Guarded on the panel actually having buttons: they are only drawn for a focused case
         // holding an effect, and a tooltip over blank panel space was pure noise.
         if (focusedCase >= menu.state().effects().size()) {
             return List.of();
         }
-        if (within(x, y, LEVEL_X, ROW_CHANGE, ROW_W, BTN_H)) {
+        if (within(x, y, ROW_X, ROW_CHANGE, ROW_W, BTN_H)) {
             return List.of(Component.translatable("beaconpack.tip.change_effect"));
         }
-        if (within(x, y, LEVEL_X, ROW_SETTINGS, LEVEL_W, BTN_H)) {
+        if (within(x, y, buttonX(0), ROW_SETTINGS, BTN_W, BTN_H)) {
             return List.of(Component.translatable("beaconpack.tip.level"));
         }
-        if (within(x, y, ENABLED_X, ROW_SETTINGS, ENABLED_W, BTN_H)) {
+        if (within(x, y, buttonX(1), ROW_SETTINGS, BTN_W, BTN_H)) {
             return List.of(Component.translatable("beaconpack.tip.effect_toggle"));
         }
-        if (within(x, y, AURA_X, ROW_SETTINGS, AURA_W, BTN_H)) {
+        if (within(x, y, buttonX(2), ROW_SETTINGS, BTN_W, BTN_H)) {
             return List.of(Component.translatable("beaconpack.tip.aura"));
         }
         return List.of();
@@ -564,59 +621,56 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         if (focusedCase >= menu.state().effects().size()) {
             return false;
         }
-        if (within(x, y, LEVEL_X, ROW_CHANGE, ROW_W, BTN_H)) {
+        if (within(x, y, ROW_X, ROW_CHANGE, ROW_W, BTN_H)) {
             openSelector(focusedCase);
             return true;
         }
-        if (within(x, y, LEVEL_X, ROW_SETTINGS, LEVEL_W, BTN_H)) {
+        if (within(x, y, buttonX(0), ROW_SETTINGS, BTN_W, BTN_H)) {
             send(BeaconPackMenu.ACTION_CYCLE_AMPLIFIER, focusedCase, 0);
             return true;
         }
-        if (within(x, y, ENABLED_X, ROW_SETTINGS, ENABLED_W, BTN_H)) {
+        if (within(x, y, buttonX(1), ROW_SETTINGS, BTN_W, BTN_H)) {
             send(BeaconPackMenu.ACTION_TOGGLE_EFFECT, focusedCase, 0);
             return true;
         }
-        if (within(x, y, AURA_X, ROW_SETTINGS, AURA_W, BTN_H)) {
+        if (within(x, y, buttonX(2), ROW_SETTINGS, BTN_W, BTN_H)) {
             send(BeaconPackMenu.ACTION_CYCLE_AURA, focusedCase, 0);
             return true;
         }
         return false;
     }
 
-    private void openSelector(int caseIndex) {
-        selectorOpen = true;
-        selectorSlot = caseIndex;
-        scroll = 0;
-        search = "";
-    }
-
     private void handleSelectorClick(int x, int y) {
-        if (!within(x, y, SELECTOR_X, SELECTOR_Y, SELECTOR_W, SELECTOR_H)) {
+        if (!within(x, y, selectorX, selectorY, SELECTOR_W, SELECTOR_H)) {
             selectorOpen = false;
             return;
         }
         List<ResourceKey<BeaconEffectDef>> rows = visibleRows();
         for (int i = 0; i < VISIBLE_ROWS && i + scroll < rows.size(); i++) {
-            int rowY = SELECTOR_Y + 22 + i * ROW_H;
-            if (!within(x, y, SELECTOR_X, rowY, SELECTOR_W, ROW_H)) {
-                continue;
-            }
-            ResourceKey<BeaconEffectDef> key = rows.get(i + scroll);
-            if (effectLookup().get(key).map(def -> def.minTier() > tierLevel()).orElse(true)) {
+            if (within(x, y, selectorX, selectorY + SEARCH_H + i * ROW_H, SELECTOR_W, ROW_H)) {
+                confirm(rows, i + scroll);
                 return;
             }
-            send(BeaconPackMenu.ACTION_SET_EFFECT, selectorSlot, allKeys().indexOf(key));
-            focusedCase = selectorSlot;
-            selectorOpen = false;
+        }
+    }
+
+    private void confirm(List<ResourceKey<BeaconEffectDef>> rows, int index) {
+        if (index < 0 || index >= rows.size()) {
             return;
         }
+        ResourceKey<BeaconEffectDef> key = rows.get(index);
+        if (effectLookup().get(key).map(def -> def.minTier() > tierLevel()).orElse(true)) {
+            return;
+        }
+        send(BeaconPackMenu.ACTION_SET_EFFECT, selectorSlot, allKeys().indexOf(key));
+        focusedCase = selectorSlot;
+        selectorOpen = false;
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double deltaX, double deltaY) {
         if (selectorOpen) {
-            int max = Math.max(0, visibleRows().size() - VISIBLE_ROWS);
-            scroll = Math.clamp(scroll - (int) Math.signum(deltaY), 0, max);
+            scroll = Mth.clamp(scroll - (int) Math.signum(deltaY), 0, maxScroll());
             return true;
         }
         return super.mouseScrolled(mouseX, mouseY, deltaX, deltaY);
@@ -627,6 +681,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         if (selectorOpen && search.length() < 24) {
             search += codePoint;
             scroll = 0;
+            highlighted = 0;
             return true;
         }
         return super.charTyped(codePoint, modifiers);
@@ -634,20 +689,46 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (selectorOpen) {
-            if (keyCode == 256) {
-                selectorOpen = false;
-                return true;
-            }
-            if (keyCode == 259 && !search.isEmpty()) {
-                search = search.substring(0, search.length() - 1);
-                scroll = 0;
-                return true;
-            }
-            // Swallow the rest so the inventory key does not close the whole screen mid-search.
-            return true;
+        if (!selectorOpen) {
+            return super.keyPressed(keyCode, scanCode, modifiers);
         }
-        return super.keyPressed(keyCode, scanCode, modifiers);
+        switch (keyCode) {
+            case GLFW.GLFW_KEY_ESCAPE -> selectorOpen = false;
+            case GLFW.GLFW_KEY_BACKSPACE -> {
+                if (!search.isEmpty()) {
+                    search = search.substring(0, search.length() - 1);
+                    scroll = 0;
+                    highlighted = 0;
+                }
+            }
+            case GLFW.GLFW_KEY_DOWN -> moveHighlight(1);
+            case GLFW.GLFW_KEY_UP -> moveHighlight(-1);
+            case GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER -> confirm(visibleRows(), highlighted);
+            default -> {
+                // Everything else is swallowed so the inventory key does not close the whole screen
+                // in the middle of typing a search.
+            }
+        }
+        return true;
+    }
+
+    /** Keeps the highlighted row on screen, which is what makes arrow keys usable at all. */
+    private void moveHighlight(int delta) {
+        int size = visibleRows().size();
+        if (size == 0) {
+            return;
+        }
+        highlighted = Math.floorMod(highlighted + delta, size);
+        if (highlighted < scroll) {
+            scroll = highlighted;
+        } else if (highlighted >= scroll + VISIBLE_ROWS) {
+            scroll = highlighted - VISIBLE_ROWS + 1;
+        }
+        scroll = Mth.clamp(scroll, 0, maxScroll());
+    }
+
+    private int maxScroll() {
+        return Math.max(0, visibleRows().size() - VISIBLE_ROWS);
     }
 
     // ------------------------------------------------------------------ helpers
@@ -676,6 +757,36 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
                                 .toLowerCase(Locale.ROOT).contains(needle))
                         .orElse(false))
                 .toList();
+    }
+
+    private String totalRuntime() {
+        double perSecond = PackResolver.fuelPerSecond(menu.state(), menu.stats(), effectLookup());
+        return atCurrentDraw(menu.state().fuel() + reserveUnits(), perSecond);
+    }
+
+    private static String atCurrentDraw(int units, double perSecond) {
+        return perSecond <= 0.0 ? "-" : formatDuration((int) (units / perSecond));
+    }
+
+    /** Fuel units still sitting in the fuel slot, not yet drawn into the buffer. */
+    private int reserveUnits() {
+        ItemStack fuel = fuelSlotStack();
+        if (fuel.isEmpty()) {
+            return 0;
+        }
+        int perItem = BPLookups.fuelValue(
+                Minecraft.getInstance().level.registryAccess(), fuel.getItem());
+        return perItem * fuel.getCount();
+    }
+
+    private ItemStack fuelSlotStack() {
+        for (var slot : menu.slots) {
+            if (slot instanceof SlotItemHandler handler
+                    && handler.getSlotIndex() == BeaconPackItem.FUEL_SLOT) {
+                return slot.getItem();
+            }
+        }
+        return ItemStack.EMPTY;
     }
 
     private int tierLevel() {
