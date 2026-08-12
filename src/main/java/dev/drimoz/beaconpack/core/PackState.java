@@ -18,6 +18,14 @@ import java.util.List;
  * <p>This record is the one place a 1.20.1 backport has to be rewritten — everything downstream
  * consumes it, nothing downstream knows how it is stored.
  *
+ * <p><b>Once released, this shape is frozen.</b> Every field is {@code optionalFieldOf} with a
+ * default, which makes adding a field safe: a pack saved by an older version simply takes the
+ * default. Removing one is safe too. What is not safe is changing what an existing field means or
+ * what type it holds — that turns every pack in every existing world into an item whose component
+ * no longer parses, with no way to tell the old encoding from the new. A changed meaning gets a new
+ * field name; the old one is read for a version or two and then dropped. This is why there is no
+ * version number: absence of a field already is the version.
+ *
  * @param effects configured effect slots, ordered; may be shorter than the tier's slot count
  * @param fuel    remaining fuel units in the internal buffer
  * @param active  master switch; false means nothing is applied and nothing is consumed

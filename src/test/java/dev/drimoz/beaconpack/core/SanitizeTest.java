@@ -41,6 +41,19 @@ class SanitizeTest {
     }
 
     @Test
+    void effectsTheDatapackNoLongerDefinesAreDropped() {
+        // A pack saved in a world whose datapack has since removed the effect. The key still
+        // deserialises fine - nothing about a ResourceKey requires the entry to exist - so this is
+        // the only place the missing entry can be caught, and every consumer downstream assumes
+        // sanitize already did.
+        PackTierDef tier = tier(4, 2, List.of());
+        PackState state = new PackState(
+                List.of(slot(effectKey("removed_by_a_datapack"), 0, AuraMode.SELF)), 0, true, 0);
+
+        assertTrue(PackResolver.sanitize(state, stats(tier, 2, 1), EFFECTS, tier).effects().isEmpty());
+    }
+
+    @Test
     void effectsAboveTheTierAreDropped() {
         PackTierDef tier = tier(2, 2, List.of());
         PackState state = new PackState(List.of(slot(STRENGTH, 0, AuraMode.SELF)), 0, true, 0);
