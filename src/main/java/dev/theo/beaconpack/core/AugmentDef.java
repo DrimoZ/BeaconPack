@@ -2,9 +2,6 @@ package dev.theo.beaconpack.core;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;
 
 import java.util.List;
@@ -41,14 +38,6 @@ public record AugmentDef(int maxTier, int color, int modelData, List<Operation> 
             Operation.CODEC.listOf().fieldOf("operations").forGetter(AugmentDef::operations)
     ).apply(i, AugmentDef::new));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, AugmentDef> STREAM_CODEC =
-            StreamCodec.composite(
-                    ByteBufCodecs.VAR_INT, AugmentDef::maxTier,
-                    ByteBufCodecs.INT, AugmentDef::color,
-                    ByteBufCodecs.VAR_INT, AugmentDef::modelData,
-                    Operation.STREAM_CODEC.apply(ByteBufCodecs.list()), AugmentDef::operations,
-                    AugmentDef::new);
-
     /**
      * A modifier with one value per augment tier. Indexing by tier rather than defining three
      * separate entries keeps "Range I/II/III" a single JSON file.
@@ -60,14 +49,6 @@ public record AugmentDef(int maxTier, int color, int modelData, List<Operation> 
                 Type.CODEC.fieldOf("type").forGetter(Operation::type),
                 Codec.DOUBLE.listOf().fieldOf("values").forGetter(Operation::values)
         ).apply(i, Operation::new));
-
-        public static final StreamCodec<RegistryFriendlyByteBuf, Operation> STREAM_CODEC =
-                StreamCodec.composite(
-                        ByteBufCodecs.idMapper(
-                                        id -> Type.values()[id], Enum::ordinal),
-                        Operation::type,
-                        ByteBufCodecs.DOUBLE.apply(ByteBufCodecs.list()), Operation::values,
-                        Operation::new);
 
         /** Value for a 1-based augment tier, clamped to what the JSON actually declares. */
         public double valueFor(int tier) {

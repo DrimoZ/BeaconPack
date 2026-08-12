@@ -4,10 +4,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.effect.MobEffect;
 
 /**
@@ -48,19 +44,6 @@ public record BeaconEffectDef(
             Codec.DOUBLE.optionalFieldOf("amplifier_cost_multiplier", 2.0)
                     .forGetter(BeaconEffectDef::amplifierCostMultiplier)
     ).apply(i, BeaconEffectDef::new));
-
-    /**
-     * Needed because the GUI must show costs and caps client-side; without a network codec the
-     * registry is not synced and every tooltip would have to round-trip to the server.
-     */
-    public static final StreamCodec<RegistryFriendlyByteBuf, BeaconEffectDef> STREAM_CODEC =
-            StreamCodec.composite(
-                    ByteBufCodecs.holderRegistry(Registries.MOB_EFFECT), BeaconEffectDef::effect,
-                    ByteBufCodecs.DOUBLE, BeaconEffectDef::cost,
-                    ByteBufCodecs.VAR_INT, BeaconEffectDef::maxAmplifier,
-                    ByteBufCodecs.VAR_INT, BeaconEffectDef::minTier,
-                    ByteBufCodecs.DOUBLE, BeaconEffectDef::amplifierCostMultiplier,
-                    BeaconEffectDef::new);
 
     /** Fuel units per second for this effect at the given amplifier and aura mode. */
     public double costPerSecond(int amplifier, AuraMode aura) {
