@@ -26,6 +26,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import net.neoforged.neoforge.items.SlotItemHandler;
 
 import java.util.ArrayList;
@@ -316,45 +317,59 @@ public class BeaconPackMenu extends AbstractContainerMenu {
      * instance - leaving a bound handler writing into an orphaned copy. The augment and fuel slots
      * would then show contents that no longer exist.
      */
-    private class LivePackHandler implements IItemHandler {
+    private class LivePackHandler implements IItemHandlerModifiable {
 
-        private IItemHandler delegate() {
-            return pack().getCapability(Capabilities.ItemHandler.ITEM);
+        /**
+         * Modifiable, not just {@link IItemHandler}: {@code SlotItemHandler#set} casts to
+         * {@link IItemHandlerModifiable} without checking, which is how the client applies the
+         * server's container contents.
+         */
+        private IItemHandlerModifiable delegate() {
+            IItemHandler handler = pack().getCapability(Capabilities.ItemHandler.ITEM);
+            return handler instanceof IItemHandlerModifiable modifiable ? modifiable : null;
+        }
+
+        @Override
+        public void setStackInSlot(int slot, ItemStack stack) {
+            IItemHandlerModifiable handler = delegate();
+            if (handler != null) {
+                handler.setStackInSlot(slot, stack);
+            }
         }
 
         @Override
         public int getSlots() {
-            IItemHandler handler = delegate();
+            IItemHandlerModifiable handler = delegate();
             return handler == null ? BeaconPackItem.CONTAINER_SIZE : handler.getSlots();
         }
 
         @Override
         public ItemStack getStackInSlot(int slot) {
-            IItemHandler handler = delegate();
+            IItemHandlerModifiable handler = delegate();
             return handler == null ? ItemStack.EMPTY : handler.getStackInSlot(slot);
         }
 
         @Override
         public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-            IItemHandler handler = delegate();
+            IItemHandlerModifiable handler = delegate();
             return handler == null ? stack : handler.insertItem(slot, stack, simulate);
         }
 
         @Override
         public ItemStack extractItem(int slot, int amount, boolean simulate) {
-            IItemHandler handler = delegate();
+            IItemHandlerModifiable handler = delegate();
             return handler == null ? ItemStack.EMPTY : handler.extractItem(slot, amount, simulate);
         }
 
         @Override
         public int getSlotLimit(int slot) {
-            IItemHandler handler = delegate();
+            IItemHandlerModifiable handler = delegate();
             return handler == null ? 64 : handler.getSlotLimit(slot);
         }
 
         @Override
         public boolean isItemValid(int slot, ItemStack stack) {
-            IItemHandler handler = delegate();
+            IItemHandlerModifiable handler = delegate();
             return handler == null || handler.isItemValid(slot, stack);
         }
     }
