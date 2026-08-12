@@ -74,6 +74,8 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     private static final int ENABLED_W = 54;
     private static final int AURA_X = INFO_X + 120;
     private static final int AURA_W = 70;
+    /** Spans exactly the settings row below it, so the two rows line up on both edges. */
+    private static final int ROW_W = AURA_X + AURA_W - LEVEL_X;
 
     private static final int SECTION_LABEL_Y = 156;
     /** Top-left of the slot frames, one pixel outside the item positions used by the menu. */
@@ -155,14 +157,19 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         }
 
         List<Component> lines = new ArrayList<>(getTooltipFromContainerItem(stack));
-        lines.add(Component.translatable("beaconpack.tip.fuel_value", perItem)
-                .withStyle(ChatFormatting.GRAY));
-
-        double perSecond = PackResolver.fuelPerSecond(menu.state(), menu.stats(), effectLookup());
+        PackStats stats = menu.stats();
+        double perSecond = PackResolver.fuelPerSecond(menu.state(), stats, effectLookup());
         if (perSecond > 0.0) {
             lines.add(Component.translatable("beaconpack.tip.fuel_worth",
+                            formatDuration((int) (perItem / perSecond)),
                             formatDuration((int) (perItem * stack.getCount() / perSecond)))
-                    .withStyle(ChatFormatting.DARK_GRAY));
+                    .withStyle(ChatFormatting.GRAY));
+        }
+        // A denser fuel than the buffer can hold is never consumed, and that would otherwise look
+        // like the pack ignoring it for no reason.
+        if (perItem > stats.fuelCapacity()) {
+            lines.add(Component.translatable("beaconpack.tip.fuel_too_dense")
+                    .withStyle(ChatFormatting.RED));
         }
         graphics.renderComponentTooltip(font, lines, mouseX, mouseY);
         return true;
@@ -238,18 +245,34 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         }
     }
 
-    /** The pack-wide figures, so the effect of an augment is visible without opening anything. */
+    /**
+     * The pack-wide figures, so the effect of an augment is visible without opening anything.
+     *
+     * <p>No fuel units anywhere: they are an implementation detail of the datapack format, and a
+     * rate in points per second tells a player nothing they can act on. Time does.
+     */
     private void drawSummary(GuiGraphics graphics, PackState state, PackStats stats) {
-        double perSecond = PackResolver.fuelPerSecond(state, stats, effectLookup());
         graphics.drawString(font, Component.translatable("beaconpack.gui.range",
                         String.format(Locale.ROOT, "%.0f", stats.range())),
                 SUMMARY_X, SUMMARY_Y, TEXT_DIM, false);
-        graphics.drawString(font, Component.translatable("beaconpack.gui.cost",
-                        String.format(Locale.ROOT, "%.1f", perSecond)),
+        graphics.drawString(font, Component.translatable("beaconpack.gui.runtime", totalRuntime()),
                 SUMMARY_X, SUMMARY_Y + 12, TEXT_DIM, false);
         graphics.drawString(font, Component.translatable("beaconpack.gui.slots",
                         state.effects().size(), stats.effectSlots()),
                 SUMMARY_X, SUMMARY_Y + 24, TEXT_DIM, false);
+    }
+
+    private static String atCurrentDraw(int units, double perSecond) {
+        return perSecond <= 0.0 ? "-" : formatDuration((int) (units / perSecond));
+    }
+
+    /** Buffer plus what is still waiting in the fuel slot, at the current draw. */
+    private String totalRuntime() {
+        double perSecond = PackResolver.fuelPerSecond(menu.state(), menu.stats(), effectLookup());
+        if (perSecond <= 0.0) {
+            return "-";
+        }
+        return formatDuration((int) ((menu.state().fuel() + reserveUnits()) / perSecond));
     }
 
     private void drawInfoPanel(GuiGraphics graphics, PackState state, PackStats stats,
@@ -273,19 +296,23 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
                         .append(roman(slot.amplifier() + 1)),
                 INFO_X + 8, INFO_Y + 8, TEXT, false);
 
+        // This effect's share of the total drain, rather than a raw rate: it answers "which of my
+        // effects is draining the pack" without asking the player to compare two decimals.
         double cost = PackResolver.fuelPerSecond(slot, stats, effectLookup()) * stats.fuelMultiplier();
-        graphics.drawString(font, String.format(Locale.ROOT, "%.1f u/s  ·  %s",
-                        cost, slot.aura().isAura()
-                                ? String.format(Locale.ROOT, "%.0f m", stats.range())
-                                : Component.translatable("beaconpack.aura.self").getString()),
+        double total = PackResolver.fuelPerSecond(state, stats, effectLookup());
+        int share = total <= 0.0 ? 0 : (int) Math.round(cost / total * 100.0);
+        graphics.drawString(font, Component.translatable("beaconpack.gui.share", share)
+                        .getString() + "  ·  " + (slot.aura().isAura()
+                        ? String.format(Locale.ROOT, "%.0f m", stats.range())
+                        : Component.translatable("beaconpack.aura.self").getString()),
                 INFO_X + 8, INFO_Y + 21, TEXT_DIM, false);
 
         // Explicit rather than "click the case again": re-clicking the case is how you focus it,
         // and overloading that click with "open the picker" made every attempt to read a second
         // effect's details pop the selector instead.
-        drawButton(graphics, INFO_X + 6, ROW_CHANGE, INFO_W - 12, BTN_H,
+        drawButton(graphics, LEVEL_X, ROW_CHANGE, ROW_W, BTN_H,
                 Component.translatable("beaconpack.gui.change_effect"),
-                within(mouseX, mouseY, INFO_X + 6, ROW_CHANGE, INFO_W - 12, BTN_H), true);
+                within(mouseX, mouseY, LEVEL_X, ROW_CHANGE, ROW_W, BTN_H), true);
 
         drawButton(graphics, LEVEL_X, ROW_SETTINGS, LEVEL_W, BTN_H,
                 Component.literal("< " + roman(slot.amplifier() + 1) + " >"),
@@ -433,14 +460,12 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
             double perSecond = PackResolver.fuelPerSecond(menu.state(), stats, effectLookup());
             return List.of(
                     Component.translatable("beaconpack.gui.fuel"),
-                    Component.translatable("beaconpack.tip.fuel",
-                            menu.state().fuel(), stats.fuelCapacity())
+                    Component.translatable("beaconpack.tip.fuel_stored",
+                            atCurrentDraw(menu.state().fuel(), perSecond))
                             .withStyle(ChatFormatting.GRAY),
-                    Component.translatable("beaconpack.tip.fuel_reserve", reserveUnits())
-                            .withStyle(ChatFormatting.GRAY),
-                    Component.translatable("beaconpack.tip.fuel_draw",
-                            String.format(Locale.ROOT, "%.1f", perSecond))
-                            .withStyle(ChatFormatting.DARK_GRAY));
+                    Component.translatable("beaconpack.tip.fuel_reserve",
+                            atCurrentDraw(reserveUnits(), perSecond))
+                            .withStyle(ChatFormatting.GRAY));
         }
         for (int i = menu.stats().augmentSlots(); i < BeaconPackItem.AUGMENT_SLOTS; i++) {
             if (within(x, y, AUGMENT_SLOT_X + i * SLOT_SIZE, SLOT_ROW_Y, SLOT_SIZE, SLOT_SIZE)) {
@@ -456,7 +481,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         if (focusedCase >= menu.state().effects().size()) {
             return List.of();
         }
-        if (within(x, y, INFO_X + 6, ROW_CHANGE, INFO_W - 12, BTN_H)) {
+        if (within(x, y, LEVEL_X, ROW_CHANGE, ROW_W, BTN_H)) {
             return List.of(Component.translatable("beaconpack.tip.change_effect"));
         }
         if (within(x, y, LEVEL_X, ROW_SETTINGS, LEVEL_W, BTN_H)) {
@@ -539,7 +564,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         if (focusedCase >= menu.state().effects().size()) {
             return false;
         }
-        if (within(x, y, INFO_X + 6, ROW_CHANGE, INFO_W - 12, BTN_H)) {
+        if (within(x, y, LEVEL_X, ROW_CHANGE, ROW_W, BTN_H)) {
             openSelector(focusedCase);
             return true;
         }

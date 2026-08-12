@@ -1,29 +1,24 @@
 {
   "itemGroup.beaconpack": "BeaconPack",
   "key.beaconpack.open_pack": "Ouvrir le Beacon Pack",
-
   "item.beaconpack.beacon_pack_i": "Beacon Pack I",
   "item.beaconpack.beacon_pack_ii": "Beacon Pack II",
   "item.beaconpack.beacon_pack_iii": "Beacon Pack III",
   "item.beaconpack.beacon_pack_iv": "Beacon Pack IV",
   "item.beaconpack.augment": "Augment",
-
   "augment.beaconpack.range": "Augment de portée %s",
   "augment.beaconpack.focus": "Augment de focalisation %s",
   "augment.beaconpack.amplification": "Augment d'amplification %s",
   "augment.beaconpack.efficiency": "Augment d'efficacité %s",
   "augment.beaconpack.capacity": "Augment de capacité %s",
   "augment.beaconpack.attunement": "Augment d'harmonisation %s",
-
   "beaconpack.tier.1": "I",
   "beaconpack.tier.2": "II",
   "beaconpack.tier.3": "III",
-
   "beaconpack.aura.self": "Moi",
   "beaconpack.aura.allies": "Alliés",
   "beaconpack.aura.team": "Équipe",
   "beaconpack.aura.allies_and_pets": "Alliés et familiers",
-
   "beaconpack.gui.effects": "Effets",
   "beaconpack.gui.augments": "Augments",
   "beaconpack.gui.fuel": "Carburant",
@@ -55,10 +50,12 @@
   "beaconpack.op.unlock_aura": "Débloque des modes de partage plus larges",
   "beaconpack.msg.out_of_fuel": "Beacon Pack à court de carburant",
   "beaconpack.msg.needs_beacon": "Il faut être près d’un beacon allumé pour modifier ceci",
-  "beaconpack.tip.fuel_value": "Vaut %s unités de carburant",
-  "beaconpack.tip.fuel_worth": "Cette pile fait tenir le pack ~%s",
-  "beaconpack.tip.fuel_reserve": "Dans le slot : %s unités",
-  "beaconpack.tip.fuel_draw": "Consommation actuelle : %s u/s",
+  "beaconpack.gui.runtime": "Autonomie : %s",
+  "beaconpack.gui.share": "%s%% de la consommation",
+  "beaconpack.tip.fuel_stored": "En réserve : %s d’autonomie",
+  "beaconpack.tip.fuel_too_dense": "Trop dense pour ce pack : montez de tier ou ajoutez Capacité",
+  "beaconpack.tip.fuel_worth": "Un seul tient ~%s · la pile ~%s",
+  "beaconpack.tip.fuel_reserve": "Dans le slot : %s d’autonomie",
   "beaconpack.tip.augment_locked": "Ce slot nécessite un tier supérieur",
   "beaconpack.gui.active": "Actif",
   "beaconpack.gui.inactive": "Éteint"

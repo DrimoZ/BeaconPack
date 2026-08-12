@@ -1,29 +1,24 @@
 {
   "itemGroup.beaconpack": "BeaconPack",
   "key.beaconpack.open_pack": "Open Beacon Pack",
-
   "item.beaconpack.beacon_pack_i": "Beacon Pack I",
   "item.beaconpack.beacon_pack_ii": "Beacon Pack II",
   "item.beaconpack.beacon_pack_iii": "Beacon Pack III",
   "item.beaconpack.beacon_pack_iv": "Beacon Pack IV",
   "item.beaconpack.augment": "Augment",
-
   "augment.beaconpack.range": "Range Augment %s",
   "augment.beaconpack.focus": "Focus Augment %s",
   "augment.beaconpack.amplification": "Amplification Augment %s",
   "augment.beaconpack.efficiency": "Efficiency Augment %s",
   "augment.beaconpack.capacity": "Capacity Augment %s",
   "augment.beaconpack.attunement": "Attunement Augment %s",
-
   "beaconpack.tier.1": "I",
   "beaconpack.tier.2": "II",
   "beaconpack.tier.3": "III",
-
   "beaconpack.aura.self": "Self",
   "beaconpack.aura.allies": "Allies",
   "beaconpack.aura.team": "Team",
   "beaconpack.aura.allies_and_pets": "Allies & pets",
-
   "beaconpack.gui.effects": "Effects",
   "beaconpack.gui.augments": "Augments",
   "beaconpack.gui.fuel": "Fuel",
@@ -55,10 +50,12 @@
   "beaconpack.op.unlock_aura": "Unlocks wider sharing modes",
   "beaconpack.msg.out_of_fuel": "Beacon Pack out of fuel",
   "beaconpack.msg.needs_beacon": "You must be near a lit beacon to change this",
-  "beaconpack.tip.fuel_value": "Worth %s fuel units",
-  "beaconpack.tip.fuel_worth": "This stack runs the pack for ~%s",
-  "beaconpack.tip.fuel_reserve": "In the fuel slot: %s units",
-  "beaconpack.tip.fuel_draw": "Current draw: %s u/s",
+  "beaconpack.gui.runtime": "Runtime: %s",
+  "beaconpack.gui.share": "%s%% of the drain",
+  "beaconpack.tip.fuel_stored": "Stored: %s of runtime",
+  "beaconpack.tip.fuel_too_dense": "Too dense for this pack: raise its tier or add Capacity",
+  "beaconpack.tip.fuel_worth": "One runs the pack ~%s · this stack ~%s",
+  "beaconpack.tip.fuel_reserve": "In the fuel slot: %s of runtime",
   "beaconpack.tip.augment_locked": "This slot needs a higher pack tier",
   "beaconpack.gui.active": "Active",
   "beaconpack.gui.inactive": "Inactive"

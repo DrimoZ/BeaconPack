@@ -1,12 +1,18 @@
 package dev.theo.beaconpack.item;
 
+import dev.theo.beaconpack.core.AugmentInstance;
 import dev.theo.beaconpack.core.BPRegistryKeys;
+import dev.theo.beaconpack.core.PackResolver;
+import dev.theo.beaconpack.core.PackStats;
 import dev.theo.beaconpack.core.EffectSlotConfig;
 import dev.theo.beaconpack.core.PackState;
 import dev.theo.beaconpack.core.PackTierDef;
 import dev.theo.beaconpack.menu.PackMenuOpener;
 import dev.theo.beaconpack.registry.BPComponents;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
@@ -17,8 +23,13 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
 
+import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /** The portable beacon itself. One class, four registered instances, one per tier. */
 public class BeaconPackItem extends Item {
@@ -95,8 +106,67 @@ public class BeaconPackItem extends Item {
                                 : ChatFormatting.DARK_GRAY)));
             }
         });
-        tooltip.add(Component.translatable("beaconpack.tip.fuel_short", state.fuel())
+        appendRuntime(stack, context, state, tooltip);
+    }
+
+    /**
+     * Remaining runtime rather than a fuel count: the stored number is an implementation detail of
+     * the datapack format, and only the time it buys is actionable.
+     */
+    private void appendRuntime(ItemStack stack, TooltipContext context, PackState state,
+                               List<Component> tooltip) {
+        HolderLookup.Provider registries = context.registries();
+        if (registries == null || state.fuel() <= 0) {
+            return;
+        }
+        PackTierDef tierDef = lookup(registries, BPRegistryKeys.TIER, tier);
+        if (tierDef == null) {
+            return;
+        }
+        PackStats stats = PackResolver.resolve(tierDef, augmentsOf(stack),
+                key -> Optional.ofNullable(lookup(registries, BPRegistryKeys.AUGMENT, key)));
+        double perSecond = PackResolver.fuelPerSecond(state, stats,
+                key -> Optional.ofNullable(lookup(registries, BPRegistryKeys.EFFECT, key)));
+        if (perSecond <= 0.0) {
+            return;
+        }
+        tooltip.add(Component.translatable("beaconpack.gui.runtime",
+                        formatDuration((int) (state.fuel() / perSecond)))
                 .withStyle(ChatFormatting.DARK_GRAY));
+    }
+
+    private static List<AugmentInstance> augmentsOf(ItemStack stack) {
+        IItemHandler handler = stack.getCapability(Capabilities.ItemHandler.ITEM);
+        if (handler == null) {
+            return List.of();
+        }
+        List<AugmentInstance> found = new ArrayList<>(AUGMENT_SLOTS);
+        for (int slot = 0; slot < Math.min(AUGMENT_SLOTS, handler.getSlots()); slot++) {
+            AugmentInstance instance = AugmentItem.instanceOf(handler.getStackInSlot(slot));
+            if (instance != null) {
+                found.add(instance);
+            }
+        }
+        return found;
+    }
+
+    @Nullable
+    private static <T> T lookup(HolderLookup.Provider registries,
+                                ResourceKey<Registry<T>> registry, ResourceKey<T> key) {
+        return registries.lookup(registry)
+                .flatMap(lookup -> lookup.get(key))
+                .map(Holder::value)
+                .orElse(null);
+    }
+
+    private static String formatDuration(int seconds) {
+        if (seconds >= 3600) {
+            return (seconds / 3600) + " h";
+        }
+        if (seconds >= 60) {
+            return (seconds / 60) + " min";
+        }
+        return seconds + " s";
     }
 
     /** A running pack glints. Cheapest possible "this is on" signal, visible from the hotbar. */
