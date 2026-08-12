@@ -1,0 +1,16 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_material": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": { "items": [ { "items": "minecraft:amethyst_shard" } ] }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": { "recipe": "beaconpack:augment_capacity" }
+    }
+  },
+  "requirements": [ [ "has_material", "has_the_recipe" ] ],
+  "rewards": { "recipes": [ "beaconpack:augment_capacity" ] },
+  "sends_telemetry_event": false
+}
