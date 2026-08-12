@@ -69,13 +69,11 @@ public class BeaconPackMenu extends AbstractContainerMenu {
         this.packSlotIndex = packSlotIndex;
         this.slotBackingStack = playerInventory.getItem(packSlotIndex);
 
-        IItemHandler handler = slotBackingStack.getCapability(Capabilities.ItemHandler.ITEM);
-        if (handler != null) {
-            for (int i = 0; i < BeaconPackItem.AUGMENT_SLOTS; i++) {
-                addSlot(new AugmentSlot(handler, i, FIRST_AUGMENT_SLOT_X + i * 18, SLOT_Y));
-            }
-            addSlot(new FuelSlot(handler, BeaconPackItem.FUEL_SLOT, FUEL_SLOT_X, SLOT_Y));
+        IItemHandler handler = new LivePackHandler();
+        for (int i = 0; i < BeaconPackItem.AUGMENT_SLOTS; i++) {
+            addSlot(new AugmentSlot(handler, i, FIRST_AUGMENT_SLOT_X + i * 18, SLOT_Y));
         }
+        addSlot(new FuelSlot(handler, BeaconPackItem.FUEL_SLOT, FUEL_SLOT_X, SLOT_Y));
 
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
@@ -308,6 +306,57 @@ public class BeaconPackMenu extends AbstractContainerMenu {
             slot.setChanged();
         }
         return original;
+    }
+
+    /**
+     * Resolves the pack's inventory on every call instead of holding a handler bound to one
+     * {@link ItemStack}.
+     *
+     * <p>Any change to the pack makes the server resend its slot, which replaces the client's stack
+     * instance - leaving a bound handler writing into an orphaned copy. The augment and fuel slots
+     * would then show contents that no longer exist.
+     */
+    private class LivePackHandler implements IItemHandler {
+
+        private IItemHandler delegate() {
+            return pack().getCapability(Capabilities.ItemHandler.ITEM);
+        }
+
+        @Override
+        public int getSlots() {
+            IItemHandler handler = delegate();
+            return handler == null ? BeaconPackItem.CONTAINER_SIZE : handler.getSlots();
+        }
+
+        @Override
+        public ItemStack getStackInSlot(int slot) {
+            IItemHandler handler = delegate();
+            return handler == null ? ItemStack.EMPTY : handler.getStackInSlot(slot);
+        }
+
+        @Override
+        public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
+            IItemHandler handler = delegate();
+            return handler == null ? stack : handler.insertItem(slot, stack, simulate);
+        }
+
+        @Override
+        public ItemStack extractItem(int slot, int amount, boolean simulate) {
+            IItemHandler handler = delegate();
+            return handler == null ? ItemStack.EMPTY : handler.extractItem(slot, amount, simulate);
+        }
+
+        @Override
+        public int getSlotLimit(int slot) {
+            IItemHandler handler = delegate();
+            return handler == null ? 64 : handler.getSlotLimit(slot);
+        }
+
+        @Override
+        public boolean isItemValid(int slot, ItemStack stack) {
+            IItemHandler handler = delegate();
+            return handler == null || handler.isItemValid(slot, stack);
+        }
     }
 
     /** Rejects a second augment of a type already installed, so the rule is visible, not hidden. */
