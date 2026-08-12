@@ -1,0 +1,30 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Cache the NeoForm runtime
+        # Decompiling Minecraft is by far the slowest step, and its output only changes when the
+        # NeoForge version does.
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/caches/neoformruntime
+          key: neoformruntime-${{ hashFiles('gradle.properties') }}
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - run: ./gradlew build
