@@ -42,12 +42,12 @@ public class BeaconPackMenu extends AbstractContainerMenu {
     public static final int ACTION_TOGGLE_EFFECT = 4;
     public static final int ACTION_CYCLE_AURA = 5;
 
-    private static final int FIRST_AUGMENT_SLOT_X = 35;
-    private static final int SLOT_Y = 131;
-    private static final int FUEL_SLOT_X = 140;
-    private static final int INVENTORY_X = 34;
-    private static final int INVENTORY_Y = 168;
-    private static final int HOTBAR_Y = 226;
+    private static final int FIRST_AUGMENT_SLOT_X = 37;
+    private static final int SLOT_Y = 169;
+    private static final int FUEL_SLOT_X = 151;
+    private static final int INVENTORY_X = 44;
+    private static final int INVENTORY_Y = 207;
+    private static final int HOTBAR_Y = 265;
 
     private final Player player;
     private final int packSlotIndex;

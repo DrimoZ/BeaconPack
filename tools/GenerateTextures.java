@@ -22,8 +22,8 @@ public final class GenerateTextures {
     private static final int DARK = 0xFF555555;
     private static final int SLOT = 0xFF8B8B8B;
 
-    private static final int WIDTH = 230;
-    private static final int HEIGHT = 250;
+    private static final int WIDTH = 248;
+    private static final int HEIGHT = 290;
 
     public static void main(String[] args) throws IOException {
         new File(GUI_DIR).mkdirs();
@@ -35,32 +35,32 @@ public final class GenerateTextures {
     }
 
     private static void writeGui() throws IOException {
-        BufferedImage image = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage image = new BufferedImage(512, 512, BufferedImage.TYPE_INT_ARGB);
 
         panel(image, 0, 0, WIDTH, HEIGHT);
 
         // Effect cases: 24x24 so the level indicator has room in the corner.
         for (int i = 0; i < 3; i++) {
-            recess(image, 35 + i * 28, 28, 24, 24);
+            recess(image, 36 + i * 32, 38, 26, 26);
         }
         // Info panel.
-        recess(image, 30, 58, 170, 62);
+        recess(image, 28, 72, 192, 76);
         // Augment slots + fuel slot, matching BeaconPackMenu's coordinates minus the 1px border.
         for (int i = 0; i < 3; i++) {
-            recess(image, 34 + i * 18, 130, 18, 18);
+            recess(image, 36 + i * 18, 168, 18, 18);
         }
-        recess(image, 139, 130, 18, 18);
+        recess(image, 150, 168, 18, 18);
         // Fuel gauge.
-        recess(image, 162, 133, 60, 14);
+        recess(image, 172, 170, 64, 14);
 
         // Player inventory + hotbar.
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                recess(image, 33 + col * 18, 167 + row * 18, 18, 18);
+                recess(image, 43 + col * 18, 206 + row * 18, 18, 18);
             }
         }
         for (int col = 0; col < 9; col++) {
-            recess(image, 33 + col * 18, 225, 18, 18);
+            recess(image, 43 + col * 18, 264, 18, 18);
         }
 
         ImageIO.write(image, "PNG", new File(GUI_DIR + "/beacon_pack.png"));
