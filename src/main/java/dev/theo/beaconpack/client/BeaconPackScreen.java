@@ -455,11 +455,14 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         }
         BeaconEffectDef def = maybeDef.get();
 
+        // The icon repeated beside the name ties the panel to the case it describes; without it,
+        // nothing said which of the cases above these controls belonged to.
+        drawEffectIcon(graphics, slot.effect(), INFO_X + 7, INFO_Y + 6);
         graphics.drawString(font, Component.empty()
                         .append(def.effect().value().getDisplayName())
                         .append(" ")
                         .append(roman(slot.amplifier() + 1)),
-                INFO_X + 8, INFO_Y + 8, TEXT, false);
+                INFO_X + 28, INFO_Y + 8, TEXT, false);
 
         // This effect's share of the total drain, rather than a raw rate: it answers "which of my
         // effects is draining the pack" without asking the player to compare two decimals.
@@ -473,7 +476,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         graphics.drawString(font,
                 Component.translatable("beaconpack.gui.share", share).getString() + "   "
                         + Component.translatable("beaconpack.gui.reach", reach).getString(),
-                INFO_X + 8, INFO_Y + 21, TEXT_DIM, false);
+                INFO_X + 28, INFO_Y + 19, TEXT_DIM, false);
 
         // Explicit rather than "click the case again": re-clicking the case is how you focus it,
         // and overloading that click with "open the picker" made every attempt to read a second

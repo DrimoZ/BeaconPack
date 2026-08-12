@@ -60,6 +60,14 @@ Risque n°1 du mod. Trois garde-fous cumulés :
 
 ## 5. La GUI
 
+> **Note (état actuel)** — la disposition décrite ci-dessous a évolué à l'usage. L'écran fait
+> 194×256, aligné sur la largeur de l'inventaire. **Stats, augments et carburant vivent dans des
+> tiroirs latéraux** ouverts par des onglets soudés au cadre, avec un onglet power séparé : ils se
+> configurent une fois puis se laissent tranquilles, et les garder en permanence à l'écran
+> encombrait le panneau qu'on lit vraiment. Le panneau principal ne porte donc plus que les cases
+> d'effet, leurs réglages et l'inventaire. Le reste de cette section — le raisonnement sur les
+> cases, le sélecteur et le panneau d'info — reste valable.
+
 Ouverture : clic-droit depuis n'importe quel slot d'inventaire, **ou** touche configurable
 (cf. §5.2). Écran complet avec un vrai `AbstractContainerMenu` (slots réels).
 
@@ -199,6 +207,7 @@ option `model_data` dans le JSON pour ceux qui veulent un modèle dédié via ov
 | Efficiency | −25 / −40 / −55 % de consommation |
 | Capacity | buffer ×2 / ×3 / ×4 |
 | Attunement | aura limitée à la team / inclut les mobs apprivoisés |
+| Discretion | masque les particules d'effet, et l'icône d'état au tier II |
 
 Chaque entrée déclare une liste d'opérations : `add_range`, `add_effect_slot`,
 `add_amplifier`, `mul_fuel`, `mul_capacity`, `set_aura_filter`.
