@@ -192,6 +192,13 @@ public class BeaconPackMenu extends AbstractContainerMenu {
      */
     public boolean applyAction(int action, int slotIndex, int value) {
         Player who = player;
+        // Both arrive from the client as var-ints, which carry negatives perfectly well. Every
+        // guard below this point is an upper bound - `slotIndex < effects.size()` and friends - so
+        // a negative index sailed past all of them and reached List.set/remove, throwing on the
+        // server thread from a packet any modified client can send at will.
+        if (slotIndex < 0 || value < 0) {
+            return false;
+        }
         PackStats stats = stats();
         PackTierDef tier = tierDef();
         if (tier == null) {
