@@ -48,15 +48,39 @@ public class BeaconPackMenu extends AbstractContainerMenu {
     public static final int ACTION_TOGGLE_EFFECT = 4;
     public static final int ACTION_CYCLE_AURA = 5;
 
-    private static final int FIRST_AUGMENT_SLOT_X = 17;
-    private static final int SLOT_Y = 167;
-    private static final int FUEL_SLOT_X = 87;
+    /**
+     * Augment and fuel slots live in side drawers, outside the main frame.
+     *
+     * <p>Their positions are fixed rather than moved when a drawer opens: {@code Slot.x} and
+     * {@code y} are final, and the screen hides a closed drawer's slots from both rendering and
+     * hit-testing instead.
+     */
+    public static final int DRAWER_X = 217;
+    public static final int AUGMENT_DRAWER_Y = 44;
+    public static final int FUEL_DRAWER_Y = 96;
+
+    private static final int FIRST_AUGMENT_SLOT_X = DRAWER_X + 9;
+    private static final int AUGMENT_SLOT_Y = AUGMENT_DRAWER_Y + 21;
+    private static final int FUEL_SLOT_X = DRAWER_X + 9;
+    private static final int FUEL_SLOT_Y = FUEL_DRAWER_Y + 21;
     private static final int INVENTORY_X = 17;
-    private static final int INVENTORY_Y = 209;
-    private static final int HOTBAR_Y = 267;
+    private static final int INVENTORY_Y = 173;
+    private static final int HOTBAR_Y = 231;
+
+    public static final int DRAWER_AUGMENTS = 0;
+    public static final int DRAWER_FUEL = 1;
+    public static final int DRAWER_NONE = 2;
 
     private final Player player;
     private final int packSlotIndex;
+    /**
+     * Which side drawer the screen is showing, or -1 on the server where nothing is hidden.
+     *
+     * <p>Vanilla skips both rendering and hover for a slot whose {@link Slot#isActive()} is false,
+     * which is the only supported way to hide one - the screen's {@code isHovering(Slot, ...)}
+     * overload is private.
+     */
+    private int visibleDrawer = -1;
     /** Only used to back the augment and fuel slots; never read for state - see {@link #pack()}. */
     private final ItemStack slotBackingStack;
     /** Varies with the fuel config, so shift-clicking cannot assume a fixed boundary. */
@@ -74,12 +98,12 @@ public class BeaconPackMenu extends AbstractContainerMenu {
 
         IItemHandler handler = new LivePackHandler();
         for (int i = 0; i < BeaconPackItem.AUGMENT_SLOTS; i++) {
-            addSlot(new AugmentSlot(handler, i, FIRST_AUGMENT_SLOT_X + i * 18, SLOT_Y));
+            addSlot(new AugmentSlot(handler, i, FIRST_AUGMENT_SLOT_X + i * 18, AUGMENT_SLOT_Y));
         }
         // No fuel slot at all when fuel is switched off, rather than a slot that refuses
         // everything. Both sides read the same synced config, so the slot counts agree.
         if (BPConfig.fuelEnabled()) {
-            addSlot(new FuelSlot(handler, BeaconPackItem.FUEL_SLOT, FUEL_SLOT_X, SLOT_Y));
+            addSlot(new FuelSlot(handler, BeaconPackItem.FUEL_SLOT, FUEL_SLOT_X, FUEL_SLOT_Y));
         }
         this.packSlotCount = slots.size();
 
@@ -381,10 +405,23 @@ public class BeaconPackMenu extends AbstractContainerMenu {
         }
     }
 
+    public void setVisibleDrawer(int drawer) {
+        this.visibleDrawer = drawer;
+    }
+
+    private boolean drawerVisible(int drawer) {
+        return visibleDrawer < 0 || visibleDrawer == drawer;
+    }
+
     /** Rejects a second augment of a type already installed, so the rule is visible, not hidden. */
     private class AugmentSlot extends SlotItemHandler {
         AugmentSlot(IItemHandler handler, int index, int x, int y) {
             super(handler, index, x, y);
+        }
+
+        @Override
+        public boolean isActive() {
+            return drawerVisible(DRAWER_AUGMENTS);
         }
 
         @Override
@@ -404,6 +441,11 @@ public class BeaconPackMenu extends AbstractContainerMenu {
     private class FuelSlot extends SlotItemHandler {
         FuelSlot(IItemHandler handler, int index, int x, int y) {
             super(handler, index, x, y);
+        }
+
+        @Override
+        public boolean isActive() {
+            return drawerVisible(DRAWER_FUEL);
         }
 
         @Override

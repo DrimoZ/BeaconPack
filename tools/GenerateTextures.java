@@ -25,7 +25,7 @@ public final class GenerateTextures {
     private static final int OUTLINE = 0xFF1B1B1B;
 
     private static final int WIDTH = 194;
-    private static final int HEIGHT = 292;
+    private static final int HEIGHT = 256;
 
     public static void main(String[] args) throws IOException {
         new File(GUI_DIR).mkdirs();
@@ -47,28 +47,20 @@ public final class GenerateTextures {
         }
         // Info panel.
         recess(image, 16, 78, 162, 68);
-        // Augment slots + fuel slot, matching BeaconPackMenu's coordinates minus the 1px border.
-        for (int i = 0; i < 3; i++) {
-            recess(image, 16 + i * 18, 166, 18, 18);
-        }
-        recess(image, 86, 166, 18, 18);
-        // Fuel gauge.
-        recess(image, 108, 168, 64, 14);
-
         // Player inventory + hotbar.
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                recess(image, 16 + col * 18, 208 + row * 18, 18, 18);
+                recess(image, 16 + col * 18, 172 + row * 18, 18, 18);
             }
         }
         for (int col = 0; col < 9; col++) {
-            recess(image, 16 + col * 18, 266, 18, 18);
+            recess(image, 16 + col * 18, 230, 18, 18);
         }
 
         // Rules between groups: the header, the pack's own controls, and the player's inventory are
         // three different things and were previously separated only by whitespace.
         separator(image, 16, 28, 162);
-        separator(image, 16, 190, 162);
+        separator(image, 16, 154, 162);
 
         ImageIO.write(image, "PNG", new File(GUI_DIR + "/beacon_pack.png"));
     }

@@ -21,6 +21,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.SlotItemHandler;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -49,21 +50,33 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     private static final int TEXTURE_SIZE = 512;
 
     static final int IMAGE_W = 194;
-    static final int IMAGE_H = 292;
+    static final int IMAGE_H = 256;
 
     /** The single column everything aligns to. */
     private static final int CONTENT_LEFT = 16;
     private static final int CONTENT_RIGHT = 178;
 
     /**
-     * The power switch lives on the frame's edge rather than inside it, the way Mekanism and
-     * Thermal put their side tabs: the one control that decides whether the whole thing runs should
-     * not compete for attention with the settings it governs.
+     * Side tabs, the way Mekanism and Thermal arrange theirs.
+     *
+     * <p>Augments and fuel moved out of the main frame entirely: they are configured once and then
+     * left alone, so keeping them permanently on screen crowded the panel the player actually reads.
+     * Power stays a tab too - the one control that decides whether the pack runs should not compete
+     * with the settings it governs.
      */
-    private static final int POWER_W = 24;
-    private static final int POWER_H = 26;
-    private static final int POWER_X = IMAGE_W - 1;
-    private static final int POWER_Y = 30;
+    private static final int TAB_X = IMAGE_W - 1;
+    private static final int TAB_W = 24;
+    private static final int TAB_H = 24;
+    private static final int POWER_TAB_Y = 16;
+    private static final int AUGMENT_TAB_Y = 44;
+    private static final int FUEL_TAB_Y = 96;
+
+    private static final int DRAWER_X = BeaconPackMenu.DRAWER_X;
+    private static final int DRAWER_W = 108;
+    private static final int DRAWER_H = 46;
+    private static final int AUGMENT_DRAWER_Y = BeaconPackMenu.AUGMENT_DRAWER_Y;
+    private static final int FUEL_DRAWER_Y = BeaconPackMenu.FUEL_DRAWER_Y;
+    private static final int SLOT_SIZE = 18;
 
     private static final int CASE_X = CONTENT_LEFT;
     private static final int CASE_Y = 44;
@@ -83,14 +96,13 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     private static final int ROW_CHANGE = INFO_Y + 30;
     private static final int ROW_SETTINGS = INFO_Y + 48;
 
-    private static final int SECTION_LABEL_Y = 154;
-    private static final int SLOT_ROW_Y = 166;
-    private static final int SLOT_SIZE = 18;
-    private static final int AUGMENT_SLOT_X = CONTENT_LEFT;
-    private static final int FUEL_SLOT_X = 86;
-    private static final int GAUGE_X = 108;
-    private static final int GAUGE_Y = 168;
-    private static final int GAUGE_W = CONTENT_RIGHT - GAUGE_X - 6;
+    private static final int AUGMENT_SLOT_X = DRAWER_X + 8;
+    private static final int AUGMENT_SLOT_Y = AUGMENT_DRAWER_Y + 20;
+    private static final int FUEL_SLOT_X = DRAWER_X + 8;
+    private static final int FUEL_SLOT_Y = FUEL_DRAWER_Y + 20;
+    private static final int GAUGE_X = DRAWER_X + 30;
+    private static final int GAUGE_Y = FUEL_DRAWER_Y + 22;
+    private static final int GAUGE_W = 70;
     private static final int GAUGE_H = 14;
 
     private static final int SELECTOR_W = 138;
@@ -131,8 +143,13 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         this.titleLabelX = CONTENT_LEFT;
         this.titleLabelY = 10;
         this.inventoryLabelX = CONTENT_LEFT;
-        this.inventoryLabelY = 196;
+        this.inventoryLabelY = 160;
     }
+
+    /** Only one drawer at a time, so the side of the screen never becomes a second panel. */
+    private enum Drawer { NONE, AUGMENTS, FUEL }
+
+    private Drawer drawer = Drawer.AUGMENTS;
 
     // ------------------------------------------------------------------ rendering
 
@@ -171,23 +188,11 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
 
         graphics.drawString(font, Component.translatable("beaconpack.gui.effects"),
                 CONTENT_LEFT, CASE_Y - 12, TEXT, false);
-        graphics.drawString(font, Component.translatable("beaconpack.gui.augments"),
-                CONTENT_LEFT, SECTION_LABEL_Y, TEXT, false);
-        if (BPConfig.fuelEnabled()) {
-            graphics.drawString(font, Component.translatable("beaconpack.gui.fuel"),
-                    FUEL_SLOT_X, SECTION_LABEL_Y, TEXT, false);
-            drawFuel(graphics, state, stats);
-        } else {
-            // The background texture is fixed, so the unused recesses are painted over rather than
-            // left as empty holes the player would read as broken slots.
-            graphics.fill(FUEL_SLOT_X - 2, SLOT_ROW_Y - 2, CONTENT_RIGHT, SLOT_ROW_Y + SLOT_SIZE + 1,
-                    0xFFC6C6C6);
-        }
 
-        drawPowerTab(graphics, state, localX, localY);
+        drawTabs(graphics, state, localX, localY);
+        drawDrawer(graphics, state, stats, localX, localY);
         drawCases(graphics, state, stats, localX, localY);
         drawSummary(graphics, state, stats);
-        drawAugmentSlotHints(graphics, stats);
 
         if (selectorOpen) {
             drawSelector(graphics, localX, localY);
@@ -196,17 +201,103 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         }
     }
 
-    private void drawPowerTab(GuiGraphics graphics, PackState state, int mouseX, int mouseY) {
-        boolean hovered = within(mouseX, mouseY, POWER_X, POWER_Y, POWER_W, POWER_H);
-        boolean on = state.active();
-        int face = on
-                ? (hovered ? 0xFF57A268 : 0xFF3E7A4B)
-                : (hovered ? 0xFF9A5252 : 0xFF7A3E3E);
+    private void drawTabs(GuiGraphics graphics, PackState state, int mouseX, int mouseY) {
+        drawTab(graphics, POWER_TAB_Y, false,
+                within(mouseX, mouseY, TAB_X, POWER_TAB_Y, TAB_W, TAB_H));
+        drawPowerGlyph(graphics, TAB_X + TAB_W / 2 + 1, POWER_TAB_Y + TAB_H / 2 - 1, 0xFF3A3A3A);
+        // A lit pip rather than a whole coloured tab: the state is legible without the button
+        // shouting louder than everything else on the screen.
+        graphics.fill(TAB_X + 4, POWER_TAB_Y + TAB_H - 6, TAB_X + TAB_W - 4, POWER_TAB_Y + TAB_H - 3,
+                state.active() ? 0xFF4BC46A : 0xFFB84B4B);
 
-        graphics.fill(POWER_X, POWER_Y - 1, POWER_X + POWER_W + 1, POWER_Y + POWER_H + 1, 0xFF1B1B1B);
-        graphics.fill(POWER_X, POWER_Y, POWER_X + POWER_W, POWER_Y + POWER_H, face);
-        graphics.fill(POWER_X, POWER_Y + 1, POWER_X + POWER_W - 1, POWER_Y + 2, 0x33FFFFFF);
-        drawPowerGlyph(graphics, POWER_X + POWER_W / 2 + 1, POWER_Y + POWER_H / 2, 0xFFEDEDED);
+        drawTab(graphics, AUGMENT_TAB_Y, drawer == Drawer.AUGMENTS,
+                within(mouseX, mouseY, TAB_X, AUGMENT_TAB_Y, TAB_W, TAB_H));
+        drawTabGem(graphics, TAB_X + TAB_W / 2, AUGMENT_TAB_Y + TAB_H / 2);
+
+        if (BPConfig.fuelEnabled()) {
+            drawTab(graphics, FUEL_TAB_Y, drawer == Drawer.FUEL,
+                    within(mouseX, mouseY, TAB_X, FUEL_TAB_Y, TAB_W, TAB_H));
+            drawTabFlame(graphics, TAB_X + TAB_W / 2, FUEL_TAB_Y + TAB_H / 2);
+        }
+    }
+
+    /** Panel-coloured like the frame it hangs off, brighter when its drawer is open. */
+    private void drawTab(GuiGraphics graphics, int y, boolean open, boolean hovered) {
+        int face = open ? 0xFFD8D8D8 : hovered ? 0xFFCFCFCF : 0xFFB4B4B4;
+        graphics.fill(TAB_X, y - 1, TAB_X + TAB_W + 1, y + TAB_H + 1, 0xFF1B1B1B);
+        graphics.fill(TAB_X, y, TAB_X + TAB_W, y + TAB_H, face);
+        graphics.fill(TAB_X, y, TAB_X + TAB_W - 1, y + 1, 0xFFFFFFFF);
+        graphics.fill(TAB_X, y + TAB_H - 1, TAB_X + TAB_W, y + TAB_H, 0xFF555555);
+    }
+
+    private static void drawTabGem(GuiGraphics graphics, int cx, int cy) {
+        graphics.fill(cx - 3, cy - 5, cx + 3, cy - 3, 0xFF3A3A3A);
+        graphics.fill(cx - 5, cy - 3, cx + 5, cy + 2, 0xFF3A3A3A);
+        graphics.fill(cx - 3, cy + 2, cx + 3, cy + 5, 0xFF3A3A3A);
+        graphics.fill(cx - 3, cy - 3, cx + 2, cy + 1, 0xFFDCDCDC);
+    }
+
+    private static void drawTabFlame(GuiGraphics graphics, int cx, int cy) {
+        graphics.fill(cx - 1, cy - 6, cx + 1, cy - 3, 0xFF3A3A3A);
+        graphics.fill(cx - 3, cy - 3, cx + 3, cy + 1, 0xFF3A3A3A);
+        graphics.fill(cx - 4, cy + 1, cx + 4, cy + 5, 0xFF3A3A3A);
+        graphics.fill(cx - 2, cy + 1, cx + 2, cy + 4, 0xFFDCDCDC);
+    }
+
+    /**
+     * The open drawer, drawn to the right of the tabs.
+     *
+     * <p>The slots inside it sit at fixed coordinates; a closed drawer hides them from rendering and
+     * from hit-testing instead of moving them, because {@code Slot.x} is final.
+     */
+    private void drawDrawer(GuiGraphics graphics, PackState state, PackStats stats,
+                            int mouseX, int mouseY) {
+        if (drawer == Drawer.NONE || (drawer == Drawer.FUEL && !BPConfig.fuelEnabled())) {
+            return;
+        }
+        int y = drawer == Drawer.AUGMENTS ? AUGMENT_DRAWER_Y : FUEL_DRAWER_Y;
+        panel(graphics, DRAWER_X, y, DRAWER_W, DRAWER_H);
+        graphics.drawString(font, Component.translatable(drawer == Drawer.AUGMENTS
+                        ? "beaconpack.gui.augments" : "beaconpack.gui.fuel"),
+                DRAWER_X + 7, y + 6, TEXT, false);
+
+        if (drawer == Drawer.AUGMENTS) {
+            for (int i = 0; i < BeaconPackItem.AUGMENT_SLOTS; i++) {
+                int x = AUGMENT_SLOT_X + i * SLOT_SIZE;
+                slotFrame(graphics, x, AUGMENT_SLOT_Y);
+                if (i >= stats.augmentSlots()) {
+                    graphics.fill(x + 1, AUGMENT_SLOT_Y + 1, x + SLOT_SIZE - 1,
+                            AUGMENT_SLOT_Y + SLOT_SIZE - 1, 0x80000000);
+                    drawPadlock(graphics, x + SLOT_SIZE / 2, AUGMENT_SLOT_Y + 8, 0xFF8A8A8A);
+                } else if (slotStack(i).isEmpty()) {
+                    graphics.drawCenteredString(font, "+", x + SLOT_SIZE / 2, AUGMENT_SLOT_Y + 5,
+                            0xFFA0A0A0);
+                }
+            }
+        } else {
+            slotFrame(graphics, FUEL_SLOT_X, FUEL_SLOT_Y);
+            graphics.fill(GAUGE_X, GAUGE_Y, GAUGE_X + GAUGE_W, GAUGE_Y + GAUGE_H, 0xFF8B8B8B);
+            graphics.renderOutline(GAUGE_X, GAUGE_Y, GAUGE_W, GAUGE_H, 0xFF373737);
+            drawFuel(graphics, state, stats);
+        }
+    }
+
+    /** Raised panel matching the frame, drawn rather than baked so the drawer can move. */
+    private static void panel(GuiGraphics graphics, int x, int y, int w, int h) {
+        graphics.fill(x, y - 1, x + w + 1, y + h + 1, 0xFF1B1B1B);
+        graphics.fill(x, y, x + w, y + h, 0xFFC6C6C6);
+        graphics.fill(x, y, x + w - 1, y + 1, 0xFFFFFFFF);
+        graphics.fill(x, y, x + 1, y + h - 1, 0xFFFFFFFF);
+        graphics.fill(x, y + h - 1, x + w, y + h, 0xFF555555);
+        graphics.fill(x + w - 1, y, x + w, y + h, 0xFF555555);
+    }
+
+    private static void slotFrame(GuiGraphics graphics, int x, int y) {
+        graphics.fill(x, y, x + SLOT_SIZE, y + SLOT_SIZE, 0xFF8B8B8B);
+        graphics.fill(x, y, x + SLOT_SIZE, y + 1, 0xFF373737);
+        graphics.fill(x, y, x + 1, y + SLOT_SIZE, 0xFF373737);
+        graphics.fill(x, y + SLOT_SIZE - 1, x + SLOT_SIZE, y + SLOT_SIZE, 0xFFFFFFFF);
+        graphics.fill(x + SLOT_SIZE - 1, y, x + SLOT_SIZE, y + SLOT_SIZE, 0xFFFFFFFF);
     }
 
     /** The universal power mark: a broken ring with a stroke through the gap. */
@@ -363,23 +454,25 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     }
 
     /**
-     * Marks each augment slot as locked or simply empty.
+     * Tells the menu which drawer is open.
      *
-     * <p>Both used to look identical, and a locked slot silently refused whatever was dropped on it
-     * - indistinguishable from an augment that does not work. An empty unlocked slot now invites a
-     * click the same way an empty effect case does.
+     * <p>Vanilla guards both slot rendering and hover on {@code Slot#isActive()}, and the {@code
+     * isHovering(Slot, ...)} overload is private, so this is the supported way to hide a slot rather
+     * than overriding the screen.
      */
-    private void drawAugmentSlotHints(GuiGraphics graphics, PackStats stats) {
-        for (int i = 0; i < BeaconPackItem.AUGMENT_SLOTS; i++) {
-            int x = AUGMENT_SLOT_X + i * SLOT_SIZE;
-            if (i >= stats.augmentSlots()) {
-                graphics.fill(x + 1, SLOT_ROW_Y + 1, x + SLOT_SIZE - 1, SLOT_ROW_Y + SLOT_SIZE - 1,
-                        0x80000000);
-                drawPadlock(graphics, x + SLOT_SIZE / 2, SLOT_ROW_Y + 8, 0xFF8A8A8A);
-            } else if (slotStack(i).isEmpty()) {
-                graphics.drawCenteredString(font, "+", x + SLOT_SIZE / 2, SLOT_ROW_Y + 5, 0xFFA0A0A0);
-            }
-        }
+    private void setDrawer(Drawer next) {
+        drawer = next;
+        menu.setVisibleDrawer(switch (next) {
+            case AUGMENTS -> BeaconPackMenu.DRAWER_AUGMENTS;
+            case FUEL -> BeaconPackMenu.DRAWER_FUEL;
+            case NONE -> BeaconPackMenu.DRAWER_NONE;
+        });
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+        setDrawer(drawer);
     }
 
     /**
@@ -642,14 +735,21 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
 
     /** Nothing on this screen is self-explanatory without these. */
     private List<Component> tooltipAt(int x, int y) {
-        if (within(x, y, POWER_X, POWER_Y, POWER_W, POWER_H)) {
+        if (within(x, y, TAB_X, POWER_TAB_Y, TAB_W, TAB_H)) {
             return List.of(
                     Component.translatable(menu.state().active()
                             ? "beaconpack.gui.active" : "beaconpack.gui.inactive"),
                     Component.translatable("beaconpack.tip.master")
                             .withStyle(ChatFormatting.GRAY));
         }
-        if (BPConfig.fuelEnabled() && within(x, y, GAUGE_X, GAUGE_Y, GAUGE_W, GAUGE_H)) {
+        if (within(x, y, TAB_X, AUGMENT_TAB_Y, TAB_W, TAB_H)) {
+            return List.of(Component.translatable("beaconpack.gui.augments"));
+        }
+        if (BPConfig.fuelEnabled() && within(x, y, TAB_X, FUEL_TAB_Y, TAB_W, TAB_H)) {
+            return List.of(Component.translatable("beaconpack.gui.fuel"));
+        }
+        if (BPConfig.fuelEnabled() && drawer == Drawer.FUEL
+                && within(x, y, GAUGE_X, GAUGE_Y, GAUGE_W, GAUGE_H)) {
             PackStats stats = menu.stats();
             double perSecond = PackResolver.fuelPerSecond(menu.state(), stats, effectLookup());
             return List.of(
@@ -669,9 +769,12 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
                 - MAX_CASES * CASE_SPACING, 36)) {
             return summaryTooltip(menu.state(), menu.stats());
         }
-        for (int i = menu.stats().augmentSlots(); i < BeaconPackItem.AUGMENT_SLOTS; i++) {
-            if (within(x, y, AUGMENT_SLOT_X + i * SLOT_SIZE, SLOT_ROW_Y, SLOT_SIZE, SLOT_SIZE)) {
-                return List.of(Component.translatable("beaconpack.tip.augment_locked"));
+        if (drawer == Drawer.AUGMENTS) {
+            for (int i = menu.stats().augmentSlots(); i < BeaconPackItem.AUGMENT_SLOTS; i++) {
+                if (within(x, y, AUGMENT_SLOT_X + i * SLOT_SIZE, AUGMENT_SLOT_Y,
+                        SLOT_SIZE, SLOT_SIZE)) {
+                    return List.of(Component.translatable("beaconpack.tip.augment_locked"));
+                }
             }
         }
         // Guarded on the panel actually having buttons: they are only drawn for a focused case
@@ -727,8 +830,16 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
             handleSelectorClick(x, y);
             return true;
         }
-        if (within(x, y, POWER_X, POWER_Y, POWER_W, POWER_H)) {
+        if (within(x, y, TAB_X, POWER_TAB_Y, TAB_W, TAB_H)) {
             send(BeaconPackMenu.ACTION_TOGGLE_ACTIVE, 0, 0);
+            return true;
+        }
+        if (within(x, y, TAB_X, AUGMENT_TAB_Y, TAB_W, TAB_H)) {
+            setDrawer(drawer == Drawer.AUGMENTS ? Drawer.NONE : Drawer.AUGMENTS);
+            return true;
+        }
+        if (BPConfig.fuelEnabled() && within(x, y, TAB_X, FUEL_TAB_Y, TAB_W, TAB_H)) {
+            setDrawer(drawer == Drawer.FUEL ? Drawer.NONE : Drawer.FUEL);
             return true;
         }
         if (handleCaseClick(x, y, button) || handleInfoClick(x, y)) {
