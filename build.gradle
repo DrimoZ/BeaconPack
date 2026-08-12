@@ -57,12 +57,19 @@ neoForge {
 repositories {
     mavenCentral()
     maven {
-        name = 'Curios / Trinkets (soft dependency, phase 3)'
+        name = 'BlameJared (JEI, Curios)'
         url = 'https://maven.blamejared.com'
     }
 }
 
 dependencies {
+    // JEI is a dev-time convenience only: it makes recipes and the augment variants browsable
+    // in-game. Nothing in the mod compiles against it, so it stays a runtime-only dependency
+    // and never turns into something players are required to install.
+    // additionalRuntimeClasspath, not runtimeOnly: ModDevGradle builds the run classpath from this
+    // configuration, and a runtimeOnly dependency never reaches the launched game.
+    additionalRuntimeClasspath "mezz.jei:jei-${jei_minecraft_version}-neoforge:${jei_version}"
+
     // Pure-logic classes under core/ are plain Java and unit-testable.
     testImplementation platform('org.junit:junit-bom:5.10.2')
     testImplementation 'org.junit.jupiter:junit-jupiter'
