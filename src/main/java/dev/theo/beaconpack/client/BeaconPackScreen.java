@@ -126,11 +126,6 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
 
     private static final int TEXT = 0x404040;
     private static final int TEXT_DIM = 0x707070;
-    private static final int PANEL = 0xFF313131;
-    private static final int PANEL_EDGE = 0xFF1B1B1B;
-    private static final int PANEL_HEADER = 0xFF262626;
-    private static final int ROW_ALT = 0xFF383838;
-    private static final int ROW_FOCUS = 0xFF3E6899;
 
     private int focusedCase = 0;
     private boolean selectorOpen;
@@ -209,36 +204,59 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     }
 
     private void drawTabs(GuiGraphics graphics, PackState state, int mouseX, int mouseY) {
-        drawTab(graphics, POWER_TAB_Y, false,
-                within(mouseX, mouseY, TAB_X, POWER_TAB_Y, TAB_W, TAB_H));
-        drawPowerGlyph(graphics, TAB_X + TAB_W / 2 + 1, POWER_TAB_Y + TAB_H / 2 - 1, 0xFF3A3A3A);
-        // A lit pip rather than a whole coloured tab: the state is legible without the button
+        boolean powerHovered = within(mouseX, mouseY, TAB_X, POWER_TAB_Y, TAB_W, TAB_H);
+        drawTab(graphics, POWER_TAB_Y, state.active(), powerHovered);
+        int powerCx = glyphCentre(state.active());
+        drawPowerGlyph(graphics, powerCx, POWER_TAB_Y + TAB_H / 2 - 2, 0xFF3A3A3A);
+        // A lit pip rather than a whole coloured tab: the state stays legible without the control
         // shouting louder than everything else on the screen.
-        graphics.fill(TAB_X + 4, POWER_TAB_Y + TAB_H - 6, TAB_X + TAB_W - 4, POWER_TAB_Y + TAB_H - 3,
-                state.active() ? 0xFF4BC46A : 0xFFB84B4B);
+        graphics.fill(powerCx - 5, POWER_TAB_Y + TAB_H - 7, powerCx + 5, POWER_TAB_Y + TAB_H - 4,
+                state.active() ? 0xFF4BC46A : 0xFF8A8A8A);
 
         drawTab(graphics, STATS_TAB_Y, drawer == Drawer.STATS,
                 within(mouseX, mouseY, TAB_X, STATS_TAB_Y, TAB_W, TAB_H));
-        drawTabBars(graphics, TAB_X + TAB_W / 2, STATS_TAB_Y + TAB_H / 2);
+        drawTabBars(graphics, glyphCentre(drawer == Drawer.STATS), STATS_TAB_Y + TAB_H / 2);
 
         drawTab(graphics, AUGMENT_TAB_Y, drawer == Drawer.AUGMENTS,
                 within(mouseX, mouseY, TAB_X, AUGMENT_TAB_Y, TAB_W, TAB_H));
-        drawTabGem(graphics, TAB_X + TAB_W / 2, AUGMENT_TAB_Y + TAB_H / 2);
+        drawTabGem(graphics, glyphCentre(drawer == Drawer.AUGMENTS), AUGMENT_TAB_Y + TAB_H / 2);
 
         if (BPConfig.fuelEnabled()) {
             drawTab(graphics, FUEL_TAB_Y, drawer == Drawer.FUEL,
                     within(mouseX, mouseY, TAB_X, FUEL_TAB_Y, TAB_W, TAB_H));
-            drawTabFlame(graphics, TAB_X + TAB_W / 2, FUEL_TAB_Y + TAB_H / 2);
+            drawTabFlame(graphics, glyphCentre(drawer == Drawer.FUEL), FUEL_TAB_Y + TAB_H / 2);
         }
     }
 
-    /** Panel-coloured like the frame it hangs off, brighter when its drawer is open. */
+    /** Icons follow the tab's width, which changes when it opens. */
+    private static int glyphCentre(boolean open) {
+        return TAB_X + 2 + (open ? TAB_W : TAB_W - 3) / 2;
+    }
+
+    /**
+     * A tab welded to the frame rather than a square floating beside it.
+     *
+     * <p>The left edge carries no outline and no bevel, so the tab reads as part of the panel it
+     * hangs off; an open one reaches further out and takes the panel's own face colour, which is
+     * what makes "this drawer belongs to this tab" obvious without a connector.
+     */
     private void drawTab(GuiGraphics graphics, int y, boolean open, boolean hovered) {
-        int face = open ? 0xFFD8D8D8 : hovered ? 0xFFCFCFCF : 0xFFB4B4B4;
-        graphics.fill(TAB_X, y - 1, TAB_X + TAB_W + 1, y + TAB_H + 1, 0xFF1B1B1B);
-        graphics.fill(TAB_X, y, TAB_X + TAB_W, y + TAB_H, face);
-        graphics.fill(TAB_X, y, TAB_X + TAB_W - 1, y + 1, 0xFFFFFFFF);
-        graphics.fill(TAB_X, y + TAB_H - 1, TAB_X + TAB_W, y + TAB_H, 0xFF555555);
+        int width = open ? TAB_W : TAB_W - 3;
+        int face = open ? 0xFFC6C6C6 : hovered ? 0xFFBDBDBD : 0xFFA8A8A8;
+        int right = TAB_X + width;
+
+        // Outline everywhere but the joint with the frame.
+        graphics.fill(TAB_X, y - 1, right + 1, y, 0xFF1B1B1B);
+        graphics.fill(TAB_X, y + TAB_H, right + 1, y + TAB_H + 1, 0xFF1B1B1B);
+        graphics.fill(right, y - 1, right + 1, y + TAB_H + 1, 0xFF1B1B1B);
+        graphics.fill(TAB_X, y, right, y + TAB_H, face);
+
+        // Clipped outer corners, so the stack reads as tabs and not as bricks.
+        graphics.fill(right - 1, y, right, y + 1, 0xFF1B1B1B);
+        graphics.fill(right - 1, y + TAB_H - 1, right, y + TAB_H, 0xFF1B1B1B);
+
+        graphics.fill(TAB_X, y + 1, right - 1, y + 2, 0x40FFFFFF);
+        graphics.fill(TAB_X, y + TAB_H - 2, right - 1, y + TAB_H - 1, 0x30000000);
     }
 
     private static void drawTabBars(GuiGraphics graphics, int cx, int cy) {
@@ -561,20 +579,23 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         float progress = openProgress();
         int height = Math.max(4, Math.round(SELECTOR_H * progress));
 
-        graphics.fill(x - 1, y - 1, x + SELECTOR_W + 1, y + height + 1, PANEL_EDGE);
-        graphics.fill(x, y, x + SELECTOR_W, y + height, PANEL);
+        // Vanilla palette, like every other surface here. A dark popup inside a light container
+        // reads as a foreign object, whatever its own merits.
+        panel(graphics, x, y, SELECTOR_W, height);
         if (progress < 1.0F) {
             return;
         }
-        graphics.fill(x, y, x + SELECTOR_W, y + SEARCH_H, PANEL_HEADER);
-
         drawSearchField(graphics, x, y);
+        // The list is a sunken well, the way vanilla sinks anything scrollable.
+        graphics.fill(x + 4, y + SEARCH_H, x + SELECTOR_W - 4, y + SELECTOR_H - FOOTER_H, 0xFF8B8B8B);
+        graphics.fill(x + 4, y + SEARCH_H, x + SELECTOR_W - 4, y + SEARCH_H + 1, 0xFF373737);
+        graphics.fill(x + 4, y + SEARCH_H, x + 5, y + SELECTOR_H - FOOTER_H, 0xFF373737);
 
         List<ResourceKey<BeaconEffectDef>> rows = visibleRows();
         if (rows.isEmpty()) {
             graphics.drawCenteredString(font,
                     Component.translatable("beaconpack.gui.no_results"),
-                    x + SELECTOR_W / 2, y + SEARCH_H + 16, 0xFF999999);
+                    x + SELECTOR_W / 2, y + SEARCH_H + 16, 0xFF5A5A5A);
             return;
         }
 
@@ -600,31 +621,34 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
                 // disagree about what Enter would pick.
                 highlighted = index;
             }
+            int listLeft = x + 5;
+            int listRight = x + SELECTOR_W - 5;
             if (index == highlighted) {
-                graphics.fill(x, rowY, x + SELECTOR_W, rowY + ROW_H, locked ? ROW_ALT : ROW_FOCUS);
+                graphics.fill(listLeft, rowY, listRight, rowY + ROW_H, 0xFF7B9FD6);
             } else if (index % 2 == 1) {
-                graphics.fill(x, rowY, x + SELECTOR_W, rowY + ROW_H, ROW_ALT);
+                graphics.fill(listLeft, rowY, listRight, rowY + ROW_H, 0x18000000);
             }
 
-            drawEffectIcon(graphics, key, x + 4, rowY + 2);
+            drawEffectIcon(graphics, key, listLeft + 2, rowY + 2);
 
             if (locked) {
                 // A padlock and the numeral, not the sentence: "Requires tier III" ate most of the
                 // row and left the effect's own name truncated to nothing.
                 String tag = roman(def.minTier());
-                int tagX = x + SELECTOR_W - font.width(tag) - 6;
-                graphics.drawString(font, tag, tagX, rowY + 5, 0xFFB86A6A, false);
-                drawPadlock(graphics, tagX - 8, rowY + 9, 0xFFB86A6A);
-                drawName(graphics, def, x, rowY, font.width(tag) + 20, 0xFF8C8C8C);
+                int tagX = listRight - font.width(tag) - 4;
+                graphics.drawString(font, tag, tagX, rowY + 5, 0xFF8B3A3A, false);
+                drawPadlock(graphics, tagX - 8, rowY + 9, 0xFF8B3A3A);
+                drawName(graphics, def, x, rowY, font.width(tag) + 20, 0xFF6E6E6E);
             } else {
-                drawCostMeter(graphics, x + SELECTOR_W - 28, rowY + 6, def.cost() / maxCost);
-                drawName(graphics, def, x, rowY, 34, 0xFFFFFFFF);
+                drawCostMeter(graphics, listRight - 26, rowY + 6, def.cost() / maxCost);
+                drawName(graphics, def, x, rowY, 34,
+                        index == highlighted ? 0xFFFFFFFF : 0xFF2B2B2B);
             }
         }
 
         drawScrollbar(graphics, x, y, rows.size());
         String count = Component.translatable("beaconpack.gui.result_count", rows.size()).getString();
-        graphics.drawString(font, count, x + 5, y + SELECTOR_H - 11, 0xFF888888, false);
+        graphics.drawString(font, count, x + 6, y + SELECTOR_H - 10, 0xFF5A5A5A, false);
     }
 
     /** Truncated against whatever the right-hand column leaves, never assumed to fit. */
@@ -651,33 +675,44 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         }
     }
 
+    /** A sunken field, matching how vanilla renders anything you type into. */
     private void drawSearchField(GuiGraphics graphics, int x, int y) {
-        graphics.fill(x + 4, y + 4, x + SELECTOR_W - 4, y + SEARCH_H - 4, 0xFF1A1A1A);
+        int left = x + 4;
+        int right = x + SELECTOR_W - 4;
+        graphics.fill(left, y + 4, right, y + SEARCH_H - 2, 0xFF8B8B8B);
+        graphics.fill(left, y + 4, right, y + 5, 0xFF373737);
+        graphics.fill(left, y + 4, left + 1, y + SEARCH_H - 2, 0xFF373737);
+        graphics.fill(left, y + SEARCH_H - 3, right, y + SEARCH_H - 2, 0xFFFFFFFF);
+
         boolean empty = search.isEmpty();
         String shown = empty
                 ? Component.translatable("beaconpack.gui.search").getString()
                 : search;
-        graphics.drawString(font, shown, x + 8, y + 6, empty ? 0xFF6A6A6A : 0xFFFFFFFF, false);
+        graphics.drawString(font, shown, left + 4, y + 7, empty ? 0xFF6E6E6E : 0xFF2B2B2B, false);
         // No caret over the placeholder: it read as a stray character appended to the hint.
         if (!empty && (System.currentTimeMillis() / 500) % 2 == 0) {
-            int caret = x + 9 + font.width(search);
-            graphics.fill(caret, y + 5, caret + 1, y + 15, 0xFFCCCCCC);
+            int caret = left + 5 + font.width(search);
+            graphics.fill(caret, y + 6, caret + 1, y + SEARCH_H - 4, 0xFF2B2B2B);
         }
     }
 
+    /** Sunken track, raised thumb - the same construction as vanilla's creative-tab scrollbar. */
     private void drawScrollbar(GuiGraphics graphics, int x, int y, int total) {
         if (total <= VISIBLE_ROWS) {
             return;
         }
-        int trackTop = y + SEARCH_H;
-        int trackHeight = VISIBLE_ROWS * ROW_H;
-        int thumbHeight = Math.max(12, trackHeight * VISIBLE_ROWS / total);
+        int trackLeft = x + SELECTOR_W - 9;
+        int trackTop = y + SEARCH_H + 1;
+        int trackHeight = VISIBLE_ROWS * ROW_H - 2;
+        int thumbHeight = Math.max(14, trackHeight * VISIBLE_ROWS / total);
         int travel = trackHeight - thumbHeight;
         int thumbTop = trackTop + travel * scroll / Math.max(1, total - VISIBLE_ROWS);
-        graphics.fill(x + SELECTOR_W - 3, trackTop, x + SELECTOR_W - 1, trackTop + trackHeight,
-                0xFF262626);
-        graphics.fill(x + SELECTOR_W - 3, thumbTop, x + SELECTOR_W - 1, thumbTop + thumbHeight,
-                0xFF7A7A7A);
+
+        graphics.fill(trackLeft, trackTop, trackLeft + 4, trackTop + trackHeight, 0xFF6E6E6E);
+        graphics.fill(trackLeft, thumbTop, trackLeft + 4, thumbTop + thumbHeight, 0xFFC6C6C6);
+        graphics.fill(trackLeft, thumbTop, trackLeft + 3, thumbTop + 1, 0xFFFFFFFF);
+        graphics.fill(trackLeft, thumbTop + thumbHeight - 1, trackLeft + 4, thumbTop + thumbHeight,
+                0xFF555555);
     }
 
     private void drawEffectIcon(GuiGraphics graphics, ResourceKey<BeaconEffectDef> key, int x, int y) {
