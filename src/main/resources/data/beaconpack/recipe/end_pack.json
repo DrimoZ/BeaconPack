@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [" C ", "MPM", " B "],
+  "key": {
+    "C": { "item": "minecraft:dragon_breath" },
+    "M": { "item": "minecraft:ender_eye" },
+    "P": { "item": "beaconpack:beacon_pack_ii" },
+    "B": { "item": "minecraft:beacon" }
+  },
+  "result": { "id": "beaconpack:end_pack", "count": 1 }
+}

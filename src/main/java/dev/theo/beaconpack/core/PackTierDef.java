@@ -2,9 +2,9 @@ package dev.theo.beaconpack.core;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceKey;
+
+import java.util.List;
 
 /**
  * One entry of the {@code beaconpack:tier} datapack registry: the base stats of a pack item,
@@ -26,7 +26,8 @@ public record PackTierDef(
         int augmentSlots,
         double baseRange,
         int fuelCapacity,
-        int maxAmplifier
+        int maxAmplifier,
+        List<ResourceKey<BeaconEffectDef>> effectPool
 ) {
     public static final Codec<PackTierDef> CODEC = RecordCodecBuilder.create(i -> i.group(
             Codec.intRange(1, 4).fieldOf("level").forGetter(PackTierDef::level),
@@ -35,16 +36,23 @@ public record PackTierDef(
             Codec.DOUBLE.fieldOf("base_range").forGetter(PackTierDef::baseRange),
             Codec.INT.fieldOf("fuel_capacity").forGetter(PackTierDef::fuelCapacity),
             Codec.intRange(0, 3).optionalFieldOf("max_amplifier", 0)
-                    .forGetter(PackTierDef::maxAmplifier)
+                    .forGetter(PackTierDef::maxAmplifier),
+            ResourceKey.codec(BPRegistryKeys.EFFECT).listOf()
+                    .optionalFieldOf("effect_pool", List.of()).forGetter(PackTierDef::effectPool)
     ).apply(i, PackTierDef::new));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, PackTierDef> STREAM_CODEC =
-            StreamCodec.composite(
-                    ByteBufCodecs.VAR_INT, PackTierDef::level,
-                    ByteBufCodecs.VAR_INT, PackTierDef::effectSlots,
-                    ByteBufCodecs.VAR_INT, PackTierDef::augmentSlots,
-                    ByteBufCodecs.DOUBLE, PackTierDef::baseRange,
-                    ByteBufCodecs.VAR_INT, PackTierDef::fuelCapacity,
-                    ByteBufCodecs.VAR_INT, PackTierDef::maxAmplifier,
-                    PackTierDef::new);
+    public PackTierDef {
+        effectPool = List.copyOf(effectPool);
+    }
+
+    /**
+     * Whether this pack may project the given effect.
+     *
+     * <p>An empty pool means "anything the effect registry allows", which is what a datapack gets
+     * for free; the shipped tiers all declare one explicitly so that a themed pack cannot quietly
+     * inherit the standard list.
+     */
+    public boolean allows(ResourceKey<BeaconEffectDef> effect) {
+        return effectPool.isEmpty() || effectPool.contains(effect);
+    }
 }

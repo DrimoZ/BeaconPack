@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class PackResolverTest {
 
-    private static final PackTierDef TIER_4 = new PackTierDef(4, 2, 3, 16.0, 12000, 1);
+    private static final PackTierDef TIER_4 = new PackTierDef(4, 2, 3, 16.0, 12000, 1, List.of());
 
     private static final ResourceKey<AugmentDef> RANGE = augmentKey("range");
     private static final ResourceKey<AugmentDef> FOCUS = augmentKey("focus");
@@ -63,7 +63,7 @@ class PackResolverTest {
     @Test
     void tierOneCannotProject() {
         PackStats stats = PackResolver.resolve(
-                new PackTierDef(1, 1, 0, 0.0, 600, 0), List.of(), AUGMENTS);
+                new PackTierDef(1, 1, 0, 0.0, 600, 0, List.of()), List.of(), AUGMENTS);
 
         assertTrue(stats.allows(AuraMode.SELF));
         assertFalse(stats.allows(AuraMode.ALLIES));

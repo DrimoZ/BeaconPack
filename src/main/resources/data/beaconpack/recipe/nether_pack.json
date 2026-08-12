@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [" C ", "MPM", " B "],
+  "key": {
+    "C": { "item": "minecraft:blaze_rod" },
+    "M": { "item": "minecraft:magma_cream" },
+    "P": { "item": "beaconpack:beacon_pack_ii" },
+    "B": { "item": "minecraft:beacon" }
+  },
+  "result": { "id": "beaconpack:nether_pack", "count": 1 }
+}

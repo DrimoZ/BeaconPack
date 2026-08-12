@@ -86,7 +86,7 @@ public final class PackTicker {
                 tier, BPLookups.installedAugments(pack), BPLookups.augments(access));
 
         PackState state = PackResolver.sanitize(
-                BeaconPackItem.stateOf(pack), stats, effectLookup, tier.level());
+                BeaconPackItem.stateOf(pack), stats, effectLookup, tier);
 
         List<EffectSlotConfig> toApply = new ArrayList<>(state.effects().size());
         double owed = 0.0;

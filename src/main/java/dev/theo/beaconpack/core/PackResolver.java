@@ -143,14 +143,16 @@ public final class PackResolver {
     public static PackState sanitize(PackState state,
                                      PackStats stats,
                                      Lookup<BeaconEffectDef> effectLookup,
-                                     int tierLevel) {
+                                     PackTierDef tier) {
         List<EffectSlotConfig> kept = new ArrayList<>(stats.effectSlots());
         for (EffectSlotConfig slot : state.effects()) {
             if (kept.size() >= stats.effectSlots()) {
                 break;
             }
             Optional<BeaconEffectDef> maybeDef = effectLookup.get(slot.effect());
-            if (maybeDef.isEmpty() || maybeDef.get().minTier() > tierLevel) {
+            if (maybeDef.isEmpty()
+                    || maybeDef.get().minTier() > tier.level()
+                    || !tier.allows(slot.effect())) {
                 continue;
             }
             int amplifierCap = Math.min(maybeDef.get().maxAmplifier(), stats.maxAmplifier());

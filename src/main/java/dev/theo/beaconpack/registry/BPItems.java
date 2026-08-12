@@ -21,10 +21,29 @@ public final class BPItems {
      * Four distinct items rather than one item plus a tier component: recipes, tags and JEI all
      * stay trivial, and a player can tell two packs apart in a chest at a glance.
      */
-    public static final DeferredItem<BeaconPackItem> PACK_I = pack("beacon_pack_i", 1, Rarity.COMMON);
-    public static final DeferredItem<BeaconPackItem> PACK_II = pack("beacon_pack_ii", 2, Rarity.UNCOMMON);
-    public static final DeferredItem<BeaconPackItem> PACK_III = pack("beacon_pack_iii", 3, Rarity.RARE);
-    public static final DeferredItem<BeaconPackItem> PACK_IV = pack("beacon_pack_iv", 4, Rarity.EPIC);
+    public static final DeferredItem<BeaconPackItem> PACK_I =
+            pack("beacon_pack_i", "tier_1", Rarity.COMMON);
+    public static final DeferredItem<BeaconPackItem> PACK_II =
+            pack("beacon_pack_ii", "tier_2", Rarity.UNCOMMON);
+    public static final DeferredItem<BeaconPackItem> PACK_III =
+            pack("beacon_pack_iii", "tier_3", Rarity.RARE);
+    public static final DeferredItem<BeaconPackItem> PACK_IV =
+            pack("beacon_pack_iv", "tier_4", Rarity.EPIC);
+
+    /**
+     * Themed packs: same machinery, different effect pool.
+     *
+     * <p>They exist entirely because a tier entry can declare which effects it accepts, so a
+     * specialist pack needs no code of its own - and a datapack can add more the same way. Each
+     * trades the standard list for effects the beacon never offered, which is what makes carrying
+     * one instead of a tier IV a real choice rather than a downgrade.
+     */
+    public static final DeferredItem<BeaconPackItem> PACK_NETHER =
+            pack("nether_pack", "nether", Rarity.RARE);
+    public static final DeferredItem<BeaconPackItem> PACK_END =
+            pack("end_pack", "end", Rarity.RARE);
+    public static final DeferredItem<BeaconPackItem> PACK_TIDAL =
+            pack("tidal_pack", "tidal", Rarity.RARE);
 
     /**
      * One registered augment item for every augment there will ever be — its identity comes from a
@@ -34,12 +53,12 @@ public final class BPItems {
             ITEMS.registerItem("augment", props -> new AugmentItem(props.stacksTo(1)));
 
     public static List<DeferredItem<BeaconPackItem>> packs() {
-        return List.of(PACK_I, PACK_II, PACK_III, PACK_IV);
+        return List.of(PACK_I, PACK_II, PACK_III, PACK_IV, PACK_NETHER, PACK_END, PACK_TIDAL);
     }
 
-    private static DeferredItem<BeaconPackItem> pack(String name, int level, Rarity rarity) {
+    private static DeferredItem<BeaconPackItem> pack(String name, String tierPath, Rarity rarity) {
         ResourceKey<PackTierDef> tier =
-                ResourceKey.create(BPRegistryKeys.TIER, BPRegistryKeys.id("tier_" + level));
+                ResourceKey.create(BPRegistryKeys.TIER, BPRegistryKeys.id(tierPath));
         return ITEMS.registerItem(name, props ->
                 new BeaconPackItem(props.stacksTo(1).rarity(rarity), tier));
     }
