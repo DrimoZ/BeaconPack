@@ -30,6 +30,12 @@ neoForge {
             programArgument '--nogui'
             systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
         }
+        // Runs every @GameTest headlessly and exits non-zero if any fails, so the in-game tests
+        // are runnable the same way the unit tests are rather than only through /test in a client.
+        gameTestServer {
+            type = 'gameTestServer'
+            systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
+        }
         data {
             // 1.21.1 has a single datagen run; clientData()/serverData() only exist from 1.21.4 on.
             data()

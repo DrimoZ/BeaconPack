@@ -53,7 +53,17 @@ public final class PackTicker {
         if (player.level().isClientSide() || player.tickCount % INTERVAL != 0) {
             return;
         }
+        tickPlayer(player);
+    }
 
+    /**
+     * One pass of the pack loop for one player.
+     *
+     * <p>Split out of the event handler so the game tests can drive a pass directly. Waiting for
+     * {@code tickCount % INTERVAL} to line up made every test depend on server timing it does not
+     * control, and a test that fails because the tick counter landed badly teaches nothing.
+     */
+    public static void tickPlayer(Player player) {
         ItemStack pack = findActivePack(player);
         if (pack.isEmpty()) {
             return;
