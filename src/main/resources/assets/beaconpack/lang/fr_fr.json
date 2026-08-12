@@ -52,6 +52,8 @@
   "beaconpack.msg.out_of_fuel": "Beacon Pack à court de carburant",
   "beaconpack.msg.needs_beacon": "Il faut être près d’un beacon allumé pour modifier ceci",
   "beaconpack.gui.runtime": "Autonomie : %s",
+  "beaconpack.gui.reach": "Portée : %s",
+  "beaconpack.gui.idle": "En veille",
   "beaconpack.gui.no_results": "Aucun effet ne correspond",
   "beaconpack.gui.result_count": "%s effets",
   "beaconpack.gui.share": "%s%% de la consommation",

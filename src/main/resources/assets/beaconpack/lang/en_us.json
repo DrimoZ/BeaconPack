@@ -52,6 +52,8 @@
   "beaconpack.msg.out_of_fuel": "Beacon Pack out of fuel",
   "beaconpack.msg.needs_beacon": "You must be near a lit beacon to change this",
   "beaconpack.gui.runtime": "Runtime: %s",
+  "beaconpack.gui.reach": "Reach: %s",
+  "beaconpack.gui.idle": "Idle",
   "beaconpack.gui.no_results": "No effect matches",
   "beaconpack.gui.result_count": "%s effects",
   "beaconpack.gui.share": "%s%% of the drain",

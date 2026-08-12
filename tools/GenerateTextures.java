@@ -25,7 +25,7 @@ public final class GenerateTextures {
     private static final int OUTLINE = 0xFF1B1B1B;
 
     private static final int WIDTH = 248;
-    private static final int HEIGHT = 294;
+    private static final int HEIGHT = 292;
 
     public static void main(String[] args) throws IOException {
         new File(GUI_DIR).mkdirs();
@@ -43,32 +43,32 @@ public final class GenerateTextures {
 
         // Effect cases: 24x24 so the level indicator has room in the corner.
         for (int i = 0; i < 3; i++) {
-            recess(image, 28 + i * 30, 38, 26, 26);
+            recess(image, 28 + i * 30, 44, 26, 26);
         }
         // Info panel.
-        recess(image, 28, 76, 192, 76);
+        recess(image, 28, 78, 192, 68);
         // Augment slots + fuel slot, matching BeaconPackMenu's coordinates minus the 1px border.
         for (int i = 0; i < 3; i++) {
-            recess(image, 28 + i * 18, 172, 18, 18);
+            recess(image, 28 + i * 18, 166, 18, 18);
         }
-        recess(image, 120, 172, 18, 18);
+        recess(image, 120, 166, 18, 18);
         // Fuel gauge.
-        recess(image, 142, 174, 72, 14);
+        recess(image, 142, 168, 72, 14);
 
         // Player inventory + hotbar.
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                recess(image, 43 + col * 18, 210 + row * 18, 18, 18);
+                recess(image, 43 + col * 18, 208 + row * 18, 18, 18);
             }
         }
         for (int col = 0; col < 9; col++) {
-            recess(image, 43 + col * 18, 268, 18, 18);
+            recess(image, 43 + col * 18, 266, 18, 18);
         }
 
         // Rules between groups: the header, the pack's own controls, and the player's inventory are
         // three different things and were previously separated only by whitespace.
-        separator(image, 28, 24, 192);
-        separator(image, 28, 192, 192);
+        separator(image, 28, 28, 192);
+        separator(image, 28, 190, 192);
 
         ImageIO.write(image, "PNG", new File(GUI_DIR + "/beacon_pack.png"));
     }
@@ -106,20 +106,22 @@ public final class GenerateTextures {
         int bodyLight = 0xFF565A6E;
 
         // Silhouette: a squat casing with a lid, outlined first.
-        fill(image, 3, 3, 10, 11, outline);
+        fill(image, 2, 3, 12, 11, outline);
         fill(image, 5, 1, 6, 2, outline);
-        fill(image, 4, 4, 8, 9, bodyDark);
+        fill(image, 3, 4, 10, 9, bodyDark);
         fill(image, 6, 2, 4, 2, bodyLight);
-        fill(image, 4, 4, 8, 1, bodyLight);
-        fill(image, 4, 4, 1, 9, bodyLight);
+        fill(image, 3, 4, 10, 1, bodyLight);
+        fill(image, 3, 4, 1, 9, bodyLight);
 
-        // Core: the one saturated area, so the eye lands there first.
-        fill(image, 6, 6, 4, 4, outline);
+        // Core: the one saturated area, so the eye lands there first. Bright enough to survive
+        // being drawn at 16px over a grey slot.
+        fill(image, 5, 5, 6, 5, outline);
         fill(image, 6, 6, 4, 3, accent);
-        fill(image, 7, 7, 1, 1, 0xFFFFFFFF);
+        fill(image, 6, 6, 2, 1, 0xFFFFFFFF);
 
+        // Tier as a pip count, readable without relying on the accent colour at all.
         for (int pip = 0; pip < tier; pip++) {
-            fill(image, 4 + pip * 2, 11, 1, 1, accent);
+            fill(image, 4 + pip * 2, 11, 1, 1, 0xFFF2F2F2);
         }
         return image;
     }

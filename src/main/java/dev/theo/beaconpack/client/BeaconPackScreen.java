@@ -48,7 +48,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     private static final int TEXTURE_SIZE = 512;
 
     static final int IMAGE_W = 248;
-    static final int IMAGE_H = 294;
+    static final int IMAGE_H = 292;
 
     /** The single column everything aligns to. */
     private static final int CONTENT_LEFT = 28;
@@ -60,13 +60,13 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     private static final int TOGGLE_Y = 6;
 
     private static final int CASE_X = CONTENT_LEFT;
-    private static final int CASE_Y = 38;
+    private static final int CASE_Y = 44;
     private static final int CASE_SIZE = 26;
     private static final int CASE_SPACING = 30;
     private static final int MAX_CASES = 3;
 
     private static final int INFO_X = CONTENT_LEFT;
-    private static final int INFO_Y = 76;
+    private static final int INFO_Y = 78;
     private static final int INFO_W = CONTENT_RIGHT - CONTENT_LEFT;
 
     private static final int BTN_H = 16;
@@ -74,25 +74,30 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     private static final int ROW_X = INFO_X + 6;
     private static final int ROW_W = INFO_W - 12;
     private static final int BTN_W = (ROW_W - 2 * BTN_GAP) / 3;
-    private static final int ROW_CHANGE = INFO_Y + 36;
-    private static final int ROW_SETTINGS = INFO_Y + 56;
+    private static final int ROW_CHANGE = INFO_Y + 30;
+    private static final int ROW_SETTINGS = INFO_Y + 48;
 
-    private static final int SECTION_LABEL_Y = 160;
-    private static final int SLOT_ROW_Y = 172;
+    private static final int SECTION_LABEL_Y = 154;
+    private static final int SLOT_ROW_Y = 166;
     private static final int SLOT_SIZE = 18;
     private static final int AUGMENT_SLOT_X = CONTENT_LEFT;
     private static final int FUEL_SLOT_X = 120;
     private static final int GAUGE_X = 142;
-    private static final int GAUGE_Y = 174;
+    private static final int GAUGE_Y = 168;
     private static final int GAUGE_W = CONTENT_RIGHT - GAUGE_X - 6;
     private static final int GAUGE_H = 14;
 
-    private static final int SELECTOR_W = 152;
-    private static final int SEARCH_H = 22;
-    private static final int ROW_H = 20;
-    private static final int VISIBLE_ROWS = 6;
-    private static final int FOOTER_H = 14;
+    private static final int SELECTOR_W = 138;
+    private static final int SEARCH_H = 20;
+    private static final int ROW_H = 18;
+    private static final int VISIBLE_ROWS = 5;
+    private static final int FOOTER_H = 12;
     private static final int SELECTOR_H = SEARCH_H + VISIBLE_ROWS * ROW_H + FOOTER_H;
+    /** Gap between the case and the popup, so the two read as related but distinct. */
+    private static final int SELECTOR_OFFSET = 6;
+    /** Above the item layer, which renders around z=150 and otherwise punches through the popup. */
+    private static final int SELECTOR_Z = 300;
+    private static final long OPEN_ANIM_MS = 110L;
 
     private static final int TEXT = 0x404040;
     private static final int TEXT_DIM = 0x707070;
@@ -111,6 +116,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     /** Index into the filtered rows; driven by both the mouse and the arrow keys. */
     private int highlighted;
     private String search = "";
+    private long openedAt;
 
     public BeaconPackScreen(BeaconPackMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
@@ -119,7 +125,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         this.titleLabelX = CONTENT_LEFT;
         this.titleLabelY = 10;
         this.inventoryLabelX = 43;
-        this.inventoryLabelY = 198;
+        this.inventoryLabelY = 196;
     }
 
     // ------------------------------------------------------------------ rendering
@@ -196,7 +202,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
                 // tier would give them.
                 graphics.fill(x + 2, CASE_Y + 2, x + CASE_SIZE - 2, CASE_Y + CASE_SIZE - 2,
                         0x60000000);
-                graphics.drawCenteredString(font, "?", x + CASE_SIZE / 2, CASE_Y + 9, TEXT_DIM);
+                drawPadlock(graphics, x + CASE_SIZE / 2, CASE_Y + 11, 0xFF8A8A8A);
                 continue;
             }
             if (i == focusedCase) {
@@ -264,11 +270,13 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         double cost = PackResolver.fuelPerSecond(slot, stats, effectLookup()) * stats.fuelMultiplier();
         double total = PackResolver.fuelPerSecond(state, stats, effectLookup());
         int share = total <= 0.0 ? 0 : (int) Math.round(cost / total * 100.0);
+        // Labelled: the bare word "Self" next to a percentage read as if the two were related.
         String reach = slot.aura().isAura()
                 ? String.format(Locale.ROOT, "%.0f m", stats.range())
                 : Component.translatable("beaconpack.aura.self").getString();
         graphics.drawString(font,
-                Component.translatable("beaconpack.gui.share", share).getString() + "  ·  " + reach,
+                Component.translatable("beaconpack.gui.share", share).getString() + "   "
+                        + Component.translatable("beaconpack.gui.reach", reach).getString(),
                 INFO_X + 8, INFO_Y + 21, TEXT_DIM, false);
 
         // Explicit rather than "click the case again": re-clicking the case is how you focus it,
@@ -320,11 +328,22 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
             if (i >= stats.augmentSlots()) {
                 graphics.fill(x + 1, SLOT_ROW_Y + 1, x + SLOT_SIZE - 1, SLOT_ROW_Y + SLOT_SIZE - 1,
                         0x80000000);
-                graphics.drawCenteredString(font, "?", x + SLOT_SIZE / 2, SLOT_ROW_Y + 5, TEXT_DIM);
+                drawPadlock(graphics, x + SLOT_SIZE / 2, SLOT_ROW_Y + 8, 0xFF8A8A8A);
             } else if (slotStack(i).isEmpty()) {
                 graphics.drawCenteredString(font, "+", x + SLOT_SIZE / 2, SLOT_ROW_Y + 5, 0xFFA0A0A0);
             }
         }
+    }
+
+    /**
+     * A padlock rather than a question mark: "?" reads as unknown content, when the slot is simply
+     * not unlocked yet. A lock is the universally understood shape for that.
+     */
+    private static void drawPadlock(GuiGraphics graphics, int cx, int cy, int colour) {
+        graphics.fill(cx - 2, cy - 5, cx + 2, cy - 4, colour);
+        graphics.fill(cx - 3, cy - 4, cx - 2, cy - 1, colour);
+        graphics.fill(cx + 1, cy - 4, cx + 2, cy - 1, colour);
+        graphics.fill(cx - 4, cy - 1, cx + 3, cy + 4, colour);
     }
 
     private ItemStack slotStack(int handlerIndex) {
@@ -352,16 +371,38 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         highlighted = 0;
         search = "";
 
-        int anchorX = CASE_X + caseIndex * CASE_SPACING + CASE_SIZE;
+        int anchorX = CASE_X + caseIndex * CASE_SPACING + CASE_SIZE + SELECTOR_OFFSET;
         selectorX = Mth.clamp(anchorX, 4, IMAGE_W - SELECTOR_W - 4);
-        selectorY = Mth.clamp(CASE_Y, 4, IMAGE_H - SELECTOR_H - 4);
+        selectorY = Mth.clamp(CASE_Y - 2, 4, IMAGE_H - SELECTOR_H - 4);
+        openedAt = System.currentTimeMillis();
+    }
+
+    /** 0 to 1 over {@link #OPEN_ANIM_MS}; the popup unrolls instead of appearing from nowhere. */
+    private float openProgress() {
+        long elapsed = System.currentTimeMillis() - openedAt;
+        return elapsed >= OPEN_ANIM_MS ? 1.0F : elapsed / (float) OPEN_ANIM_MS;
     }
 
     private void drawSelector(GuiGraphics graphics, int mouseX, int mouseY) {
+        // Raised above the item layer: slot contents are drawn at a higher z than renderLabels, so
+        // without this the inventory's items show straight through the popup.
+        graphics.pose().pushPose();
+        graphics.pose().translate(0.0F, 0.0F, SELECTOR_Z);
+        drawSelectorBody(graphics, mouseX, mouseY);
+        graphics.pose().popPose();
+    }
+
+    private void drawSelectorBody(GuiGraphics graphics, int mouseX, int mouseY) {
         int x = selectorX;
         int y = selectorY;
-        graphics.fill(x - 1, y - 1, x + SELECTOR_W + 1, y + SELECTOR_H + 1, PANEL_EDGE);
-        graphics.fill(x, y, x + SELECTOR_W, y + SELECTOR_H, PANEL);
+        float progress = openProgress();
+        int height = Math.max(4, Math.round(SELECTOR_H * progress));
+
+        graphics.fill(x - 1, y - 1, x + SELECTOR_W + 1, y + height + 1, PANEL_EDGE);
+        graphics.fill(x, y, x + SELECTOR_W, y + height, PANEL);
+        if (progress < 1.0F) {
+            return;
+        }
         graphics.fill(x, y, x + SELECTOR_W, y + SEARCH_H, PANEL_HEADER);
 
         drawSearchField(graphics, x, y);
@@ -405,14 +446,16 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
             drawEffectIcon(graphics, key, x + 4, rowY + 2);
 
             if (locked) {
-                String tag = Component.translatable("beaconpack.gui.locked_tier",
-                        roman(def.minTier())).getString();
-                graphics.drawString(font, tag, x + SELECTOR_W - font.width(tag) - 5, rowY + 6,
-                        0xFFAA5555, false);
-                drawName(graphics, def, x, rowY, font.width(tag) + 10, 0xFF888888);
+                // A padlock and the numeral, not the sentence: "Requires tier III" ate most of the
+                // row and left the effect's own name truncated to nothing.
+                String tag = roman(def.minTier());
+                int tagX = x + SELECTOR_W - font.width(tag) - 6;
+                graphics.drawString(font, tag, tagX, rowY + 5, 0xFFB86A6A, false);
+                drawPadlock(graphics, tagX - 8, rowY + 9, 0xFFB86A6A);
+                drawName(graphics, def, x, rowY, font.width(tag) + 20, 0xFF8C8C8C);
             } else {
-                drawCostMeter(graphics, x + SELECTOR_W - 30, rowY + 7, def.cost() / maxCost);
-                drawName(graphics, def, x, rowY, 36, 0xFFFFFFFF);
+                drawCostMeter(graphics, x + SELECTOR_W - 28, rowY + 6, def.cost() / maxCost);
+                drawName(graphics, def, x, rowY, 34, 0xFFFFFFFF);
             }
         }
 
@@ -451,10 +494,11 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         String shown = empty
                 ? Component.translatable("beaconpack.gui.search").getString()
                 : search;
-        graphics.drawString(font, shown, x + 8, y + 8, empty ? 0xFF6A6A6A : 0xFFFFFFFF, false);
-        if (!empty || (System.currentTimeMillis() / 500) % 2 == 0) {
-            int caret = x + 8 + (empty ? 0 : font.width(search));
-            graphics.fill(caret + 1, y + 7, caret + 2, y + 16, 0xFFCCCCCC);
+        graphics.drawString(font, shown, x + 8, y + 6, empty ? 0xFF6A6A6A : 0xFFFFFFFF, false);
+        // No caret over the placeholder: it read as a stray character appended to the hint.
+        if (!empty && (System.currentTimeMillis() / 500) % 2 == 0) {
+            int caret = x + 9 + font.width(search);
+            graphics.fill(caret, y + 5, caret + 1, y + 15, 0xFFCCCCCC);
         }
     }
 
@@ -806,8 +850,16 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         return atCurrentDraw(menu.state().fuel() + reserveUnits(), perSecond);
     }
 
+    /**
+     * "Idle" rather than a dash when nothing is drawing.
+     *
+     * <p>A lone "-" reads as missing data or a bug; naming the state says the pack is fine and
+     * simply has nothing running.
+     */
     private static String atCurrentDraw(int units, double perSecond) {
-        return perSecond <= 0.0 ? "-" : formatDuration((int) (units / perSecond));
+        return perSecond <= 0.0
+                ? Component.translatable("beaconpack.gui.idle").getString()
+                : formatDuration((int) (units / perSecond));
     }
 
     /** Fuel units still sitting in the fuel slot, not yet drawn into the buffer. */
