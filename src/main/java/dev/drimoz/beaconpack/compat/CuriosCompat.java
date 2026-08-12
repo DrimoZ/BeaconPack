@@ -13,9 +13,11 @@ import net.neoforged.fml.ModList;
  * {@link #loaded()} and inside a nested class, so the classes are only ever resolved when the mod
  * is actually present - referencing them from this class directly would fail to link without it.
  *
- * <p>No slot type is declared and no tag is shipped: which slot a pack may go in is the pack
- * author's or the player's business, and forcing one would fight whatever slot layout their pack
- * already uses.
+ * <p>Packs bind to Curios' {@code charm} slot through a shipped tag rather than being left for the
+ * pack author to wire up. Declaring nothing was the tidier position, but it meant a player who
+ * installed both mods found the integration simply did not work, with no way to tell that a
+ * config file was missing. The binding is additive - {@code replace: false} on both files - so a
+ * datapack can still move packs to another slot.
  */
 public final class CuriosCompat {
 

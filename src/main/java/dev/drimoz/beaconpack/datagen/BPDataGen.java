@@ -32,6 +32,8 @@ public final class BPDataGen {
 
         generator.addProvider(event.includeClient(), new BPItemModelProvider(output, helper));
         generator.addProvider(event.includeServer(), new BPRecipeProvider(output, registries));
+        generator.addProvider(event.includeServer(),
+                new BPItemTagProvider(output, registries, helper));
     }
 
     private BPDataGen() {}

@@ -119,6 +119,15 @@ item.
 
 ---
 
+## Compatibility
+
+**Curios** is optional. With it installed, a pack worn in the `charm` slot works exactly like one
+carried in the inventory — the binding ships with the mod, so nothing needs configuring. A pack in
+the inventory still wins if you somehow carry two. Without Curios, none of that code is ever
+touched.
+
+---
+
 ## Building
 
 Requires JDK 21.
