@@ -131,7 +131,7 @@ public final class PackResolver {
      * strictly worse than no augment at all, which is not a choice, just a trap.
      */
     private static double rangeFactor(double range) {
-        return 1.0 + range / 32.0;
+        return 1.0 + range / 64.0;
     }
 
     /**

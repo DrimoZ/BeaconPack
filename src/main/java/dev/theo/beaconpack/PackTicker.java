@@ -155,11 +155,15 @@ public final class PackTicker {
             return state;
         }
         int units = BPLookups.fuelValue(access, fuel.getItem());
-        if (units <= 0) {
+        if (units <= 0 || state.fuel() + units > stats.fuelCapacity()) {
+            // Never burn an item the buffer cannot hold in full - clamping the overflow away would
+            // silently destroy most of a netherite ingot. It waits instead, which is also what
+            // gives the Capacity augment and the higher tiers a reason to exist: they are what
+            // unlock the denser fuels.
             return state;
         }
         handler.extractItem(BeaconPackItem.FUEL_SLOT, 1, false);
-        return state.withFuel(Math.min(stats.fuelCapacity(), state.fuel() + units));
+        return state.withFuel(state.fuel() + units);
     }
 
     /**

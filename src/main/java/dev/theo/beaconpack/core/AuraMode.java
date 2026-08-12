@@ -12,9 +12,9 @@ import net.minecraft.util.StringRepresentable;
  */
 public enum AuraMode implements StringRepresentable {
     SELF("self", 1, 1.0),
-    ALLIES("allies", 2, 2.5),
-    TEAM("team", 2, 2.0),
-    ALLIES_AND_PETS("allies_and_pets", 3, 3.0);
+    ALLIES("allies", 2, 2.0),
+    TEAM("team", 2, 1.7),
+    ALLIES_AND_PETS("allies_and_pets", 3, 2.4);
 
     public static final Codec<AuraMode> CODEC = StringRepresentable.fromEnum(AuraMode::values);
 
