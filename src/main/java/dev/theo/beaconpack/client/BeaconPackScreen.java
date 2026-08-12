@@ -13,12 +13,14 @@ import dev.theo.beaconpack.net.PackActionPayload;
 import dev.theo.beaconpack.registry.BPLookups;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
@@ -371,7 +373,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     private void drawCases(GuiGraphics graphics, PackState state, PackStats stats,
                            int mouseX, int mouseY) {
         List<EffectSlotConfig> effects = state.effects();
-        for (int i = 0; i < MAX_CASES; i++) {
+        for (int i = 0; i < visibleCases(stats); i++) {
             int x = CASE_X + i * CASE_SPACING;
 
             if (i >= stats.effectSlots()) {
@@ -398,7 +400,23 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
             }
             graphics.drawString(font, roman(slot.amplifier() + 1),
                     x + CASE_SIZE - 9, CASE_Y + CASE_SIZE - 10, 0xFFFFFF, true);
+            // A shared effect looked identical to a private one, which hid the single most
+            // expensive setting on the screen.
+            if (slot.aura().isAura()) {
+                graphics.fill(x + 3, CASE_Y + 3, x + 7, CASE_Y + 7, 0xFF6FA8DC);
+                graphics.renderOutline(x + 3, CASE_Y + 3, 4, 4, 0xFF20364C);
+            }
         }
+    }
+
+    /**
+     * Unlocked cases plus a single locked preview.
+     *
+     * <p>Drawing the full five turned a tier-IV pack into two slots and three padlocks, which reads
+     * as a broken screen rather than as progression.
+     */
+    private int visibleCases(PackStats stats) {
+        return Math.min(MAX_CASES, stats.effectSlots() + 1);
     }
 
     /**
@@ -501,6 +519,9 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
      * than overriding the screen.
      */
     private void setDrawer(Drawer next) {
+        if (next != drawer) {
+            click();
+        }
         drawer = next;
         menu.setVisibleDrawer(switch (next) {
             case STATS -> BeaconPackMenu.DRAWER_NONE;
@@ -899,7 +920,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     }
 
     private List<Component> caseTooltip(int x, int y) {
-        for (int i = 0; i < MAX_CASES; i++) {
+        for (int i = 0; i < visibleCases(menu.stats()); i++) {
             if (!within(x, y, CASE_X + i * CASE_SPACING, CASE_Y, CASE_SIZE, CASE_SIZE)) {
                 continue;
             }
@@ -954,7 +975,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     }
 
     private boolean handleCaseClick(int x, int y, int button) {
-        for (int i = 0; i < MAX_CASES; i++) {
+        for (int i = 0; i < visibleCases(menu.stats()); i++) {
             if (!within(x, y, CASE_X + i * CASE_SPACING, CASE_Y, CASE_SIZE, CASE_SIZE)) {
                 continue;
             }
@@ -1091,7 +1112,19 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     // ------------------------------------------------------------------ helpers
 
     private void send(int action, int slot, int value) {
+        click();
         PacketDistributor.sendToServer(new PackActionPayload(action, slot, value));
+    }
+
+    /**
+     * The click every vanilla button makes.
+     *
+     * <p>Hand-drawn controls get no audio for free, and a button that changes colour but makes no
+     * sound reads as not having registered the press.
+     */
+    private static void click() {
+        Minecraft.getInstance().getSoundManager()
+                .play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
     }
 
     private PackResolver.Lookup<BeaconEffectDef> effectLookup() {
