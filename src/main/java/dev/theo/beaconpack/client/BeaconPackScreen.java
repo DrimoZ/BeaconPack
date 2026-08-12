@@ -139,6 +139,9 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     private int highlighted;
     private String search = "";
     private long openedAt;
+    private List<ResourceKey<BeaconEffectDef>> allKeysCache;
+    private List<ResourceKey<BeaconEffectDef>> rowsCache;
+    private String rowsCacheKey;
 
     public BeaconPackScreen(BeaconPackMenu menu, Inventory inventory, Component title) {
         super(menu, inventory, title);
@@ -1138,38 +1141,41 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
      * The whole registry, in the order both sides agree on.
      *
      * <p>This is what the wire index refers to, so it must never be filtered - the server resolves
-     * the index against the same unfiltered list.
+     * the index against the same unfiltered list. Cached because the registry cannot change while
+     * the screen is open, and building it means a stream and a sort.
      */
     private List<ResourceKey<BeaconEffectDef>> allKeys() {
-        return BPLookups.sortedEffectKeys(Minecraft.getInstance().level.registryAccess());
+        if (allKeysCache == null) {
+            allKeysCache = BPLookups.sortedEffectKeys(Minecraft.getInstance().level.registryAccess());
+        }
+        return allKeysCache;
     }
 
     /**
-     * Only what this pack could ever project.
+     * The rows the picker shows: this pack's pool, narrowed by the search box.
      *
      * <p>A themed pack listing the standard beacon effects it will never accept would be a list of
-     * dead ends, so the pool filters the picker rather than greying rows out.
+     * dead ends, so the pool filters the picker rather than greying rows out. Locked entries are
+     * kept, though - those are progress, not dead ends.
+     *
+     * <p>Recomputed only when the search text changes. Drawing one frame of the picker asks for
+     * this list several times, and it used to re-sort the registry on every one of them.
      */
-    private List<ResourceKey<BeaconEffectDef>> poolKeys() {
-        PackTierDef tier = menu.tierDef();
-        if (tier == null) {
-            return allKeys();
-        }
-        return allKeys().stream().filter(tier::allows).toList();
-    }
-
-    /** Filtered by the search box, but locked entries are kept so progress stays visible. */
     private List<ResourceKey<BeaconEffectDef>> visibleRows() {
-        if (search.isEmpty()) {
-            return poolKeys();
+        if (rowsCache != null && search.equals(rowsCacheKey)) {
+            return rowsCache;
         }
+        PackTierDef tier = menu.tierDef();
         String needle = search.toLowerCase(Locale.ROOT);
-        return poolKeys().stream()
-                .filter(key -> effectLookup().get(key)
+        rowsCache = allKeys().stream()
+                .filter(key -> tier == null || tier.allows(key))
+                .filter(key -> needle.isEmpty() || effectLookup().get(key)
                         .map(def -> def.effect().value().getDisplayName().getString()
                                 .toLowerCase(Locale.ROOT).contains(needle))
                         .orElse(false))
                 .toList();
+        rowsCacheKey = search;
+        return rowsCache;
     }
 
     private String totalRuntime() {
