@@ -40,6 +40,7 @@
   "beaconpack.gui.slots": "Cases : %s / %s",
   "beaconpack.tip.hold_shift": "Maintenir [Maj] pour les détails",
   "beaconpack.tip.augment_rule": "Un seul augment de chaque type par pack",
+  "beaconpack.tip.augment_line": "◈ %s",
   "beaconpack.tip.pack_tier": "Tier %s · %s cases d’effet · %s slots d’augment",
   "beaconpack.tip.fuel_short": "Carburant : %s unités",
   "beaconpack.op.add_range": "Portée +%s m",

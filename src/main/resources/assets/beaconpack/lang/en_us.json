@@ -40,6 +40,7 @@
   "beaconpack.gui.slots": "Slots: %s / %s",
   "beaconpack.tip.hold_shift": "Hold [Shift] for details",
   "beaconpack.tip.augment_rule": "One augment of each type per pack",
+  "beaconpack.tip.augment_line": "◈ %s",
   "beaconpack.tip.pack_tier": "Tier %s · %s effect slots · %s augment slots",
   "beaconpack.tip.fuel_short": "Fuel: %s units",
   "beaconpack.op.add_range": "Range +%s m",

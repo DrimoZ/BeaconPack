@@ -15,6 +15,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.Mth;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -106,6 +107,16 @@ public class BeaconPackItem extends Item {
                                 : ChatFormatting.DARK_GRAY)));
             }
         });
+        // Installed augments, which were missing entirely: two packs of the same tier can behave
+        // completely differently and looked identical in a chest.
+        List<AugmentInstance> augments = augmentsOf(stack);
+        for (AugmentInstance augment : augments) {
+            tooltip.add(Component.translatable("beaconpack.tip.augment_line",
+                            Component.translatable("augment." + augment.type().location().getNamespace()
+                                    + "." + augment.type().location().getPath(),
+                                    Component.translatable("beaconpack.tier." + augment.tier())))
+                    .withStyle(ChatFormatting.DARK_AQUA));
+        }
         appendRuntime(stack, context, state, tooltip);
     }
 
@@ -177,6 +188,18 @@ public class BeaconPackItem extends Item {
 
     @Override
     public boolean isBarVisible(ItemStack stack) {
-        return stateOf(stack).fuel() > 0;
+        return stateOf(stack).capacity() > 0;
+    }
+
+    @Override
+    public int getBarWidth(ItemStack stack) {
+        return (int) Math.round(stateOf(stack).fillRatio() * 13.0);
+    }
+
+    /** Green to red as it empties, so a nearly dry pack is obvious without reading the tooltip. */
+    @Override
+    public int getBarColor(ItemStack stack) {
+        float ratio = (float) stateOf(stack).fillRatio();
+        return Mth.hsvToRgb(ratio / 3.0F, 1.0F, 1.0F);
     }
 }

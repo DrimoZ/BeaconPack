@@ -168,7 +168,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         drawCases(graphics, state, stats, localX, localY);
         drawSummary(graphics, state, stats);
         drawFuel(graphics, state, stats);
-        drawLockedAugmentSlots(graphics, stats);
+        drawAugmentSlotHints(graphics, stats);
 
         if (selectorOpen) {
             drawSelector(graphics, localX, localY);
@@ -181,7 +181,8 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         boolean hovered = within(mouseX, mouseY, TOGGLE_X, TOGGLE_Y, TOGGLE_W, TOGGLE_H);
         Component label = Component.translatable(
                 state.active() ? "beaconpack.gui.active" : "beaconpack.gui.inactive");
-        drawButton(graphics, TOGGLE_X, TOGGLE_Y, TOGGLE_W, TOGGLE_H, label, hovered, state.active());
+        drawButton(graphics, TOGGLE_X, TOGGLE_Y, TOGGLE_W, TOGGLE_H, label, hovered, true,
+                state.active());
     }
 
     private void drawCases(GuiGraphics graphics, PackState state, PackStats stats,
@@ -275,20 +276,20 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         // effect's details pop the selector instead.
         drawButton(graphics, ROW_X, ROW_CHANGE, ROW_W, BTN_H,
                 Component.translatable("beaconpack.gui.change_effect"),
-                within(mouseX, mouseY, ROW_X, ROW_CHANGE, ROW_W, BTN_H), true);
+                within(mouseX, mouseY, ROW_X, ROW_CHANGE, ROW_W, BTN_H), true, false);
 
         drawButton(graphics, buttonX(0), ROW_SETTINGS, BTN_W, BTN_H,
                 Component.literal("< " + roman(slot.amplifier() + 1) + " >"),
                 within(mouseX, mouseY, buttonX(0), ROW_SETTINGS, BTN_W, BTN_H),
-                canAmplify(def, stats));
+                canAmplify(def, stats), false);
         drawButton(graphics, buttonX(1), ROW_SETTINGS, BTN_W, BTN_H,
                 Component.translatable(slot.enabled()
                         ? "beaconpack.gui.active" : "beaconpack.gui.inactive"),
-                within(mouseX, mouseY, buttonX(1), ROW_SETTINGS, BTN_W, BTN_H), slot.enabled());
+                within(mouseX, mouseY, buttonX(1), ROW_SETTINGS, BTN_W, BTN_H), true, slot.enabled());
         drawButton(graphics, buttonX(2), ROW_SETTINGS, BTN_W, BTN_H,
                 Component.translatable("beaconpack.aura." + slot.aura().getSerializedName()),
                 within(mouseX, mouseY, buttonX(2), ROW_SETTINGS, BTN_W, BTN_H),
-                stats.allowedAuraModes().size() > 1);
+                stats.allowedAuraModes().size() > 1, slot.aura().isAura());
     }
 
     private static int buttonX(int index) {
@@ -306,13 +307,34 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
                 GAUGE_X + (GAUGE_W - font.width(label)) / 2, GAUGE_Y + 4, 0xFFFFFFFF, true);
     }
 
-    private void drawLockedAugmentSlots(GuiGraphics graphics, PackStats stats) {
-        for (int i = stats.augmentSlots(); i < BeaconPackItem.AUGMENT_SLOTS; i++) {
+    /**
+     * Marks each augment slot as locked or simply empty.
+     *
+     * <p>Both used to look identical, and a locked slot silently refused whatever was dropped on it
+     * - indistinguishable from an augment that does not work. An empty unlocked slot now invites a
+     * click the same way an empty effect case does.
+     */
+    private void drawAugmentSlotHints(GuiGraphics graphics, PackStats stats) {
+        for (int i = 0; i < BeaconPackItem.AUGMENT_SLOTS; i++) {
             int x = AUGMENT_SLOT_X + i * SLOT_SIZE;
-            graphics.fill(x + 1, SLOT_ROW_Y + 1, x + SLOT_SIZE - 1, SLOT_ROW_Y + SLOT_SIZE - 1,
-                    0x80000000);
-            graphics.drawCenteredString(font, "?", x + SLOT_SIZE / 2, SLOT_ROW_Y + 5, TEXT_DIM);
+            if (i >= stats.augmentSlots()) {
+                graphics.fill(x + 1, SLOT_ROW_Y + 1, x + SLOT_SIZE - 1, SLOT_ROW_Y + SLOT_SIZE - 1,
+                        0x80000000);
+                graphics.drawCenteredString(font, "?", x + SLOT_SIZE / 2, SLOT_ROW_Y + 5, TEXT_DIM);
+            } else if (slotStack(i).isEmpty()) {
+                graphics.drawCenteredString(font, "+", x + SLOT_SIZE / 2, SLOT_ROW_Y + 5, 0xFFA0A0A0);
+            }
         }
+    }
+
+    private ItemStack slotStack(int handlerIndex) {
+        for (var slot : menu.slots) {
+            if (slot instanceof SlotItemHandler handler
+                    && handler.getSlotIndex() == handlerIndex) {
+                return slot.getItem();
+            }
+        }
+        return ItemStack.EMPTY;
     }
 
     // ------------------------------------------------------------------ effect selector
@@ -461,16 +483,36 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         });
     }
 
+    /**
+     * Draws a button with <em>availability</em> and <em>state</em> as two separate inputs.
+     *
+     * <p>They used to share one flag, so a greyed-out button meant "you cannot press this" on one
+     * control and "this setting is off" on the next. Colour now means state, and only a dimmed,
+     * unhoverable face means unavailable.
+     */
     private void drawButton(GuiGraphics graphics, int x, int y, int w, int h,
-                            Component label, boolean hovered, boolean lit) {
-        int background = !lit ? 0xFF5A5A5A : hovered ? 0xFF7FA7D8 : 0xFF6E6E6E;
+                            Component label, boolean hovered, boolean available, boolean on) {
+        int background;
+        int textColour = 0xFFFFFFFF;
+        if (!available) {
+            background = 0xFF4C4C4C;
+            textColour = 0xFF9A9A9A;
+        } else if (on) {
+            background = hovered ? 0xFF57A268 : 0xFF3E7A4B;
+        } else {
+            background = hovered ? 0xFF8797AC : 0xFF6E6E6E;
+        }
         graphics.fill(x, y, x + w, y + h, background);
         graphics.renderOutline(x, y, w, h, 0xFF2B2B2B);
+        // Highlight along the top edge so the control reads as raised, i.e. as pressable.
+        if (available) {
+            graphics.fill(x + 1, y + 1, x + w - 1, y + 2, 0x33FFFFFF);
+        }
         // Truncated defensively: a translated label that overflows used to run past the button and
         // under the frame.
         String text = font.plainSubstrByWidth(label.getString(), w - 6);
         graphics.drawString(font, text, x + (w - font.width(text)) / 2, y + (h - 8) / 2,
-                0xFFFFFFFF, false);
+                textColour, false);
     }
 
     // ------------------------------------------------------------------ tooltips
@@ -770,23 +812,13 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
 
     /** Fuel units still sitting in the fuel slot, not yet drawn into the buffer. */
     private int reserveUnits() {
-        ItemStack fuel = fuelSlotStack();
+        ItemStack fuel = slotStack(BeaconPackItem.FUEL_SLOT);
         if (fuel.isEmpty()) {
             return 0;
         }
         int perItem = BPLookups.fuelValue(
                 Minecraft.getInstance().level.registryAccess(), fuel.getItem());
         return perItem * fuel.getCount();
-    }
-
-    private ItemStack fuelSlotStack() {
-        for (var slot : menu.slots) {
-            if (slot instanceof SlotItemHandler handler
-                    && handler.getSlotIndex() == BeaconPackItem.FUEL_SLOT) {
-                return slot.getItem();
-            }
-        }
-        return ItemStack.EMPTY;
     }
 
     private int tierLevel() {

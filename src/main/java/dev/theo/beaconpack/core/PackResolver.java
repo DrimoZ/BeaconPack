@@ -158,7 +158,9 @@ public final class PackResolver {
             kept.add(slot.withAmplifier(Math.clamp(slot.amplifier(), 0, amplifierCap))
                     .withAura(aura));
         }
-        return state.withEffects(kept).withFuel(Math.min(state.fuel(), stats.fuelCapacity()));
+        return state.withEffects(kept)
+                .withFuel(Math.min(state.fuel(), stats.fuelCapacity()))
+                .withCapacity(stats.fuelCapacity());
     }
 
     private PackResolver() {}

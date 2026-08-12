@@ -21,6 +21,8 @@ public final class GenerateTextures {
     private static final int LIGHT = 0xFFFFFFFF;
     private static final int DARK = 0xFF555555;
     private static final int SLOT = 0xFF8B8B8B;
+    private static final int SLOT_SHADE = 0xFF373737;
+    private static final int OUTLINE = 0xFF1B1B1B;
 
     private static final int WIDTH = 248;
     private static final int HEIGHT = 294;
@@ -63,6 +65,11 @@ public final class GenerateTextures {
             recess(image, 43 + col * 18, 268, 18, 18);
         }
 
+        // Rules between groups: the header, the pack's own controls, and the player's inventory are
+        // three different things and were previously separated only by whitespace.
+        separator(image, 28, 24, 192);
+        separator(image, 28, 192, 192);
+
         ImageIO.write(image, "PNG", new File(GUI_DIR + "/beacon_pack.png"));
     }
 
@@ -70,7 +77,8 @@ public final class GenerateTextures {
         int[] tierColours = {0xFF9AA7B0, 0xFF62C2E0, 0xFF6BE07F, 0xFFE0C24A};
         String[] names = {"beacon_pack_i", "beacon_pack_ii", "beacon_pack_iii", "beacon_pack_iv"};
         for (int i = 0; i < names.length; i++) {
-            ImageIO.write(packIcon(tierColours[i]), "PNG", new File(ITEM_DIR + "/" + names[i] + ".png"));
+            ImageIO.write(packIcon(tierColours[i], i + 1), "PNG",
+                    new File(ITEM_DIR + "/" + names[i] + ".png"));
         }
         // Greyscale on purpose: the augment item is tinted at render time from its registry entry.
         ImageIO.write(augmentIcon(null), "PNG", new File(ITEM_DIR + "/augment.png"));
@@ -84,28 +92,57 @@ public final class GenerateTextures {
         }
     }
 
-    private static BufferedImage packIcon(int accent) {
+    /**
+     * At 16x16 the silhouette carries the whole icon, so the shape is blocked out first and only
+     * then shaded, with a hard outline to keep it readable against any inventory background.
+     *
+     * <p>The tier is shown by both colour and a count of pips: colour alone excludes anyone with a
+     * colour vision deficiency, and four shades of "glowing gem" are hard to tell apart regardless.
+     */
+    private static BufferedImage packIcon(int accent, int tier) {
         BufferedImage image = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-        fill(image, 3, 4, 10, 10, 0xFF3B3B44);
-        fill(image, 4, 5, 8, 8, 0xFF54545F);
-        fill(image, 6, 2, 4, 3, 0xFF2A2A31);
-        fill(image, 6, 7, 4, 4, accent);
-        fill(image, 7, 8, 2, 2, 0xFFFFFFFF);
+        int outline = 0xFF15161C;
+        int bodyDark = 0xFF3A3D4C;
+        int bodyLight = 0xFF565A6E;
+
+        // Silhouette: a squat casing with a lid, outlined first.
+        fill(image, 3, 3, 10, 11, outline);
+        fill(image, 5, 1, 6, 2, outline);
+        fill(image, 4, 4, 8, 9, bodyDark);
+        fill(image, 6, 2, 4, 2, bodyLight);
+        fill(image, 4, 4, 8, 1, bodyLight);
+        fill(image, 4, 4, 1, 9, bodyLight);
+
+        // Core: the one saturated area, so the eye lands there first.
+        fill(image, 6, 6, 4, 4, outline);
+        fill(image, 6, 6, 4, 3, accent);
+        fill(image, 7, 7, 1, 1, 0xFFFFFFFF);
+
+        for (int pip = 0; pip < tier; pip++) {
+            fill(image, 4 + pip * 2, 11, 1, 1, accent);
+        }
         return image;
     }
 
-    /** Gem body plus an optional glyph. Everything stays greyscale so the tint does the colouring. */
+    /**
+     * Gem body plus an optional glyph, outlined for contrast and left greyscale so the registry
+     * tint does the colouring. The glyph is the identity here - two augments of similar hue must
+     * still be distinguishable, so shape carries the meaning and colour only reinforces it.
+     */
     private static BufferedImage augmentIcon(String glyph) {
         BufferedImage image = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-        fill(image, 5, 2, 6, 1, 0xFF7A7A7A);
-        fill(image, 4, 3, 8, 10, 0xFF7A7A7A);
-        fill(image, 5, 3, 6, 9, 0xFFD8D8D8);
-        fill(image, 5, 13, 6, 1, 0xFF7A7A7A);
+        int outline = 0xFF2A2A2A;
+        fill(image, 4, 2, 8, 12, outline);
+        fill(image, 3, 4, 10, 8, outline);
+        fill(image, 5, 3, 6, 10, 0xFFE4E4E4);
+        fill(image, 4, 5, 8, 6, 0xFFE4E4E4);
+        fill(image, 5, 4, 2, 2, 0xFFFFFFFF);
+        fill(image, 9, 9, 2, 2, 0xFFB4B4B4);
         if (glyph == null) {
             return image;
         }
 
-        int ink = 0xFF3A3A3A;
+        int ink = 0xFF2F2F2F;
         switch (glyph) {
             // Outward arrow: reach.
             case "range" -> {
@@ -153,20 +190,37 @@ public final class GenerateTextures {
         return image;
     }
 
+    /**
+     * Two-step bevel plus an outer keyline.
+     *
+     * <p>A single-pixel border reads as flat and disappears against a bright world; the keyline is
+     * what separates the panel from whatever is behind it.
+     */
     private static void panel(BufferedImage image, int x, int y, int w, int h) {
-        fill(image, x, y, w, h, FACE);
-        fill(image, x, y, w, 1, LIGHT);
-        fill(image, x, y, 1, h, LIGHT);
-        fill(image, x, y + h - 1, w, 1, DARK);
-        fill(image, x + w - 1, y, 1, h, DARK);
+        fill(image, x, y, w, h, OUTLINE);
+        fill(image, x + 1, y + 1, w - 2, h - 2, FACE);
+        fill(image, x + 1, y + 1, w - 2, 1, LIGHT);
+        fill(image, x + 1, y + 1, 1, h - 2, LIGHT);
+        fill(image, x + 1, y + h - 2, w - 2, 1, DARK);
+        fill(image, x + w - 2, y + 1, 1, h - 2, DARK);
     }
 
+    /** Sunken frame, shaded the opposite way to the panel so it reads as a hole, not a tile. */
     private static void recess(BufferedImage image, int x, int y, int w, int h) {
         fill(image, x, y, w, h, SLOT);
-        fill(image, x, y, w, 1, DARK);
-        fill(image, x, y, 1, h, DARK);
+        fill(image, x, y, w, 1, SLOT_SHADE);
+        fill(image, x, y, 1, h, SLOT_SHADE);
         fill(image, x, y + h - 1, w, 1, LIGHT);
         fill(image, x + w - 1, y, 1, h, LIGHT);
+        // Corners left un-beveled, the way vanilla slots are, so a row of them reads as one strip.
+        fill(image, x, y + h - 1, 1, 1, SLOT);
+        fill(image, x + w - 1, y, 1, 1, SLOT);
+    }
+
+    /** Hairline rule separating one group of controls from the next. */
+    private static void separator(BufferedImage image, int x, int y, int w) {
+        fill(image, x, y, w, 1, DARK);
+        fill(image, x, y + 1, w, 1, LIGHT);
     }
 
     private static void fill(BufferedImage image, int x, int y, int w, int h, int argb) {

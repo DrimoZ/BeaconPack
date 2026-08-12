@@ -73,7 +73,7 @@ class PackResolverTest {
     void inactivePackCostsNothing() {
         PackState state = new PackState(
                 List.of(new EffectSlotConfig(effectKey("speed"), 0, true, AuraMode.SELF)),
-                1000, false);
+                1000, false, 12000);
         PackStats stats = PackResolver.resolve(TIER_4, List.of(), AUGMENTS);
 
         assertEquals(0.0, PackResolver.fuelPerSecond(state, stats,
