@@ -1,5 +1,6 @@
 {
   "itemGroup.beaconpack": "BeaconPack",
+  "key.beaconpack.open_pack": "Open Beacon Pack",
 
   "item.beaconpack.beacon_pack_i": "Beacon Pack I",
   "item.beaconpack.beacon_pack_ii": "Beacon Pack II",
