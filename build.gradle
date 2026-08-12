@@ -33,6 +33,9 @@ neoForge {
         data {
             // 1.21.1 has a single datagen run; clientData()/serverData() only exist from 1.21.4 on.
             data()
+            programArguments.addAll '--mod', mod_id, '--all',
+                    '--output', file('src/generated/resources/').absolutePath,
+                    '--existing', file('src/main/resources/').absolutePath
         }
         configureEach {
             gameDirectory = project.file('run')
@@ -110,6 +113,8 @@ var generateModMetadata = tasks.register('generateModMetadata', ProcessResources
 }
 
 sourceSets.main.resources.srcDir generateModMetadata
+// Generated resources are committed, so a clone builds without running datagen first.
+sourceSets.main.resources.srcDir 'src/generated/resources'
 neoForge.ideSyncTask generateModMetadata
 
 tasks.withType(JavaCompile).configureEach {

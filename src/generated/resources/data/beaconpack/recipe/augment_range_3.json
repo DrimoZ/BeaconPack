@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "minecraft:amethyst_block"
+    },
+    "E": {
+      "item": "minecraft:ender_eye"
+    },
+    "M": {
+      "item": "minecraft:ender_pearl"
+    }
+  },
+  "pattern": [
+    "BEB",
+    "EME",
+    "BEB"
+  ],
+  "result": {
+    "components": {
+      "beaconpack:augment": {
+        "type": "beaconpack:range",
+        "tier": 3
+      }
+    },
+    "count": 1,
+    "id": "beaconpack:augment"
+  }
+}

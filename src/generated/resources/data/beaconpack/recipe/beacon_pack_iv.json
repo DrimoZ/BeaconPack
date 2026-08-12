@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "minecraft:beacon"
+    },
+    "N": {
+      "item": "minecraft:netherite_ingot"
+    },
+    "P": {
+      "item": "beaconpack:beacon_pack_iii"
+    },
+    "S": {
+      "item": "minecraft:nether_star"
+    }
+  },
+  "pattern": [
+    " S ",
+    "NPN",
+    " B "
+  ],
+  "result": {
+    "count": 1,
+    "id": "beaconpack:beacon_pack_iv"
+  }
+}

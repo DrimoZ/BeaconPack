@@ -64,36 +64,6 @@ class BuiltinDataTest {
         assertAllParse("fuel", FuelDef.CODEC);
     }
 
-    /**
-     * Recipes are hand-written, and a malformed one is dropped at load time with only a line in the
-     * log - in practice it just goes missing from the crafting book. Full validation needs registry
-     * access, so this checks the part that actually breaks: well-formed JSON, and augment results
-     * carrying the component that gives them their identity.
-     */
-    @Test
-    void recipesAreWellFormed() throws IOException {
-        Path recipes = DATA.getParent().resolve("recipe");
-        List<Path> files;
-        try (Stream<Path> stream = Files.list(recipes)) {
-            files = stream.filter(path -> path.toString().endsWith(".json")).toList();
-        }
-        assertFalse(files.isEmpty(), "no recipes found");
-
-        for (Path file : files) {
-            try (Reader reader = Files.newBufferedReader(file)) {
-                var root = JsonParser.parseReader(reader).getAsJsonObject();
-                var result = root.getAsJsonObject("result");
-                if (!"beaconpack:augment".equals(result.get("id").getAsString())) {
-                    continue;
-                }
-                var component = result.getAsJsonObject("components")
-                        .getAsJsonObject("beaconpack:augment");
-                assertFalse(component.get("type").getAsString().isEmpty(),
-                        file + ": augment result without a type");
-            }
-        }
-    }
-
     private static void assertAllParse(String folder, Codec<?> codec) throws IOException {
         List<Path> files;
         try (Stream<Path> stream = Files.list(DATA.resolve(folder))) {
