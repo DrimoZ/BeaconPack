@@ -1,6 +1,7 @@
 package dev.theo.beaconpack.client;
 
 import dev.theo.beaconpack.core.BeaconEffectDef;
+import dev.theo.beaconpack.item.BeaconPackItem;
 import dev.theo.beaconpack.core.EffectSlotConfig;
 import dev.theo.beaconpack.core.PackResolver;
 import dev.theo.beaconpack.core.PackState;
@@ -9,6 +10,7 @@ import dev.theo.beaconpack.core.PackTierDef;
 import dev.theo.beaconpack.menu.BeaconPackMenu;
 import dev.theo.beaconpack.net.PackActionPayload;
 import dev.theo.beaconpack.registry.BPLookups;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -17,8 +19,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.items.SlotItemHandler;
 import net.neoforged.neoforge.network.PacketDistributor;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -70,6 +76,10 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     private static final int AURA_W = 70;
 
     private static final int SECTION_LABEL_Y = 156;
+    /** Top-left of the slot frames, one pixel outside the item positions used by the menu. */
+    private static final int AUGMENT_SLOT_X = 36;
+    private static final int SLOT_ROW_Y = 168;
+    private static final int SLOT_SIZE = 18;
     private static final int GAUGE_X = 172;
     private static final int GAUGE_Y = 170;
     private static final int GAUGE_W = 64;
@@ -114,12 +124,48 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         if (selectorOpen) {
             return;
         }
+        if (renderFuelSlotTooltip(graphics, mouseX, mouseY)) {
+            return;
+        }
         List<Component> tooltip = tooltipAt(mouseX - leftPos, mouseY - topPos);
         if (tooltip.isEmpty()) {
             renderTooltip(graphics, mouseX, mouseY);
         } else {
             graphics.renderComponentTooltip(font, tooltip, mouseX, mouseY);
         }
+    }
+
+    /**
+     * Appends what the held fuel is actually worth to its normal tooltip.
+     *
+     * <p>"Diamond" says nothing about whether it is a good thing to burn here; "8 minutes at the
+     * current draw" does.
+     */
+    private boolean renderFuelSlotTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
+        if (!(hoveredSlot instanceof SlotItemHandler handler)
+                || handler.getSlotIndex() != BeaconPackItem.FUEL_SLOT
+                || !hoveredSlot.hasItem()) {
+            return false;
+        }
+        ItemStack stack = hoveredSlot.getItem();
+        int perItem = BPLookups.fuelValue(
+                Minecraft.getInstance().level.registryAccess(), stack.getItem());
+        if (perItem <= 0) {
+            return false;
+        }
+
+        List<Component> lines = new ArrayList<>(getTooltipFromContainerItem(stack));
+        lines.add(Component.translatable("beaconpack.tip.fuel_value", perItem)
+                .withStyle(ChatFormatting.GRAY));
+
+        double perSecond = PackResolver.fuelPerSecond(menu.state(), menu.stats(), effectLookup());
+        if (perSecond > 0.0) {
+            lines.add(Component.translatable("beaconpack.tip.fuel_worth",
+                            formatDuration((int) (perItem * stack.getCount() / perSecond)))
+                    .withStyle(ChatFormatting.DARK_GRAY));
+        }
+        graphics.renderComponentTooltip(font, lines, mouseX, mouseY);
+        return true;
     }
 
     @Override
@@ -143,6 +189,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         drawCases(graphics, state, stats, localX, localY);
         drawSummary(graphics, state, stats);
         drawFuel(graphics, state, stats);
+        drawLockedAugmentSlots(graphics, stats);
 
         if (selectorOpen) {
             drawSelector(graphics, localX, localY);
@@ -254,6 +301,12 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
                 stats.allowedAuraModes().size() > 1);
     }
 
+    /**
+     * Shows how long the pack will keep running, not how many points it holds.
+     *
+     * <p>Unit counts mean nothing without doing the division yourself, and the number that actually
+     * drives a decision is the time - including what is still waiting in the fuel slot.
+     */
     private void drawFuel(GuiGraphics graphics, PackState state, PackStats stats) {
         int capacity = Math.max(1, stats.fuelCapacity());
         int filled = (int) ((GAUGE_W - 4) * Math.min(1.0, state.fuel() / (double) capacity));
@@ -261,10 +314,47 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
                 0xFF3FA34D);
 
         double perSecond = PackResolver.fuelPerSecond(state, stats, effectLookup());
-        String autonomy = perSecond <= 0.0 ? "-" : formatDuration((int) (state.fuel() / perSecond));
-        String label = state.fuel() + " u  ·  " + autonomy;
+        String label = perSecond <= 0.0
+                ? "-"
+                : formatDuration((int) ((state.fuel() + reserveUnits()) / perSecond));
         graphics.drawString(font, label,
                 GAUGE_X + (GAUGE_W - font.width(label)) / 2, GAUGE_Y + 4, 0xFFFFFFFF, true);
+    }
+
+    /**
+     * Marks augment slots the tier has not unlocked.
+     *
+     * <p>They silently refused anything dropped on them before, which is indistinguishable from an
+     * augment that does not work.
+     */
+    private void drawLockedAugmentSlots(GuiGraphics graphics, PackStats stats) {
+        for (int i = stats.augmentSlots(); i < BeaconPackItem.AUGMENT_SLOTS; i++) {
+            int x = AUGMENT_SLOT_X + i * SLOT_SIZE;
+            graphics.fill(x + 1, SLOT_ROW_Y + 1, x + SLOT_SIZE - 1, SLOT_ROW_Y + SLOT_SIZE - 1,
+                    0x80000000);
+            graphics.drawCenteredString(font, "?", x + SLOT_SIZE / 2, SLOT_ROW_Y + 5, TEXT_DIM);
+        }
+    }
+
+    /** Fuel units still sitting in the fuel slot, not yet drawn into the buffer. */
+    private int reserveUnits() {
+        ItemStack fuel = fuelSlotStack();
+        if (fuel.isEmpty()) {
+            return 0;
+        }
+        int perItem = BPLookups.fuelValue(
+                Minecraft.getInstance().level.registryAccess(), fuel.getItem());
+        return perItem * fuel.getCount();
+    }
+
+    private ItemStack fuelSlotStack() {
+        for (Slot slot : menu.slots) {
+            if (slot instanceof SlotItemHandler handler
+                    && handler.getSlotIndex() == BeaconPackItem.FUEL_SLOT) {
+                return slot.getItem();
+            }
+        }
+        return ItemStack.EMPTY;
     }
 
     private void drawSelector(GuiGraphics graphics, int mouseX, int mouseY) {
@@ -339,10 +429,23 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
             return List.of(Component.translatable("beaconpack.tip.master"));
         }
         if (within(x, y, GAUGE_X, GAUGE_Y, GAUGE_W, GAUGE_H)) {
+            PackStats stats = menu.stats();
+            double perSecond = PackResolver.fuelPerSecond(menu.state(), stats, effectLookup());
             return List.of(
                     Component.translatable("beaconpack.gui.fuel"),
                     Component.translatable("beaconpack.tip.fuel",
-                            menu.state().fuel(), menu.stats().fuelCapacity()));
+                            menu.state().fuel(), stats.fuelCapacity())
+                            .withStyle(ChatFormatting.GRAY),
+                    Component.translatable("beaconpack.tip.fuel_reserve", reserveUnits())
+                            .withStyle(ChatFormatting.GRAY),
+                    Component.translatable("beaconpack.tip.fuel_draw",
+                            String.format(Locale.ROOT, "%.1f", perSecond))
+                            .withStyle(ChatFormatting.DARK_GRAY));
+        }
+        for (int i = menu.stats().augmentSlots(); i < BeaconPackItem.AUGMENT_SLOTS; i++) {
+            if (within(x, y, AUGMENT_SLOT_X + i * SLOT_SIZE, SLOT_ROW_Y, SLOT_SIZE, SLOT_SIZE)) {
+                return List.of(Component.translatable("beaconpack.tip.augment_locked"));
+            }
         }
         List<Component> caseTip = caseTooltip(x, y);
         if (!caseTip.isEmpty()) {

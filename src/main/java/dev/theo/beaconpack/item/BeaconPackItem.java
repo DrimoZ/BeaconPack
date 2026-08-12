@@ -99,6 +99,12 @@ public class BeaconPackItem extends Item {
                 .withStyle(ChatFormatting.DARK_GRAY));
     }
 
+    /** A running pack glints. Cheapest possible "this is on" signal, visible from the hotbar. */
+    @Override
+    public boolean isFoil(ItemStack stack) {
+        return stateOf(stack).active();
+    }
+
     @Override
     public boolean isBarVisible(ItemStack stack) {
         return stateOf(stack).fuel() > 0;

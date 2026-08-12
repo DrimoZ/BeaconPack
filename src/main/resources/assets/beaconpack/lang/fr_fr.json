@@ -55,6 +55,11 @@
   "beaconpack.op.unlock_aura": "Débloque des modes de partage plus larges",
   "beaconpack.msg.out_of_fuel": "Beacon Pack à court de carburant",
   "beaconpack.msg.needs_beacon": "Il faut être près d’un beacon allumé pour modifier ceci",
+  "beaconpack.tip.fuel_value": "Vaut %s unités de carburant",
+  "beaconpack.tip.fuel_worth": "Cette pile fait tenir le pack ~%s",
+  "beaconpack.tip.fuel_reserve": "Dans le slot : %s unités",
+  "beaconpack.tip.fuel_draw": "Consommation actuelle : %s u/s",
+  "beaconpack.tip.augment_locked": "Ce slot nécessite un tier supérieur",
   "beaconpack.gui.active": "Actif",
   "beaconpack.gui.inactive": "Éteint"
 }
