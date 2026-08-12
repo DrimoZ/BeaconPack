@@ -1,0 +1,28 @@
+# Gradle
+.gradle/
+build/
+repo/
+
+# Dev runtime
+run/
+runs/
+run-data/
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.eclipse/
+.settings/
+.classpath
+.project
+bin/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Datagen output is committed on purpose (see build.gradle); only its cache is not.
+src/generated/resources/.cache/
