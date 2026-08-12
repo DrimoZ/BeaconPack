@@ -1,5 +1,6 @@
 package dev.theo.beaconpack;
 
+import dev.theo.beaconpack.compat.CuriosCompat;
 import dev.theo.beaconpack.core.AuraMode;
 import dev.theo.beaconpack.core.BeaconEffectDef;
 import dev.theo.beaconpack.core.EffectSlotConfig;
@@ -71,7 +72,9 @@ public final class PackTicker {
                 return stack;
             }
         }
-        return ItemStack.EMPTY;
+        // Curios last, so a pack in the inventory keeps behaving the way it always has and the
+        // integration cannot change which pack wins for players who already had two.
+        return CuriosCompat.findActivePack(player);
     }
 
     private static void tickPack(Player player, ItemStack pack) {

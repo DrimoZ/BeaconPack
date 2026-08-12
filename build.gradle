@@ -57,8 +57,12 @@ neoForge {
 repositories {
     mavenCentral()
     maven {
-        name = 'BlameJared (JEI, Curios)'
+        name = 'BlameJared (JEI)'
         url = 'https://maven.blamejared.com'
+    }
+    maven {
+        name = 'TheIllusiveC4 (Curios)'
+        url = 'https://maven.theillusivec4.top'
     }
 }
 
@@ -69,6 +73,11 @@ dependencies {
     // additionalRuntimeClasspath, not runtimeOnly: ModDevGradle builds the run classpath from this
     // configuration, and a runtimeOnly dependency never reaches the launched game.
     additionalRuntimeClasspath "mezz.jei:jei-${jei_minecraft_version}-neoforge:${jei_version}"
+
+    // Curios is a soft dependency: compiled against, never required. The integration is isolated
+    // behind a load check so the mod runs identically without it.
+    compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
+    additionalRuntimeClasspath "top.theillusivec4.curios:curios-neoforge:${curios_version}"
 
     // Pure-logic classes under core/ are plain Java and unit-testable.
     testImplementation platform('org.junit:junit-bom:5.10.2')
