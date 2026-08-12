@@ -14,6 +14,8 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 public final class BPCreativeTabs {
 
+    private static final org.slf4j.Logger LOGGER = com.mojang.logging.LogUtils.getLogger();
+
     public static final DeferredRegister<CreativeModeTab> TABS =
             DeferredRegister.create(Registries.CREATIVE_MODE_TAB, BeaconPack.MOD_ID);
 
@@ -26,9 +28,14 @@ public final class BPCreativeTabs {
 
                         // Augments are enumerated from the registry, so datapack-added ones show up
                         // here on their own - the whole point of them not being separate items.
-                        parameters.holders().lookup(BPRegistryKeys.AUGMENT).ifPresent(lookup ->
-                                lookup.listElements().forEach(holder ->
-                                        addAugmentTiers(output, holder)));
+                        parameters.holders().lookup(BPRegistryKeys.AUGMENT).ifPresentOrElse(
+                                lookup -> lookup.listElements()
+                                        .forEach(holder -> addAugmentTiers(output, holder)),
+                                // Only reachable if the tab is built before the datapack registry
+                                // is available, which is silent otherwise: the tab simply comes out
+                                // short and nothing is logged.
+                                () -> LOGGER.warn("Augment registry unavailable while building the "
+                                        + "creative tab; no augments were listed."));
                     })
                     .build());
 
