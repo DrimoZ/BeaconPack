@@ -1,0 +1,35 @@
+{
+  "item.beaconpack.beacon_pack_i": "Beacon Pack I",
+  "item.beaconpack.beacon_pack_ii": "Beacon Pack II",
+  "item.beaconpack.beacon_pack_iii": "Beacon Pack III",
+  "item.beaconpack.beacon_pack_iv": "Beacon Pack IV",
+  "item.beaconpack.augment": "Augment",
+
+  "augment.beaconpack.range": "Augment de portée %s",
+  "augment.beaconpack.focus": "Augment de focalisation %s",
+  "augment.beaconpack.amplification": "Augment d'amplification %s",
+  "augment.beaconpack.efficiency": "Augment d'efficacité %s",
+  "augment.beaconpack.capacity": "Augment de capacité %s",
+  "augment.beaconpack.attunement": "Augment d'harmonisation %s",
+
+  "beaconpack.tier.1": "I",
+  "beaconpack.tier.2": "II",
+  "beaconpack.tier.3": "III",
+
+  "beaconpack.aura.self": "Moi",
+  "beaconpack.aura.allies": "Alliés",
+  "beaconpack.aura.team": "Équipe",
+  "beaconpack.aura.allies_and_pets": "Alliés et familiers",
+
+  "beaconpack.gui.effects": "Effets",
+  "beaconpack.gui.augments": "Augments",
+  "beaconpack.gui.fuel": "Carburant",
+  "beaconpack.gui.empty_slot": "Cliquer pour choisir un effet",
+  "beaconpack.gui.locked_tier": "Nécessite le tier %s",
+  "beaconpack.gui.search": "Rechercher",
+  "beaconpack.gui.range": "Portée : %s m",
+  "beaconpack.gui.cost": "Coût : %s u/s",
+  "beaconpack.gui.autonomy": "~%s restantes",
+  "beaconpack.gui.active": "Actif",
+  "beaconpack.gui.inactive": "Éteint"
+}

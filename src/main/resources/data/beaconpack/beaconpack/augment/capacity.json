@@ -1,0 +1,7 @@
+{
+  "max_tier": 3,
+  "color": 11141290,
+  "operations": [
+    { "type": "mul_capacity", "values": [2.0, 3.0, 4.0] }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "item.beaconpack.beacon_pack_i": "Beacon Pack I",
+  "item.beaconpack.beacon_pack_ii": "Beacon Pack II",
+  "item.beaconpack.beacon_pack_iii": "Beacon Pack III",
+  "item.beaconpack.beacon_pack_iv": "Beacon Pack IV",
+  "item.beaconpack.augment": "Augment",
+
+  "augment.beaconpack.range": "Range Augment %s",
+  "augment.beaconpack.focus": "Focus Augment %s",
+  "augment.beaconpack.amplification": "Amplification Augment %s",
+  "augment.beaconpack.efficiency": "Efficiency Augment %s",
+  "augment.beaconpack.capacity": "Capacity Augment %s",
+  "augment.beaconpack.attunement": "Attunement Augment %s",
+
+  "beaconpack.tier.1": "I",
+  "beaconpack.tier.2": "II",
+  "beaconpack.tier.3": "III",
+
+  "beaconpack.aura.self": "Self",
+  "beaconpack.aura.allies": "Allies",
+  "beaconpack.aura.team": "Team",
+  "beaconpack.aura.allies_and_pets": "Allies & pets",
+
+  "beaconpack.gui.effects": "Effects",
+  "beaconpack.gui.augments": "Augments",
+  "beaconpack.gui.fuel": "Fuel",
+  "beaconpack.gui.empty_slot": "Click to pick an effect",
+  "beaconpack.gui.locked_tier": "Requires tier %s",
+  "beaconpack.gui.search": "Search",
+  "beaconpack.gui.range": "Range: %s m",
+  "beaconpack.gui.cost": "Cost: %s u/s",
+  "beaconpack.gui.autonomy": "~%s remaining",
+  "beaconpack.gui.active": "Active",
+  "beaconpack.gui.inactive": "Inactive"
+}
