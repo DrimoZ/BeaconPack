@@ -33,7 +33,7 @@ public record OpenPackPayload(int slot) implements CustomPacketPayload {
         return TYPE;
     }
 
-    @EventBusSubscriber(modid = BeaconPack.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
+    @EventBusSubscriber(modid = BeaconPack.MOD_ID)
     public static final class Handler {
         @SubscribeEvent
         public static void register(RegisterPayloadHandlersEvent event) {

@@ -17,7 +17,7 @@ import net.neoforged.neoforge.registries.DeferredItem;
  * which is what keeps a pack sitting in a chest, an ender chest or another player's inventory from
  * ever holding a stale copy of its own contents.
  */
-@EventBusSubscriber(modid = BeaconPack.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = BeaconPack.MOD_ID)
 public final class BPCapabilities {
 
     @SubscribeEvent

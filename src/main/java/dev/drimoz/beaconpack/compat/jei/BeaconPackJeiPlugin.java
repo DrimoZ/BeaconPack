@@ -7,7 +7,8 @@ import dev.drimoz.beaconpack.item.AugmentItem;
 import dev.drimoz.beaconpack.registry.BPItems;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
-import mezz.jei.api.ingredients.subtypes.IIngredientSubtypeInterpreter;
+import mezz.jei.api.ingredients.subtypes.ISubtypeInterpreter;
+import mezz.jei.api.ingredients.subtypes.UidContext;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
@@ -48,12 +49,21 @@ public class BeaconPackJeiPlugin implements IModPlugin {
     @Override
     public void registerItemSubtypes(ISubtypeRegistration registration) {
         registration.registerSubtypeInterpreter(BPItems.AUGMENT.get(),
-                (IIngredientSubtypeInterpreter<ItemStack>) (stack, context) -> {
-                    AugmentInstance instance = AugmentItem.instanceOf(stack);
-                    if (instance == null) {
-                        return IIngredientSubtypeInterpreter.NONE;
+                new ISubtypeInterpreter<ItemStack>() {
+                    @Override
+                    public Object getSubtypeData(ItemStack stack, UidContext context) {
+                        // The component itself is the identity, so JEI can compare augments without
+                        // going through a string at all.
+                        return AugmentItem.instanceOf(stack);
                     }
-                    return instance.type().location() + "@" + instance.tier();
+
+                    @Override
+                    public String getLegacyStringSubtypeInfo(ItemStack stack, UidContext context) {
+                        AugmentInstance instance = AugmentItem.instanceOf(stack);
+                        return instance == null
+                                ? ""
+                                : instance.type().location() + "@" + instance.tier();
+                    }
                 });
     }
 

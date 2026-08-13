@@ -15,7 +15,7 @@ import net.neoforged.neoforge.registries.DataPackRegistryEvent;
  * gets the definitions too — the GUI has to render costs, caps and tier requirements without a
  * round trip.
  */
-@EventBusSubscriber(modid = BeaconPack.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = BeaconPack.MOD_ID)
 public final class BPDatapackRegistries {
 
     @SubscribeEvent

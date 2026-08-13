@@ -20,7 +20,7 @@ import java.util.concurrent.CompletableFuture;
  * hand-written too, since a generator only ever produces {@code en_us} and translators work on the
  * files directly.
  */
-@EventBusSubscriber(modid = BeaconPack.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(modid = BeaconPack.MOD_ID)
 public final class BPDataGen {
 
     @SubscribeEvent

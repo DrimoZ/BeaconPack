@@ -39,7 +39,7 @@ public final class BPClientEvents {
             GLFW.GLFW_KEY_B,
             "key.categories.beaconpack");
 
-    @EventBusSubscriber(modid = BeaconPack.MOD_ID, bus = EventBusSubscriber.Bus.MOD,
+    @EventBusSubscriber(modid = BeaconPack.MOD_ID,
             value = Dist.CLIENT)
     public static final class ModBus {
 
@@ -95,7 +95,7 @@ public final class BPClientEvents {
         private ModBus() {}
     }
 
-    @EventBusSubscriber(modid = BeaconPack.MOD_ID, bus = EventBusSubscriber.Bus.GAME,
+    @EventBusSubscriber(modid = BeaconPack.MOD_ID,
             value = Dist.CLIENT)
     public static final class GameBus {
 

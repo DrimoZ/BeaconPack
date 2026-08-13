@@ -35,7 +35,7 @@ public record PackActionPayload(int action, int slot, int value) implements Cust
         return TYPE;
     }
 
-    @EventBusSubscriber(modid = BeaconPack.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
+    @EventBusSubscriber(modid = BeaconPack.MOD_ID)
     public static final class Handler {
         @SubscribeEvent
         public static void register(RegisterPayloadHandlersEvent event) {

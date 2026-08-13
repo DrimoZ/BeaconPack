@@ -38,7 +38,7 @@ import java.util.Optional;
  * <p>Runs every {@link #INTERVAL} ticks rather than every tick: a beacon that follows the player
  * does not need 20 Hz precision, and the aura scan is an AABB query per projecting effect.
  */
-@EventBusSubscriber(modid = BeaconPack.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
+@EventBusSubscriber(modid = BeaconPack.MOD_ID)
 public final class PackTicker {
 
     private static final int INTERVAL = 40;
