@@ -1,5 +1,6 @@
 {
   "itemGroup.beaconpack": "BeaconPack",
+  "key.categories.beaconpack": "BeaconPack",
   "key.beaconpack.open_pack": "Apri lo zaino faro",
   "item.beaconpack.beacon_pack_i": "Zaino faro I",
   "item.beaconpack.beacon_pack_ii": "Zaino faro II",

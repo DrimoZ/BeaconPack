@@ -2,6 +2,7 @@ package dev.drimoz.beaconpack.menu;
 
 import dev.drimoz.beaconpack.BPConfig;
 import dev.drimoz.beaconpack.BeaconProximity;
+import dev.drimoz.beaconpack.compat.CuriosCompat;
 import dev.drimoz.beaconpack.core.AuraMode;
 import dev.drimoz.beaconpack.core.BeaconEffectDef;
 import dev.drimoz.beaconpack.core.EffectSlotConfig;
@@ -71,6 +72,15 @@ public class BeaconPackMenu extends AbstractContainerMenu {
     public static final int DRAWER_FUEL = 1;
     public static final int DRAWER_NONE = 2;
 
+    /**
+     * Stands in for "the pack worn as a curio" where an inventory slot index is expected.
+     *
+     * <p>Negative so it can never collide with a real index. The pack's own inventory slot is
+     * frozen while its menu is open, to stop the stack being moved out from under it; a worn pack
+     * needs no such treatment, because it is not one of the slots this menu draws.
+     */
+    public static final int CURIO_SLOT = -1;
+
     private final Player player;
     private final int packSlotIndex;
     /**
@@ -94,7 +104,9 @@ public class BeaconPackMenu extends AbstractContainerMenu {
         super(BPMenus.BEACON_PACK.get(), containerId);
         this.player = playerInventory.player;
         this.packSlotIndex = packSlotIndex;
-        this.slotBackingStack = playerInventory.getItem(packSlotIndex);
+        this.slotBackingStack = packSlotIndex == CURIO_SLOT
+                ? CuriosCompat.findPack(playerInventory.player)
+                : playerInventory.getItem(packSlotIndex);
 
         IItemHandler handler = new LivePackHandler();
         for (int i = 0; i < BeaconPackItem.AUGMENT_SLOTS; i++) {
@@ -148,7 +160,9 @@ public class BeaconPackMenu extends AbstractContainerMenu {
      * is closed and reopened.
      */
     public ItemStack pack() {
-        return player.getInventory().getItem(packSlotIndex);
+        return packSlotIndex == CURIO_SLOT
+                ? CuriosCompat.findPack(player)
+                : player.getInventory().getItem(packSlotIndex);
     }
 
     public PackState state() {
@@ -181,8 +195,15 @@ public class BeaconPackMenu extends AbstractContainerMenu {
     public boolean stillValid(Player who) {
         // Compared against the instance captured at open time: a same-looking pack swapped into the
         // slot is not this pack. The server never replaces the instance, it mutates it in place.
-        return who == player
-                && packSlotIndex < who.getInventory().getContainerSize()
+        if (who != player) {
+            return false;
+        }
+        if (packSlotIndex == CURIO_SLOT) {
+            // Same rule, different container: the menu stays valid only while the very stack it
+            // was opened over is still being worn.
+            return CuriosCompat.findPack(who) == slotBackingStack;
+        }
+        return packSlotIndex < who.getInventory().getContainerSize()
                 && who.getInventory().getItem(packSlotIndex) == slotBackingStack;
     }
 

@@ -29,15 +29,26 @@ public final class CuriosCompat {
 
     /** The first active pack worn as a curio, or empty. */
     public static ItemStack findActivePack(Player player) {
-        return LOADED ? Inner.findActivePack(player) : ItemStack.EMPTY;
+        return LOADED ? Inner.find(player, true) : ItemStack.EMPTY;
+    }
+
+    /**
+     * The first pack worn as a curio whether it is switched on or not, or empty.
+     *
+     * <p>Separate from {@link #findActivePack} because the two answer different questions: the
+     * ticker wants a pack that is running, while opening the screen must find the pack precisely
+     * when it is switched off - that is usually why the player is opening it.
+     */
+    public static ItemStack findPack(Player player) {
+        return LOADED ? Inner.find(player, false) : ItemStack.EMPTY;
     }
 
     private static final class Inner {
-        static ItemStack findActivePack(Player player) {
+        static ItemStack find(Player player, boolean mustBeActive) {
             return top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player)
                     .flatMap(inventory -> inventory.findFirstCurio(stack ->
                             stack.getItem() instanceof BeaconPackItem
-                                    && BeaconPackItem.stateOf(stack).active()))
+                                    && (!mustBeActive || BeaconPackItem.stateOf(stack).active())))
                     .map(found -> found.stack())
                     .orElse(ItemStack.EMPTY);
         }

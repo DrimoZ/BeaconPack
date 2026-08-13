@@ -1,5 +1,6 @@
 {
   "itemGroup.beaconpack": "BeaconPack",
+  "key.categories.beaconpack": "BeaconPack",
   "key.beaconpack.open_pack": "打开信标背包",
   "item.beaconpack.beacon_pack_i": "信标背包 I",
   "item.beaconpack.beacon_pack_ii": "信标背包 II",

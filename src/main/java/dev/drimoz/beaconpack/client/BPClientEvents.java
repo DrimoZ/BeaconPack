@@ -26,12 +26,18 @@ import org.lwjgl.glfw.GLFW;
 
 public final class BPClientEvents {
 
+    /**
+     * Opens the active pack without having to hold it.
+     *
+     * <p>Its own category rather than the vanilla "Inventory" one: filed there it sat among twenty
+     * vanilla binds and was effectively impossible to find, which reads as the bind not existing.
+     */
     public static final KeyMapping OPEN_PACK = new KeyMapping(
             "key.beaconpack.open_pack",
             KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_B,
-            "key.categories.inventory");
+            "key.categories.beaconpack");
 
     @EventBusSubscriber(modid = BeaconPack.MOD_ID, bus = EventBusSubscriber.Bus.MOD,
             value = Dist.CLIENT)

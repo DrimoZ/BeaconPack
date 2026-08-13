@@ -76,15 +76,20 @@ public final class PackTicker {
      * pointless — four tier-I packs would beat one tier-IV.
      */
     private static ItemStack findActivePack(Player player) {
+        // Curios first: a pack the player has deliberately equipped should beat one that happens to
+        // be loose in the bag. The reverse order made a worn pack look broken - the inventory one
+        // quietly won and there was nothing on screen to say why.
+        ItemStack worn = CuriosCompat.findActivePack(player);
+        if (!worn.isEmpty()) {
+            return worn;
+        }
         for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
             ItemStack stack = player.getInventory().getItem(slot);
             if (stack.getItem() instanceof BeaconPackItem && BeaconPackItem.stateOf(stack).active()) {
                 return stack;
             }
         }
-        // Curios last, so a pack in the inventory keeps behaving the way it always has and the
-        // integration cannot change which pack wins for players who already had two.
-        return CuriosCompat.findActivePack(player);
+        return ItemStack.EMPTY;
     }
 
     private static void tickPack(Player player, ItemStack pack) {

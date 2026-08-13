@@ -1,5 +1,6 @@
 package dev.drimoz.beaconpack.menu;
 
+import dev.drimoz.beaconpack.compat.CuriosCompat;
 import dev.drimoz.beaconpack.item.BeaconPackItem;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -19,10 +20,13 @@ public final class PackMenuOpener {
     public static final int MAX_OPENABLE_SLOT = 36;
 
     public static boolean open(ServerPlayer player, int slotIndex) {
-        if (slotIndex < 0 || slotIndex >= MAX_OPENABLE_SLOT) {
+        if (slotIndex != BeaconPackMenu.CURIO_SLOT
+                && (slotIndex < 0 || slotIndex >= MAX_OPENABLE_SLOT)) {
             return false;
         }
-        ItemStack stack = player.getInventory().getItem(slotIndex);
+        ItemStack stack = slotIndex == BeaconPackMenu.CURIO_SLOT
+                ? CuriosCompat.findPack(player)
+                : player.getInventory().getItem(slotIndex);
         if (!(stack.getItem() instanceof BeaconPackItem)) {
             return false;
         }
@@ -33,16 +37,29 @@ public final class PackMenuOpener {
         return true;
     }
 
-    /** First pack in the inventory, hotbar first, for the key binding. */
+    /**
+     * The pack the key binding should open: the one worn as a curio if there is one, otherwise the
+     * first in the inventory, hotbar first.
+     *
+     * <p>Curios is checked first to match which pack actually runs. Before this the binding only
+     * ever looked in the inventory, so a player wearing their only pack pressed the key and nothing
+     * happened at all - which reads as the binding being broken rather than as a missed slot.
+     */
     public static int findPack(ServerPlayer player) {
+        if (!CuriosCompat.findPack(player).isEmpty()) {
+            return BeaconPackMenu.CURIO_SLOT;
+        }
         // Inventory indices 0-8 are the hotbar already, so plain ascending order is hotbar first.
         for (int slot = 0; slot < MAX_OPENABLE_SLOT; slot++) {
             if (player.getInventory().getItem(slot).getItem() instanceof BeaconPackItem) {
                 return slot;
             }
         }
-        return -1;
+        return NONE;
     }
+
+    /** Returned by {@link #findPack} when the player has no pack at all. */
+    public static final int NONE = -99;
 
     private PackMenuOpener() {}
 }

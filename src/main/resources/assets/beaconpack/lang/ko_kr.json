@@ -1,5 +1,6 @@
 {
   "itemGroup.beaconpack": "BeaconPack",
+  "key.categories.beaconpack": "BeaconPack",
   "key.beaconpack.open_pack": "신호기 팩 열기",
   "item.beaconpack.beacon_pack_i": "신호기 팩 I",
   "item.beaconpack.beacon_pack_ii": "신호기 팩 II",
