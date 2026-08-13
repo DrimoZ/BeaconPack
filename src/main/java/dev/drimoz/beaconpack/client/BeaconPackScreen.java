@@ -69,8 +69,8 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
      */
     private static final int TAB_W = 24;
     private static final int TAB_H = 24;
-    /** How far an open tab reaches past a closed one, so the open one reads as pulled out. */
-    private static final int TAB_CLOSED_INSET = 3;
+    /** Content clears the tab's own glyph, which stays put when the panel grows around it. */
+    private static final int PANEL_TEXT_INSET = TAB_W + 6;
 
     /**
      * Two columns, not one.
@@ -105,7 +105,8 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
 
     /** One accent per tab, so the four are told apart by colour and not only by a grey glyph. */
     private static final int ACCENT_POWER = 0xFF4BC46A;
-    private static final int ACCENT_OFF = 0xFF7A7A7A;
+    /** Glyph colour on a shut tab: dark enough to read, quiet enough not to compete. */
+    private static final int GLYPH_OFF = 0xFF4A4A4A;
     private static final int ACCENT_STATS = 0xFF5B9BD5;
     private static final int ACCENT_AUGMENTS = 0xFFB07CD8;
     private static final int ACCENT_FUEL = 0xFFE0913A;
@@ -275,33 +276,33 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         boolean powerHovered = hitTab(mouseX, mouseY, false, POWER_TAB_Y);
         // Never expanded - power is a switch, not a drawer. Passing "is the pack on" as the
         // expanded flag is what drew this tab a full panel wide whenever the pack was running.
-        drawTab(graphics, false, POWER_TAB_Y, TAB_H, 0.0F, powerHovered,
-                state.active() ? ACCENT_POWER : ACCENT_OFF);
+        drawTab(graphics, false, POWER_TAB_Y, TAB_H, 0.0F, powerHovered);
         int powerCx = glyphCentre(false);
-        drawPowerGlyph(graphics, powerCx, POWER_TAB_Y + TAB_H / 2 - 2, 0xFF3A3A3A);
+        drawPowerGlyph(graphics, powerCx, POWER_TAB_Y + TAB_H / 2 - 2,
+                state.active() ? ACCENT_POWER : GLYPH_OFF);
         // A lit pip rather than a whole coloured tab: the state stays legible without the control
         // shouting louder than everything else on the screen.
         graphics.fill(powerCx - 5, POWER_TAB_Y + TAB_H - 7, powerCx + 5, POWER_TAB_Y + TAB_H - 4,
                 state.active() ? ACCENT_POWER : 0xFF8A8A8A);
 
         float leftP = progress(leftAnimStart, leftDrawer != Drawer.NONE);
-        drawTab(graphics, false, STATS_TAB_Y, lerp(TAB_H, STATS_PANEL_H, leftP), leftP,
-                hitTab(mouseX, mouseY, false, STATS_TAB_Y), ACCENT_STATS);
-        drawTabBars(graphics, glyphCentre(false), STATS_TAB_Y + TAB_H / 2);
+        drawTab(graphics, false, STATS_TAB_Y, lerp(TAB_H, STATS_PANEL_H, leftP), leftP, hitTab(mouseX, mouseY, false, STATS_TAB_Y));
+        drawTabBars(graphics, glyphCentre(false), STATS_TAB_Y + TAB_H / 2,
+                leftDrawer == Drawer.STATS ? ACCENT_STATS : GLYPH_OFF);
 
         // Right column: the two containers you load.
         float rightP = progress(rightAnimStart, rightDrawer != Drawer.NONE);
         float augP = rightDrawer == Drawer.AUGMENTS ? rightP : 0.0F;
-        drawTab(graphics, true, AUGMENT_TAB_Y, lerp(TAB_H, PANEL_H, augP), augP,
-                hitTab(mouseX, mouseY, true, AUGMENT_TAB_Y), ACCENT_AUGMENTS);
-        drawTabGem(graphics, glyphCentre(true), AUGMENT_TAB_Y + TAB_H / 2);
+        drawTab(graphics, true, AUGMENT_TAB_Y, lerp(TAB_H, PANEL_H, augP), augP, hitTab(mouseX, mouseY, true, AUGMENT_TAB_Y));
+        drawTabGem(graphics, glyphCentre(true), AUGMENT_TAB_Y + TAB_H / 2,
+                rightDrawer == Drawer.AUGMENTS ? ACCENT_AUGMENTS : GLYPH_OFF);
 
         if (BPConfig.fuelEnabled()) {
             float fuelP = rightDrawer == Drawer.FUEL ? rightP : 0.0F;
             int fuelY = fuelTabY();
-            drawTab(graphics, true, fuelY, lerp(TAB_H, PANEL_H, fuelP), fuelP,
-                    hitTab(mouseX, mouseY, true, fuelY), ACCENT_FUEL);
-            drawTabFlame(graphics, glyphCentre(true), fuelY + TAB_H / 2);
+            drawTab(graphics, true, fuelY, lerp(TAB_H, PANEL_H, fuelP), fuelP, hitTab(mouseX, mouseY, true, fuelY));
+            drawTabFlame(graphics, glyphCentre(true), fuelY + TAB_H / 2,
+                    rightDrawer == Drawer.FUEL ? ACCENT_FUEL : GLYPH_OFF);
         }
     }
 
@@ -337,7 +338,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
 
     /** Icons keep to the closed tab's centre, so they do not slide about as the panel grows. */
     private static int glyphCentre(boolean right) {
-        int width = TAB_W - TAB_CLOSED_INSET;
+        int width = TAB_W;
         return right ? RIGHT_TAB_X + 2 + width / 2 : LEFT_TAB_X - 2 - width / 2;
     }
 
@@ -357,8 +358,8 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
      * alone are small and all the same grey.
      */
     private void drawTab(GuiGraphics graphics, boolean right, int y, int height,
-                         float openness, boolean hovered, int accent) {
-        int width = lerp(TAB_W - TAB_CLOSED_INSET, PANEL_W, openness);
+                         float openness, boolean hovered) {
+        int width = lerp(TAB_W, PANEL_W, openness);
         boolean open = openness > 0.99F;
         int face = open ? 0xFFC6C6C6 : hovered ? 0xFFBDBDBD : 0xFFA8A8A8;
         // Everything is written for the right-hand column and mirrored for the left, so the two
@@ -381,31 +382,48 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
 
         graphics.fill(outerLo, y + 1, outerHi - 1, y + 2, 0x40FFFFFF);
         graphics.fill(outerLo, y + height - 2, outerHi - 1, y + height - 1, 0x30000000);
-
-        // Accent on the outer edge, brighter while the tab is the open one.
-        int stripeLo = right ? far - 3 : far + 1;
-        graphics.fill(stripeLo, y + 2, stripeLo + 2, y + height - 2,
-                open ? accent : (accent & 0x00FFFFFF) | 0x90000000);
     }
 
-    private static void drawTabBars(GuiGraphics graphics, int cx, int cy) {
-        graphics.fill(cx - 5, cy + 1, cx - 2, cy + 5, 0xFF3A3A3A);
-        graphics.fill(cx - 1, cy - 2, cx + 2, cy + 5, 0xFF3A3A3A);
-        graphics.fill(cx + 3, cy - 5, cx + 6, cy + 5, 0xFF3A3A3A);
+    /**
+     * Ascending bars, drawn on a baseline so they read as a chart and not as three loose blocks.
+     *
+     * <p>Every glyph is a silhouette in one colour with a single darker shadow. The previous ones
+     * mixed a mid grey with a near-white highlight, which at this size just looked muddy.
+     */
+    private static void drawTabBars(GuiGraphics graphics, int cx, int cy, int c) {
+        int shadow = shade(c);
+        graphics.fill(cx - 6, cy + 5, cx + 7, cy + 6, shadow);
+        graphics.fill(cx - 5, cy + 1, cx - 2, cy + 5, c);
+        graphics.fill(cx - 1, cy - 2, cx + 2, cy + 5, c);
+        graphics.fill(cx + 3, cy - 5, cx + 6, cy + 5, c);
     }
 
-    private static void drawTabGem(GuiGraphics graphics, int cx, int cy) {
-        graphics.fill(cx - 3, cy - 5, cx + 3, cy - 3, 0xFF3A3A3A);
-        graphics.fill(cx - 5, cy - 3, cx + 5, cy + 2, 0xFF3A3A3A);
-        graphics.fill(cx - 3, cy + 2, cx + 3, cy + 5, 0xFF3A3A3A);
-        graphics.fill(cx - 3, cy - 3, cx + 2, cy + 1, 0xFFDCDCDC);
+    /** A cut gem: wide shoulders, tapered foot, with one facet picked out. */
+    private static void drawTabGem(GuiGraphics graphics, int cx, int cy, int c) {
+        int shadow = shade(c);
+        graphics.fill(cx - 4, cy - 5, cx + 4, cy - 3, c);
+        graphics.fill(cx - 5, cy - 3, cx + 5, cy + 1, c);
+        graphics.fill(cx - 3, cy + 1, cx + 3, cy + 3, c);
+        graphics.fill(cx - 1, cy + 3, cx + 1, cy + 5, c);
+        graphics.fill(cx - 3, cy - 3, cx - 1, cy, shadow);
     }
 
-    private static void drawTabFlame(GuiGraphics graphics, int cx, int cy) {
-        graphics.fill(cx - 1, cy - 6, cx + 1, cy - 3, 0xFF3A3A3A);
-        graphics.fill(cx - 3, cy - 3, cx + 3, cy + 1, 0xFF3A3A3A);
-        graphics.fill(cx - 4, cy + 1, cx + 4, cy + 5, 0xFF3A3A3A);
-        graphics.fill(cx - 2, cy + 1, cx + 2, cy + 4, 0xFFDCDCDC);
+    /** A flame: narrow tip, full body, with a hollow core so it is not a solid blob. */
+    private static void drawTabFlame(GuiGraphics graphics, int cx, int cy, int c) {
+        int shadow = shade(c);
+        graphics.fill(cx - 1, cy - 6, cx + 1, cy - 4, c);
+        graphics.fill(cx - 2, cy - 4, cx + 2, cy - 2, c);
+        graphics.fill(cx - 4, cy - 2, cx + 4, cy + 3, c);
+        graphics.fill(cx - 3, cy + 3, cx + 3, cy + 5, c);
+        graphics.fill(cx - 2, cy, cx + 2, cy + 3, shadow);
+    }
+
+    /** The same hue, darkened - one colour per glyph keeps the four consistent. */
+    private static int shade(int argb) {
+        int r = (argb >> 16 & 0xFF) * 55 / 100;
+        int g = (argb >> 8 & 0xFF) * 55 / 100;
+        int b = (argb & 0xFF) * 55 / 100;
+        return 0xFF000000 | r << 16 | g << 8 | b;
     }
 
     /**
@@ -429,7 +447,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         int y = rightDrawer == Drawer.AUGMENTS ? AUGMENT_DRAWER_Y : FUEL_DRAWER_Y;
         graphics.drawString(font, Component.translatable(rightDrawer == Drawer.AUGMENTS
                         ? "beaconpack.gui.augments" : "beaconpack.gui.fuel"),
-                DRAWER_X + 8, y + 6, TEXT, false);
+                DRAWER_X + PANEL_TEXT_INSET, y + 6, TEXT, false);
 
         if (rightDrawer == Drawer.AUGMENTS) {
             for (int i = 0; i < BeaconPackItem.AUGMENT_SLOTS; i++) {
@@ -462,12 +480,14 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     private void drawStatsDrawer(GuiGraphics graphics, PackState state, PackStats stats) {
         // Opens leftward, so its text is laid out from the panel's far edge inwards.
         int x = LEFT_TAB_X - PANEL_W + 8;
+        // Stops short of the tab glyph, which sits at the panel's inner edge.
+        int textW = PANEL_W - PANEL_TEXT_INSET - 8;
         graphics.drawString(font, Component.translatable("beaconpack.gui.stats"),
                 x, STATS_TAB_Y + 6, TEXT, false);
 
         int y = STATS_TAB_Y + 20;
         for (Component line : summaryTooltip(state, stats)) {
-            graphics.drawString(font, font.plainSubstrByWidth(line.getString(), PANEL_W - 16),
+            graphics.drawString(font, font.plainSubstrByWidth(line.getString(), textW),
                     x, y, TEXT_DIM, false);
             y += 11;
         }
