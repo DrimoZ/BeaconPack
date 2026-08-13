@@ -61,7 +61,10 @@ public class BeaconPackEmiPlugin implements EmiPlugin {
             if (input == null || input.isEmpty()) {
                 continue;
             }
-            ResourceLocation id = entry.getKey().location().withPrefix("fuel/");
+            // Leading slash: EMI reserves plain ids for recipes it can find in the recipe manager,
+            // and warns on screen about any it cannot. These are built from a registry, not from a
+            // JSON recipe, so they are synthetic and have to say so.
+            ResourceLocation id = entry.getKey().location().withPrefix("/fuel/");
             // One unit is one second of one basic effect kept to yourself - the scale the rest of
             // the mod is written in, so the two agree by construction.
             registry.addRecipe(new FuelEmiRecipe(id, input, def.units(), def.units()));
