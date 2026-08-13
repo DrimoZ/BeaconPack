@@ -46,7 +46,12 @@ public record OpenPackPayload(int slot) implements CustomPacketPayload {
                         int slot = payload.slot() == FIND_ANY
                                 ? PackMenuOpener.findPack(player)
                                 : payload.slot();
-                        if (slot >= 0) {
+                        // Only "no pack at all" is rejected here. This used to read `slot >= 0`,
+                        // which silently swallowed the negative sentinel meaning "the pack worn as
+                        // a curio" - pressing the key while wearing one did nothing whatsoever.
+                        // PackMenuOpener.open validates the index itself, so duplicating the range
+                        // check here bought nothing and cost that.
+                        if (slot != PackMenuOpener.NONE) {
                             PackMenuOpener.open(player, slot);
                         }
                     }));

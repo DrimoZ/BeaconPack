@@ -46,7 +46,7 @@ public final class CuriosCompat {
     private static final class Inner {
         static ItemStack find(Player player, boolean mustBeActive) {
             return top.theillusivec4.curios.api.CuriosApi.getCuriosInventory(player)
-                    .flatMap(inventory -> inventory.findFirstCurio(stack ->
+                    .flatMap(inv -> inv.findFirstCurio(stack ->
                             stack.getItem() instanceof BeaconPackItem
                                     && (!mustBeActive || BeaconPackItem.stateOf(stack).active())))
                     .map(found -> found.stack())

@@ -199,9 +199,11 @@ public class BeaconPackMenu extends AbstractContainerMenu {
             return false;
         }
         if (packSlotIndex == CURIO_SLOT) {
-            // Same rule, different container: the menu stays valid only while the very stack it
-            // was opened over is still being worn.
-            return CuriosCompat.findPack(who) == slotBackingStack;
+            // "Still wearing a pack", not "still wearing this exact instance". The inventory case
+            // compares instances to stop the stack being moved out from under an open menu, but a
+            // worn pack is not one of the slots this menu draws, so there is no such move to guard
+            // against - and Curios is free to hand back a different instance for the same slot.
+            return !CuriosCompat.findPack(who).isEmpty();
         }
         return packSlotIndex < who.getInventory().getContainerSize()
                 && who.getInventory().getItem(packSlotIndex) == slotBackingStack;

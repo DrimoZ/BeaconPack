@@ -494,10 +494,18 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         String reach = slot.aura().isAura()
                 ? String.format(Locale.ROOT, "%.0f m", stats.range())
                 : Component.translatable("beaconpack.aura.self").getString();
+        // Two independent facts, so they are placed independently: share from the left, reach
+        // against the right edge, and the share truncated if the two would meet. Concatenating them
+        // with spaces meant the pair ran past the panel as soon as either string grew - which is
+        // every language whose words are longer than English's.
+        String shareText = Component.translatable("beaconpack.gui.share", share).getString();
+        String reachText = Component.translatable("beaconpack.gui.reach", reach).getString();
+        int reachX = INFO_X + INFO_W - 6 - font.width(reachText);
+        int shareX = INFO_X + 28;
         graphics.drawString(font,
-                Component.translatable("beaconpack.gui.share", share).getString() + "   "
-                        + Component.translatable("beaconpack.gui.reach", reach).getString(),
-                INFO_X + 28, INFO_Y + 19, TEXT_DIM, false);
+                font.plainSubstrByWidth(shareText, Math.max(0, reachX - shareX - 6)),
+                shareX, INFO_Y + 19, TEXT_DIM, false);
+        graphics.drawString(font, reachText, reachX, INFO_Y + 19, TEXT_DIM, false);
 
         // Explicit rather than "click the case again": re-clicking the case is how you focus it,
         // and overloading that click with "open the picker" made every attempt to read a second
