@@ -1,0 +1,51 @@
+Copyright (c) 2026 DrimoZ. All rights reserved.
+
+This covers everything under src/main/resources/assets/ - the item icons, the
+GUI artwork and the mod logo - whether committed or produced by the generator
+scripts under tools/. It does not cover the code, which is under the MIT
+License; see LICENSE.
+
+These assets are "all rights reserved" by default, with the following
+permissions granted on top. Nothing here takes away a right you would otherwise
+have.
+
+
+YOU MAY, WITHOUT ASKING:
+
+  1. Redistribute these assets as part of an unmodified BeaconPack release.
+     This explicitly includes modpacks, public or private, monetised or not,
+     on any platform or launcher.
+
+  2. Redistribute them as part of a modified build of BeaconPack, provided the
+     result is not presented as the original mod. See the note on the name
+     below.
+
+  3. Show them: screenshots, videos, streams, wikis, modpack pages and store
+     listings, monetised or not.
+
+  4. Modify them for your own use, or ship modified versions inside a resource
+     pack.
+
+
+YOU MAY NOT, WITHOUT WRITTEN PERMISSION:
+
+  5. Use these assets in another project, mod or product.
+
+  6. Redistribute them on their own, separately from the mod.
+
+
+ON THE NAME
+
+"BeaconPack" is not licensed by either file. You are free to fork the code, but
+please do not publish a fork under the same name - two different mods with one
+name only confuses players trying to work out which one broke their world.
+
+
+CONTRIBUTIONS
+
+Anything you contribute to this repository is contributed under these same
+terms, code under LICENSE and assets under this file.
+
+
+If you want to do something this does not cover, open an issue and ask. The
+answer is usually yes.

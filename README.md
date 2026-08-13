@@ -143,6 +143,25 @@ touched.
 
 ---
 
+## Permissions
+
+**Modpacks: yes.** No permission needed, no message required, public or private,
+monetised or not, on any platform or launcher. If you are reading this to find out whether you may
+include BeaconPack, the answer is yes and you can stop reading.
+
+**Credit** is appreciated and never required.
+
+**Forks and addons: yes**, under the MIT terms. Please do not publish a fork under the name
+*BeaconPack* — the name is not covered by the licence, and two mods sharing one name only confuses
+players trying to work out which one broke their world.
+
+**Assets** — icons, GUI artwork, logo — are the one exception: redistribute them with the mod
+freely, but do not lift them into another project. See [LICENSE-ASSETS](LICENSE-ASSETS).
+
+**Contributions** are accepted under the same terms as the rest of the repository.
+
+---
+
 ## Building
 
 Requires JDK 21.

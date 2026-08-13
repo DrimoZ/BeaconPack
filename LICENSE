@@ -1,6 +1,17 @@
+BeaconPack is dual-licensed.
+
+  Code   - the MIT License, reproduced in full below.
+  Assets - everything under src/main/resources/assets/ is NOT covered by the
+           MIT License. See LICENSE-ASSETS.
+
+Redistributing the mod itself, including in modpacks, is permitted under both.
+See the Permissions section of the README for the short version.
+
+--------------------------------------------------------------------------------
+
 MIT License
 
-Copyright (c) 2026 Théo
+Copyright (c) 2026 DrimoZ
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
