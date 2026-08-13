@@ -156,6 +156,13 @@ sourceSets.main.resources.srcDir generateModMetadata
 sourceSets.main.resources.srcDir 'src/generated/resources'
 neoForge.ideSyncTask generateModMetadata
 
+// Both licences travel with the jar. A distributed artifact that does not carry its own terms
+// leaves anyone who only has the file with no way to know them.
+tasks.named('jar', Jar) {
+    from(file('LICENSE')) { into 'META-INF' }
+    from(file('LICENSE-ASSETS')) { into 'META-INF' }
+}
+
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
     options.release = 21

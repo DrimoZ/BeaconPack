@@ -3,6 +3,31 @@
 All notable changes to this project are documented here, newest first.
 Versions follow `{mod version}+{minecraft version}`.
 
+## 0.9.0 — first public build
+
+Released as a **beta**: everything here works and is tested, but nobody outside the author has
+played it yet. Report anything odd on the [issue tracker](https://github.com/DrimoZ/BeaconPack/issues).
+
+### Added
+- Advancements: get a pack, fit an augment, then specialise or finish the ladder.
+- Fifteen languages: English, French, Spanish, German, Portuguese (BR), Russian, Simplified and
+  Traditional Chinese, Japanese, Korean, Polish, Italian, Dutch, Turkish, Ukrainian.
+- JEI plugin: augments are shown as the fifteen distinct items they are, and a fuel category lists
+  what each burnable item is worth as runtime.
+- A key bind (**B** by default) that opens the pack you are carrying or wearing, without holding it.
+
+### Changed
+- The pack screen's side tabs are split across both edges — power and stats on the left, augments
+  and fuel on the right — and open in place with a short animation instead of appearing as detached
+  panels. One drawer per side can be open at a time.
+- A pack worn in a Curios slot now takes priority over one loose in the inventory.
+- Built against NeoForge 21.1.248.
+
+### Fixed
+- A pack worn as a Curio could not be opened at all: the key bind's request was discarded before it
+  reached the code that opens the menu.
+- Two labels in the effect panel could run past the frame, and one was truncated to nonsense.
+
 ## Unreleased
 
 ### Added
