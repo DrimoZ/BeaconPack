@@ -82,6 +82,10 @@ repositories {
         name = 'TheIllusiveC4 (Curios)'
         url = 'https://maven.theillusivec4.top'
     }
+    maven {
+        name = 'TerraformersMC (EMI)'
+        url = 'https://maven.terraformersmc.com/releases'
+    }
 }
 
 configurations {
@@ -97,12 +101,15 @@ dependencies {
     // from mods/, so both sat on the classpath and never appeared in the mod list at all.
     devMods "mezz.jei:jei-${jei_minecraft_version}-neoforge:${jei_version}"
     devMods "top.theillusivec4.curios:curios-neoforge:${curios_version}"
+    devMods "dev.emi:emi-neoforge:${emi_version}"
 
     // Both are soft dependencies: compiled against, never required. Each integration is isolated
     // so the mod runs identically without them - Curios behind a load check, JEI behind a class
     // only JEI itself ever loads.
     compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
     compileOnly "mezz.jei:jei-${jei_minecraft_version}-neoforge:${jei_version}"
+    // EMI publishes a separate :api artifact for compiling against; the full jar is runtime only.
+    compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
 
     // Pure-logic classes under core/ are plain Java and unit-testable.
     testImplementation platform('org.junit:junit-bom:5.10.2')

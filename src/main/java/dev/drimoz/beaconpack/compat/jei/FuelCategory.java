@@ -51,7 +51,7 @@ public class FuelCategory implements IRecipeCategory<FuelEntry> {
 
     @Override
     public Component getTitle() {
-        return Component.translatable("beaconpack.jei.fuel");
+        return Component.translatable("beaconpack.viewer.fuel");
     }
 
     @Override
@@ -84,11 +84,11 @@ public class FuelCategory implements IRecipeCategory<FuelEntry> {
         // Time first and in white: it is the answer to the question people are asking. The unit
         // count is the same fact in the mod's own currency, so it is there but subdued.
         graphics.drawString(font,
-                Component.translatable("beaconpack.jei.fuel_runtime",
+                Component.translatable("beaconpack.viewer.fuel_runtime",
                         Durations.format(entry.seconds())),
                 24, 4, 0xFFFFFF, false);
         graphics.drawString(font,
-                Component.translatable("beaconpack.jei.fuel_units", entry.units())
+                Component.translatable("beaconpack.viewer.fuel_units", entry.units())
                         .withStyle(ChatFormatting.GRAY),
                 24, 15, 0xA0A0A0, false);
     }
