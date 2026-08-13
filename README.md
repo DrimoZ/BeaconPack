@@ -75,6 +75,15 @@ four-segment meter comparing fuel costs.
 
 ---
 
+## Configuration
+
+Four server-side options: whether fuel exists, whether the aura reaches players off your team,
+whether a real beacon makes an effect free, and whether reconfiguring needs a beacon nearby.
+
+**[Config reference →](CONFIG.md)**
+
+---
+
 ## Keeping the vanilla beacon relevant
 
 The obvious failure mode for a mod like this is making the beacon block pointless. Three
@@ -107,6 +116,9 @@ Four datapack registries under `data/<namespace>/beaconpack/`:
   "min_tier": 2
 }
 ```
+
+**[Full datapack guide →](DATAPACK.md)** — every field of all four registries, with worked examples
+for adding an effect, an augment and a themed tier.
 
 The screen adapts on its own: effects live in a scrollable, searchable picker rather than a
 fixed grid, so declaring forty of them changes nothing about the layout. Effect icons come from
