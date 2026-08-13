@@ -72,7 +72,7 @@ public class FuelCategory implements IRecipeCategory<FuelEntry> {
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, FuelEntry entry, IFocusGroup focuses) {
         builder.addSlot(RecipeIngredientRole.INPUT, 1, 5)
-                .addIngredients(VanillaTypes.ITEM_STACK, java.util.List.of(entry.item()));
+                .addIngredients(VanillaTypes.ITEM_STACK, entry.items());
     }
 
     @Override

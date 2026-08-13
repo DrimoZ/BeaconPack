@@ -58,6 +58,7 @@ public class BeaconPackJeiPlugin implements IModPlugin {
                     }
 
                     @Override
+                    @SuppressWarnings("deprecation") // Abstract on the interface; not optional.
                     public String getLegacyStringSubtypeInfo(ItemStack stack, UidContext context) {
                         AugmentInstance instance = AugmentItem.instanceOf(stack);
                         return instance == null
@@ -95,9 +96,31 @@ public class BeaconPackJeiPlugin implements IModPlugin {
         for (FuelDef def : access.registryOrThrow(BPRegistryKeys.FUEL)) {
             // One unit is one second of one basic effect kept to yourself - the scale the whole
             // GUI is written in, so the two agree by construction.
-            entries.add(new FuelEntry(new ItemStack(def.item().value()), def.units(), def.units()));
+            List<ItemStack> items = def.item()
+                    .map(holder -> List.of(new ItemStack(holder.value())))
+                    .orElseGet(() -> itemsIn(def));
+            if (!items.isEmpty()) {
+                entries.add(new FuelEntry(items, def.units(), def.units()));
+            }
         }
         entries.sort(Comparator.comparingInt(FuelEntry::units));
         return entries;
+    }
+
+    /**
+     * Every item currently in a tag-keyed entry's tag.
+     *
+     * <p>One row per tag, not per item: the slot cycles through them, which is how JEI shows a set
+     * that means the same thing. An empty tag - the mod it belongs to is not installed - is dropped
+     * rather than listed as a blank row.
+     */
+    private static List<ItemStack> itemsIn(FuelDef def) {
+        return def.tag()
+                .map(tag -> net.minecraft.core.registries.BuiltInRegistries.ITEM.getTag(tag)
+                        .map(holders -> holders.stream()
+                                .map(holder -> new ItemStack(holder.value()))
+                                .toList())
+                        .orElse(List.<ItemStack>of()))
+                .orElse(List.of());
     }
 }

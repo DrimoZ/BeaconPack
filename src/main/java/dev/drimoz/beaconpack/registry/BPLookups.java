@@ -60,12 +60,19 @@ public final class BPLookups {
 
     /** Fuel units the given item is worth, or 0 if it is not fuel. */
     public static int fuelValue(RegistryAccess access, Item item) {
+        // An item named directly wins over one matched through a tag, so a pack can price a single
+        // metal without having to exclude it from whatever convention tag it belongs to.
+        int viaTag = 0;
         for (FuelDef def : access.registryOrThrow(BPRegistryKeys.FUEL)) {
-            if (def.item().value() == item) {
+            if (!def.matches(item)) {
+                continue;
+            }
+            if (def.item().isPresent()) {
                 return def.units();
             }
+            viaTag = Math.max(viaTag, def.units());
         }
-        return 0;
+        return viaTag;
     }
 
     /** The augments currently installed in a pack, read straight from its container component. */
