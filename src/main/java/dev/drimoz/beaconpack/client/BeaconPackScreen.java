@@ -67,19 +67,41 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
      * Power stays a tab too - the one control that decides whether the pack runs should not compete
      * with the settings it governs.
      */
-    private static final int TAB_X = IMAGE_W - 1;
     private static final int TAB_W = 24;
     private static final int TAB_H = 24;
+    /** How far an open tab reaches past a closed one, so the open one reads as pulled out. */
+    private static final int TAB_CLOSED_INSET = 3;
+
+    /**
+     * Two columns, not one.
+     *
+     * <p>Four tabs stacked down one edge left the window visibly heavier on that side. Split, each
+     * side carries what belongs together: the two controls that govern the pack on the left, the
+     * two containers you load on the right.
+     */
+    private static final int LEFT_TAB_X = 1;
+    private static final int RIGHT_TAB_X = IMAGE_W - 1;
+
     private static final int POWER_TAB_Y = 16;
     private static final int STATS_TAB_Y = 44;
-    private static final int AUGMENT_TAB_Y = 72;
-    private static final int FUEL_TAB_Y = 100;
+    private static final int AUGMENT_TAB_Y = 16;
+    private static final int FUEL_TAB_Y = 44;
+
+    /**
+     * An open tab grows into its panel in place and pushes the tabs below it down, the way Thermal
+     * does it, rather than a detached square appearing alongside.
+     *
+     * <p>This works only because one drawer is open at a time: a tab is displaced only by a panel
+     * above it, and if a panel above is open then this one is shut, so every panel is always drawn
+     * at its tab's resting position. That is what lets the slots inside keep fixed coordinates -
+     * {@code Slot.x} is final and cannot follow a moving panel.
+     */
+    private static final int PANEL_W = 112;
+    private static final int PANEL_H = 46;
+    private static final int STATS_PANEL_H = 62;
+    private static final int PANEL_GAP = 4;
 
     private static final int DRAWER_X = BeaconPackMenu.DRAWER_X;
-    private static final int DRAWER_W = 122;
-    private static final int DRAWER_H = 46;
-    private static final int STATS_DRAWER_Y = STATS_TAB_Y;
-    private static final int STATS_DRAWER_H = 62;
     private static final int AUGMENT_DRAWER_Y = BeaconPackMenu.AUGMENT_DRAWER_Y;
     private static final int FUEL_DRAWER_Y = BeaconPackMenu.FUEL_DRAWER_Y;
     private static final int SLOT_SIZE = 18;
@@ -227,59 +249,89 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     }
 
     private void drawTabs(GuiGraphics graphics, PackState state, int mouseX, int mouseY) {
-        boolean powerHovered = within(mouseX, mouseY, TAB_X, POWER_TAB_Y, TAB_W, TAB_H);
-        drawTab(graphics, POWER_TAB_Y, state.active(), powerHovered);
-        int powerCx = glyphCentre(state.active());
+        // Left column: the two controls that govern the pack.
+        boolean powerHovered = hitTab(mouseX, mouseY, false, POWER_TAB_Y);
+        drawTab(graphics, false, POWER_TAB_Y, TAB_H, state.active(), powerHovered);
+        int powerCx = glyphCentre(false, state.active());
         drawPowerGlyph(graphics, powerCx, POWER_TAB_Y + TAB_H / 2 - 2, 0xFF3A3A3A);
         // A lit pip rather than a whole coloured tab: the state stays legible without the control
         // shouting louder than everything else on the screen.
         graphics.fill(powerCx - 5, POWER_TAB_Y + TAB_H - 7, powerCx + 5, POWER_TAB_Y + TAB_H - 4,
                 state.active() ? 0xFF4BC46A : 0xFF8A8A8A);
 
-        drawTab(graphics, STATS_TAB_Y, drawer == Drawer.STATS,
-                within(mouseX, mouseY, TAB_X, STATS_TAB_Y, TAB_W, TAB_H));
-        drawTabBars(graphics, glyphCentre(drawer == Drawer.STATS), STATS_TAB_Y + TAB_H / 2);
+        boolean statsOpen = drawer == Drawer.STATS;
+        drawTab(graphics, false, STATS_TAB_Y, statsOpen ? STATS_PANEL_H : TAB_H, statsOpen,
+                hitTab(mouseX, mouseY, false, STATS_TAB_Y));
+        drawTabBars(graphics, glyphCentre(false, statsOpen), STATS_TAB_Y + TAB_H / 2);
 
-        drawTab(graphics, AUGMENT_TAB_Y, drawer == Drawer.AUGMENTS,
-                within(mouseX, mouseY, TAB_X, AUGMENT_TAB_Y, TAB_W, TAB_H));
-        drawTabGem(graphics, glyphCentre(drawer == Drawer.AUGMENTS), AUGMENT_TAB_Y + TAB_H / 2);
+        // Right column: the two containers you load.
+        boolean augmentsOpen = drawer == Drawer.AUGMENTS;
+        drawTab(graphics, true, AUGMENT_TAB_Y, augmentsOpen ? PANEL_H : TAB_H, augmentsOpen,
+                hitTab(mouseX, mouseY, true, AUGMENT_TAB_Y));
+        drawTabGem(graphics, glyphCentre(true, augmentsOpen), AUGMENT_TAB_Y + TAB_H / 2);
 
         if (BPConfig.fuelEnabled()) {
-            drawTab(graphics, FUEL_TAB_Y, drawer == Drawer.FUEL,
-                    within(mouseX, mouseY, TAB_X, FUEL_TAB_Y, TAB_W, TAB_H));
-            drawTabFlame(graphics, glyphCentre(drawer == Drawer.FUEL), FUEL_TAB_Y + TAB_H / 2);
+            boolean fuelOpen = drawer == Drawer.FUEL;
+            int fuelY = fuelTabY();
+            drawTab(graphics, true, fuelY, fuelOpen ? PANEL_H : TAB_H, fuelOpen,
+                    hitTab(mouseX, mouseY, true, fuelY));
+            drawTabFlame(graphics, glyphCentre(true, fuelOpen), fuelY + TAB_H / 2);
         }
     }
 
+    /**
+     * Where the fuel tab currently sits: pushed down when the augment panel above it is open.
+     *
+     * <p>Its own panel is therefore always drawn at {@link #FUEL_TAB_Y} - opening it closes the one
+     * above - which is what keeps the fuel slot's fixed coordinates correct.
+     */
+    private int fuelTabY() {
+        return drawer == Drawer.AUGMENTS ? AUGMENT_TAB_Y + PANEL_H + PANEL_GAP : FUEL_TAB_Y;
+    }
+
     /** Icons follow the tab's width, which changes when it opens. */
-    private static int glyphCentre(boolean open) {
-        return TAB_X + 2 + (open ? TAB_W : TAB_W - 3) / 2;
+    private static int glyphCentre(boolean right, boolean open) {
+        int width = open ? TAB_W : TAB_W - TAB_CLOSED_INSET;
+        return right ? RIGHT_TAB_X + 2 + width / 2 : LEFT_TAB_X - 2 - width / 2;
+    }
+
+    private static boolean hitTab(int mouseX, int mouseY, boolean right, int y) {
+        int width = TAB_W;
+        int x = right ? RIGHT_TAB_X : LEFT_TAB_X - width;
+        return within(mouseX, mouseY, x, y, width, TAB_H);
     }
 
     /**
-     * A tab welded to the frame rather than a square floating beside it.
+     * A tab welded to the frame, which grows into its own panel when opened.
      *
-     * <p>The left edge carries no outline and no bevel, so the tab reads as part of the panel it
-     * hangs off; an open one reaches further out and takes the panel's own face colour, which is
-     * what makes "this drawer belongs to this tab" obvious without a connector.
+     * <p>The edge against the frame carries no outline and no bevel, so tab and panel read as one
+     * piece hinged on the window rather than as a square parked next to it. An open tab keeps the
+     * frame's own face colour for the same reason: it is the same surface, pulled out.
      */
-    private void drawTab(GuiGraphics graphics, int y, boolean open, boolean hovered) {
-        int width = open ? TAB_W : TAB_W - 3;
+    private void drawTab(GuiGraphics graphics, boolean right, int y, int height,
+                         boolean open, boolean hovered) {
+        int width = open ? PANEL_W : TAB_W - TAB_CLOSED_INSET;
         int face = open ? 0xFFC6C6C6 : hovered ? 0xFFBDBDBD : 0xFFA8A8A8;
-        int right = TAB_X + width;
+        // Everything is written for the right-hand column and mirrored for the left, so the two
+        // cannot drift apart.
+        int near = right ? RIGHT_TAB_X : LEFT_TAB_X;
+        int far = right ? near + width : near - width;
+        int outerLo = Math.min(near, far);
+        int outerHi = Math.max(near, far);
 
-        // Outline everywhere but the joint with the frame.
-        graphics.fill(TAB_X, y - 1, right + 1, y, 0xFF1B1B1B);
-        graphics.fill(TAB_X, y + TAB_H, right + 1, y + TAB_H + 1, 0xFF1B1B1B);
-        graphics.fill(right, y - 1, right + 1, y + TAB_H + 1, 0xFF1B1B1B);
-        graphics.fill(TAB_X, y, right, y + TAB_H, face);
+        graphics.fill(outerLo, y - 1, outerHi + 1, y, 0xFF1B1B1B);
+        graphics.fill(outerLo, y + height, outerHi + 1, y + height + 1, 0xFF1B1B1B);
+        graphics.fill(right ? far : far - 1, y - 1, right ? far + 1 : far, y + height + 1,
+                0xFF1B1B1B);
+        graphics.fill(outerLo, y, outerHi, y + height, face);
 
-        // Clipped outer corners, so the stack reads as tabs and not as bricks.
-        graphics.fill(right - 1, y, right, y + 1, 0xFF1B1B1B);
-        graphics.fill(right - 1, y + TAB_H - 1, right, y + TAB_H, 0xFF1B1B1B);
+        // Clipped outer corners, so a column of them reads as tabs and not as bricks.
+        int cornerLo = right ? far - 1 : far;
+        graphics.fill(cornerLo, y, cornerLo + 1, y + 1, 0xFF1B1B1B);
+        graphics.fill(cornerLo, y + height - 1, cornerLo + 1, y + height, 0xFF1B1B1B);
 
-        graphics.fill(TAB_X, y + 1, right - 1, y + 2, 0x40FFFFFF);
-        graphics.fill(TAB_X, y + TAB_H - 2, right - 1, y + TAB_H - 1, 0x30000000);
+        graphics.fill(outerLo, y + 1, outerHi - 1, y + 2, 0x40FFFFFF);
+        graphics.fill(outerLo, y + height - 2, outerHi - 1, y + height - 1, 0x30000000);
     }
 
     private static void drawTabBars(GuiGraphics graphics, int cx, int cy) {
@@ -317,11 +369,11 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
             drawStatsDrawer(graphics, state, stats);
             return;
         }
+        // The panel itself is the open tab, drawn by drawTabs; only its contents belong here.
         int y = drawer == Drawer.AUGMENTS ? AUGMENT_DRAWER_Y : FUEL_DRAWER_Y;
-        panel(graphics, DRAWER_X, y, DRAWER_W, DRAWER_H);
         graphics.drawString(font, Component.translatable(drawer == Drawer.AUGMENTS
                         ? "beaconpack.gui.augments" : "beaconpack.gui.fuel"),
-                DRAWER_X + 7, y + 6, TEXT, false);
+                DRAWER_X + 8, y + 6, TEXT, false);
 
         if (drawer == Drawer.AUGMENTS) {
             for (int i = 0; i < BeaconPackItem.AUGMENT_SLOTS; i++) {
@@ -352,18 +404,24 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
      * whole width back.
      */
     private void drawStatsDrawer(GuiGraphics graphics, PackState state, PackStats stats) {
-        panel(graphics, DRAWER_X, STATS_DRAWER_Y, DRAWER_W, STATS_DRAWER_H);
+        // Opens leftward, so its text is laid out from the panel's far edge inwards.
+        int x = LEFT_TAB_X - PANEL_W + 8;
         graphics.drawString(font, Component.translatable("beaconpack.gui.stats"),
-                DRAWER_X + 7, STATS_DRAWER_Y + 6, TEXT, false);
+                x, STATS_TAB_Y + 6, TEXT, false);
 
-        int y = STATS_DRAWER_Y + 20;
+        int y = STATS_TAB_Y + 20;
         for (Component line : summaryTooltip(state, stats)) {
-            graphics.drawString(font, line, DRAWER_X + 7, y, TEXT_DIM, false);
+            graphics.drawString(font, font.plainSubstrByWidth(line.getString(), PANEL_W - 16),
+                    x, y, TEXT_DIM, false);
             y += 11;
         }
     }
 
-    /** Raised panel matching the frame, drawn rather than baked so the drawer can move. */
+    /**
+     * Raised panel matching the frame. Still needed by the effect picker, which floats over the
+     * screen wherever its case happens to be; the drawers no longer use it, because an open tab
+     * draws its own body.
+     */
     private static void panel(GuiGraphics graphics, int x, int y, int w, int h) {
         graphics.fill(x, y - 1, x + w + 1, y + h + 1, 0xFF1B1B1B);
         graphics.fill(x, y, x + w, y + h, 0xFFC6C6C6);
@@ -890,20 +948,20 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
 
     /** Nothing on this screen is self-explanatory without these. */
     private List<Component> tooltipAt(int x, int y) {
-        if (within(x, y, TAB_X, POWER_TAB_Y, TAB_W, TAB_H)) {
+        if (hitTab(x, y, false, POWER_TAB_Y)) {
             return List.of(
                     Component.translatable(menu.state().active()
                             ? "beaconpack.gui.active" : "beaconpack.gui.inactive"),
                     Component.translatable("beaconpack.tip.master")
                             .withStyle(ChatFormatting.GRAY));
         }
-        if (within(x, y, TAB_X, STATS_TAB_Y, TAB_W, TAB_H)) {
+        if (hitTab(x, y, false, STATS_TAB_Y)) {
             return List.of(Component.translatable("beaconpack.gui.stats"));
         }
-        if (within(x, y, TAB_X, AUGMENT_TAB_Y, TAB_W, TAB_H)) {
+        if (hitTab(x, y, true, AUGMENT_TAB_Y)) {
             return List.of(Component.translatable("beaconpack.gui.augments"));
         }
-        if (BPConfig.fuelEnabled() && within(x, y, TAB_X, FUEL_TAB_Y, TAB_W, TAB_H)) {
+        if (BPConfig.fuelEnabled() && hitTab(x, y, true, fuelTabY())) {
             return List.of(Component.translatable("beaconpack.gui.fuel"));
         }
         if (BPConfig.fuelEnabled() && drawer == Drawer.FUEL
@@ -984,19 +1042,20 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
             handleSelectorClick(x, y);
             return true;
         }
-        if (within(x, y, TAB_X, POWER_TAB_Y, TAB_W, TAB_H)) {
+        if (hitTab(x, y, false, POWER_TAB_Y)) {
             send(BeaconPackMenu.ACTION_TOGGLE_ACTIVE, 0, 0);
             return true;
         }
-        if (within(x, y, TAB_X, STATS_TAB_Y, TAB_W, TAB_H)) {
+        if (hitTab(x, y, false, STATS_TAB_Y)) {
             setDrawer(drawer == Drawer.STATS ? Drawer.NONE : Drawer.STATS);
             return true;
         }
-        if (within(x, y, TAB_X, AUGMENT_TAB_Y, TAB_W, TAB_H)) {
+        if (hitTab(x, y, true, AUGMENT_TAB_Y)) {
             setDrawer(drawer == Drawer.AUGMENTS ? Drawer.NONE : Drawer.AUGMENTS);
             return true;
         }
-        if (BPConfig.fuelEnabled() && within(x, y, TAB_X, FUEL_TAB_Y, TAB_W, TAB_H)) {
+        // Against where the tab is now, not where it rests: the augment panel above pushes it down.
+        if (BPConfig.fuelEnabled() && hitTab(x, y, true, fuelTabY())) {
             setDrawer(drawer == Drawer.FUEL ? Drawer.NONE : Drawer.FUEL);
             return true;
         }

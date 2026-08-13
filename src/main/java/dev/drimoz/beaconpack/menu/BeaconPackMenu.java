@@ -56,9 +56,9 @@ public class BeaconPackMenu extends AbstractContainerMenu {
      * {@code y} are final, and the screen hides a closed drawer's slots from both rendering and
      * hit-testing instead.
      */
-    public static final int DRAWER_X = 217;
-    public static final int AUGMENT_DRAWER_Y = 72;
-    public static final int FUEL_DRAWER_Y = 100;
+    public static final int DRAWER_X = 193;
+    public static final int AUGMENT_DRAWER_Y = 16;
+    public static final int FUEL_DRAWER_Y = 44;
 
     private static final int FIRST_AUGMENT_SLOT_X = DRAWER_X + 9;
     private static final int AUGMENT_SLOT_Y = AUGMENT_DRAWER_Y + 21;
