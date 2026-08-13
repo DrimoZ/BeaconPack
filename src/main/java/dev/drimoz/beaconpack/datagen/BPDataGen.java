@@ -34,6 +34,9 @@ public final class BPDataGen {
         generator.addProvider(event.includeServer(), new BPRecipeProvider(output, registries));
         generator.addProvider(event.includeServer(),
                 new BPItemTagProvider(output, registries, helper));
+        generator.addProvider(event.includeServer(), new net.neoforged.neoforge.common.data
+                .AdvancementProvider(output, registries, helper,
+                java.util.List.of(new BPAdvancementProvider())));
     }
 
     private BPDataGen() {}

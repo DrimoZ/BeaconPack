@@ -74,5 +74,13 @@
   "beaconpack.tip.fuel_reserve": "In the fuel slot: %s of runtime",
   "beaconpack.tip.augment_locked": "This slot needs a higher pack tier",
   "beaconpack.gui.active": "Active",
-  "beaconpack.gui.inactive": "Inactive"
+  "beaconpack.gui.inactive": "Inactive",
+  "advancement.beaconpack.root.title": "Beacon to Go",
+  "advancement.beaconpack.root.description": "Take a beacon with you",
+  "advancement.beaconpack.augmented.title": "Kitted Out",
+  "advancement.beaconpack.augmented.description": "Obtain an augment to slot into a pack",
+  "advancement.beaconpack.tier_four.title": "The Whole Star",
+  "advancement.beaconpack.tier_four.description": "Obtain a Beacon Pack IV",
+  "advancement.beaconpack.themed.title": "Specialist",
+  "advancement.beaconpack.themed.description": "Obtain a Cinder, Void or Tidal Pack"
 }

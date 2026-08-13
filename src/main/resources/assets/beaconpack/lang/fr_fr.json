@@ -74,5 +74,13 @@
   "beaconpack.tip.fuel_reserve": "Dans le slot : %s d’autonomie",
   "beaconpack.tip.augment_locked": "Ce slot nécessite un tier supérieur",
   "beaconpack.gui.active": "Actif",
-  "beaconpack.gui.inactive": "Éteint"
+  "beaconpack.gui.inactive": "Éteint",
+  "advancement.beaconpack.root.title": "Balise portative",
+  "advancement.beaconpack.root.description": "Emportez une balise avec vous",
+  "advancement.beaconpack.augmented.title": "Bien équipé",
+  "advancement.beaconpack.augmented.description": "Obtenez une augmentation à insérer dans un pack",
+  "advancement.beaconpack.tier_four.title": "L’étoile entière",
+  "advancement.beaconpack.tier_four.description": "Obtenez un Beacon Pack IV",
+  "advancement.beaconpack.themed.title": "Spécialiste",
+  "advancement.beaconpack.themed.description": "Obtenez un pack Cendre, Vide ou Marée"
 }
