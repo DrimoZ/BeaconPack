@@ -61,9 +61,9 @@ public class BeaconPackMenu extends AbstractContainerMenu {
     public static final int FUEL_DRAWER_Y = 50;
 
     private static final int FIRST_AUGMENT_SLOT_X = DRAWER_X + 9;
-    private static final int AUGMENT_SLOT_Y = AUGMENT_DRAWER_Y + 21;
+    private static final int AUGMENT_SLOT_Y = AUGMENT_DRAWER_Y + 25;
     private static final int FUEL_SLOT_X = DRAWER_X + 9;
-    private static final int FUEL_SLOT_Y = FUEL_DRAWER_Y + 21;
+    private static final int FUEL_SLOT_Y = FUEL_DRAWER_Y + 25;
     private static final int INVENTORY_X = 17;
     private static final int INVENTORY_Y = 173;
     private static final int HOTBAR_Y = 231;

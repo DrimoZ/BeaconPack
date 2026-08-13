@@ -139,11 +139,11 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     private static final int ROW_SETTINGS = INFO_Y + 48;
 
     private static final int AUGMENT_SLOT_X = DRAWER_X + 8;
-    private static final int AUGMENT_SLOT_Y = AUGMENT_DRAWER_Y + 20;
+    private static final int AUGMENT_SLOT_Y = AUGMENT_DRAWER_Y + 24;
     private static final int FUEL_SLOT_X = DRAWER_X + 8;
-    private static final int FUEL_SLOT_Y = FUEL_DRAWER_Y + 20;
+    private static final int FUEL_SLOT_Y = FUEL_DRAWER_Y + 24;
     private static final int GAUGE_X = DRAWER_X + 30;
-    private static final int GAUGE_Y = FUEL_DRAWER_Y + 22;
+    private static final int GAUGE_Y = FUEL_DRAWER_Y + 26;
     private static final int GAUGE_W = 70;
     private static final int GAUGE_H = 14;
 
