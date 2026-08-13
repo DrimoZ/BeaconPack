@@ -67,8 +67,8 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
      * Power stays a tab too - the one control that decides whether the pack runs should not compete
      * with the settings it governs.
      */
-    private static final int TAB_W = 24;
-    private static final int TAB_H = 24;
+    private static final int TAB_W = 30;
+    private static final int TAB_H = 28;
     /** Content clears the tab's own glyph, which stays put when the panel grows around it. */
     private static final int PANEL_TEXT_INSET = TAB_W + 6;
 
@@ -83,9 +83,9 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     private static final int RIGHT_TAB_X = IMAGE_W - 1;
 
     private static final int POWER_TAB_Y = 16;
-    private static final int STATS_TAB_Y = 44;
+    private static final int STATS_TAB_Y = 50;
     private static final int AUGMENT_TAB_Y = 16;
-    private static final int FUEL_TAB_Y = 44;
+    private static final int FUEL_TAB_Y = 50;
 
     /**
      * An open tab grows into its panel in place and pushes the tabs below it down, the way Thermal
@@ -96,7 +96,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
      * at its tab's resting position. That is what lets the slots inside keep fixed coordinates -
      * {@code Slot.x} is final and cannot follow a moving panel.
      */
-    private static final int PANEL_W = 112;
+    private static final int PANEL_W = 120;
     private static final int PANEL_H = 46;
     private static final int STATS_PANEL_H = 62;
     private static final int PANEL_GAP = 4;
@@ -282,7 +282,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
                 state.active() ? ACCENT_POWER : GLYPH_OFF);
         // A lit pip rather than a whole coloured tab: the state stays legible without the control
         // shouting louder than everything else on the screen.
-        graphics.fill(powerCx - 5, POWER_TAB_Y + TAB_H - 7, powerCx + 5, POWER_TAB_Y + TAB_H - 4,
+        graphics.fill(powerCx - 7, POWER_TAB_Y + TAB_H - 8, powerCx + 7, POWER_TAB_Y + TAB_H - 5,
                 state.active() ? ACCENT_POWER : 0xFF8A8A8A);
 
         float leftP = progress(leftAnimStart, leftDrawer != Drawer.NONE);
@@ -392,30 +392,30 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
      */
     private static void drawTabBars(GuiGraphics graphics, int cx, int cy, int c) {
         int shadow = shade(c);
-        graphics.fill(cx - 6, cy + 5, cx + 7, cy + 6, shadow);
-        graphics.fill(cx - 5, cy + 1, cx - 2, cy + 5, c);
-        graphics.fill(cx - 1, cy - 2, cx + 2, cy + 5, c);
-        graphics.fill(cx + 3, cy - 5, cx + 6, cy + 5, c);
+        graphics.fill(cx - 9, cy + 7, cx + 10, cy + 9, shadow);
+        graphics.fill(cx - 8, cy + 1, cx - 3, cy + 7, c);
+        graphics.fill(cx - 2, cy - 3, cx + 3, cy + 7, c);
+        graphics.fill(cx + 4, cy - 7, cx + 9, cy + 7, c);
     }
 
     /** A cut gem: wide shoulders, tapered foot, with one facet picked out. */
     private static void drawTabGem(GuiGraphics graphics, int cx, int cy, int c) {
         int shadow = shade(c);
-        graphics.fill(cx - 4, cy - 5, cx + 4, cy - 3, c);
-        graphics.fill(cx - 5, cy - 3, cx + 5, cy + 1, c);
-        graphics.fill(cx - 3, cy + 1, cx + 3, cy + 3, c);
-        graphics.fill(cx - 1, cy + 3, cx + 1, cy + 5, c);
-        graphics.fill(cx - 3, cy - 3, cx - 1, cy, shadow);
+        graphics.fill(cx - 6, cy - 7, cx + 6, cy - 4, c);
+        graphics.fill(cx - 8, cy - 4, cx + 8, cy + 1, c);
+        graphics.fill(cx - 5, cy + 1, cx + 5, cy + 4, c);
+        graphics.fill(cx - 2, cy + 4, cx + 2, cy + 7, c);
+        graphics.fill(cx - 5, cy - 4, cx - 2, cy + 1, shadow);
     }
 
     /** A flame: narrow tip, full body, with a hollow core so it is not a solid blob. */
     private static void drawTabFlame(GuiGraphics graphics, int cx, int cy, int c) {
         int shadow = shade(c);
-        graphics.fill(cx - 1, cy - 6, cx + 1, cy - 4, c);
-        graphics.fill(cx - 2, cy - 4, cx + 2, cy - 2, c);
-        graphics.fill(cx - 4, cy - 2, cx + 4, cy + 3, c);
-        graphics.fill(cx - 3, cy + 3, cx + 3, cy + 5, c);
-        graphics.fill(cx - 2, cy, cx + 2, cy + 3, shadow);
+        graphics.fill(cx - 2, cy - 8, cx + 2, cy - 5, c);
+        graphics.fill(cx - 3, cy - 5, cx + 3, cy - 2, c);
+        graphics.fill(cx - 6, cy - 2, cx + 6, cy + 4, c);
+        graphics.fill(cx - 4, cy + 4, cx + 4, cy + 7, c);
+        graphics.fill(cx - 3, cy, cx + 3, cy + 4, shadow);
     }
 
     /** The same hue, darkened - one colour per glyph keeps the four consistent. */
@@ -517,12 +517,12 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
 
     /** The universal power mark: a broken ring with a stroke through the gap. */
     private static void drawPowerGlyph(GuiGraphics graphics, int cx, int cy, int colour) {
-        graphics.fill(cx - 1, cy - 6, cx + 1, cy, colour);
-        graphics.fill(cx - 5, cy - 3, cx - 3, cy + 3, colour);
-        graphics.fill(cx + 3, cy - 3, cx + 5, cy + 3, colour);
-        graphics.fill(cx - 4, cy + 3, cx + 4, cy + 5, colour);
-        graphics.fill(cx - 5, cy - 4, cx - 2, cy - 2, colour);
-        graphics.fill(cx + 2, cy - 4, cx + 5, cy - 2, colour);
+        graphics.fill(cx - 1, cy - 9, cx + 2, cy - 1, colour);
+        graphics.fill(cx - 7, cy - 5, cx - 4, cy + 4, colour);
+        graphics.fill(cx + 4, cy - 5, cx + 7, cy + 4, colour);
+        graphics.fill(cx - 6, cy + 4, cx + 6, cy + 7, colour);
+        graphics.fill(cx - 7, cy - 6, cx - 3, cy - 3, colour);
+        graphics.fill(cx + 3, cy - 6, cx + 7, cy - 3, colour);
     }
 
     private void drawCases(GuiGraphics graphics, PackState state, PackStats stats,
