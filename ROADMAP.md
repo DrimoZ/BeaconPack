@@ -38,6 +38,29 @@ GUI and datapack hooks is easy to include, and the permissions block already say
 
 Then bump to 1.0.0 and change the release type. Nothing else is required.
 
+## Deferred — a second client for multiplayer testing
+
+A second `runs` entry with its own game directory and username launches a second client against the
+same dev server, which is what the open 1.0 criterion "the aura confirmed by someone who is not the
+author" actually needs. It is the one thing that would close that item without waiting for a
+player.
+
+The reference that prompted this is [ForgeGradle](https://github.com/Create-Nuclear-Team/CreateNuclearForge/blob/V2/build.gradle#L113-L124),
+so it cannot be pasted as-is: `workingDirectory`, `parent runs.client` and the mixin SRG properties
+have no ModDevGradle equivalent. In MDG the shape is a plain second run —
+
+```gradle
+client2 {
+    client()
+    gameDirectory = project.file('run-client2')
+    programArguments.addAll '--username', 'Dev2'
+}
+```
+
+— which is the same pattern `gameTestServer` already uses here. Untested; verify when picking this
+up. Its own directory matters for the reason the game test run needed one: runs that share `run/`
+share `run/mods` and each other's world.
+
 ## Soon — worth doing regardless
 
 **EMI plugin.** JEI's is shipped; EMI matters at least as much on 1.21 and its absence means
