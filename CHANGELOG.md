@@ -18,3 +18,14 @@ Versions follow `{mod version}+{minecraft version}`.
   fuel values can all be retuned or extended without code.
 - Server config for fuel, aura reach, free coverage near a real beacon, and an optional
   requirement to stand near a lit beacon to reconfigure.
+- Optional Curios support: a pack worn in the `charm` slot works like one carried in the inventory.
+  A pack in the inventory still wins if you carry both.
+
+### Fixed
+- A modified client could send a negative slot or value in a configuration action. Every existing
+  check was an upper bound, so it reached `List.set` / `List.remove` and threw on the server thread.
+
+### Notes
+- Documentation lives in the [wiki](https://github.com/DrimoZ/BeaconPack/wiki).
+- Code is MIT; the artwork is reserved, with redistribution as part of the mod — modpacks
+  included — granted explicitly. See the README's Permissions section.

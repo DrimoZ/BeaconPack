@@ -14,25 +14,33 @@ Ordered by what blocks a release, not by effort.
 | No `logoFile` / `logo.png` / `displayURL` | Done — generated from the same script as the item icons. |
 | No `pack.mcmeta` | Done. |
 | Package and author said `theo` | Done — `dev.drimoz`, author `DrimoZ`. |
-| Version still `0.1.0` | Bump to `1.0.0` at publish time; both platforms key updates off it. |
-| **Dedicated-server run never tested** | Open. Needs `run/eula.txt`. The whole effect loop is server-side; single-player runs an integrated server, which hides a class of client/server-split bugs. |
-| **Multiplayer aura never tested** | Open. `AuraMode.ALLIES/TEAM/ALLIES_AND_PETS` has never had a second player in front of it, and team lookup and pet ownership are exactly where this breaks. Needs two clients. |
+| Licence was MIT by default, undecided | Done — MIT for code, assets reserved with redistribution granted, permissions block in the README. |
+| Dedicated-server run never tested | Done — boots clean, config loads server-side, 1312 recipes, no tag or registry errors. |
+| Multiplayer aura never tested | Done, and not by hand — the game tests place real players in a level and check who is reached. See P1. |
+| **Version still `0.1.0`** | Open. Bump to `1.0.0` at publish time; both platforms key updates off it. |
+| **No screenshots or GIF** | Open, and the last real blocker. A store page without them does not convert, and the GUI is the differentiator. Needs a person at a client. |
 
 ## P1 — should ship in 1.0
 
 **Curios slot type.** Done. Packs bind to the `charm` slot through a shipped tag; both files are
 additive so a datapack can still move them.
 
-**Server-side action validation.** Partly done. Auditing it found a real hole: `slot` and `value`
-are var-ints, so a modified client could send `-1`, and every existing check was an upper bound —
-the negative index reached `List.set` / `List.remove` and threw on the server thread. Fixed at the
-entry point. The rest of the validation (tier, pool, amplifier cap, aura mode) was already correct.
-It is still not *covered*, which is what the game tests below are for.
+**Server-side action validation.** Done. Auditing it found a real hole: `slot` and `value` are
+var-ints, so a modified client could send `-1`, and every existing check was an upper bound — the
+negative index reached `List.set` / `List.remove` and threw on the server thread. Fixed at the entry
+point, and now covered by a game test that fires hostile indices at every action.
 
-**Game tests.** `neoforge.enabledGameTestNamespaces` is set to the mod id with nothing behind it.
-The natural first two: give a player a pack, tick, assert the effect landed; and drive
-`applyAction` with hostile inputs. This is the integration seam unit tests structurally cannot
-reach.
+**Game tests.** Done — seven of them, run headlessly with `./gradlew runGameTestServer`. They cover
+what single player structurally cannot: the aura reaching a second player, `self` not leaking to a
+bystander, `team` excluding someone off the team, and pets being reached while a stray wolf is not.
+
+Not covered, deliberately: the `PlayerTickEvent` subscription itself. Synthetic players tick as
+entities but their connection never reaches the state where the server drives a player tick, so a
+test of it failed for that reason alone and was removed rather than weakened into passing.
+
+**Documentation.** Done, and the [wiki](https://github.com/DrimoZ/BeaconPack/wiki) is the single
+source of truth — fourteen pages covering playing, running and extending the mod. The repo's own
+copies were deleted rather than left to drift.
 
 **Data component migration.** Decided: no version field. Every field on `PackState` is
 optional-with-default, so additions and removals already migrate themselves and the absence of a
@@ -64,23 +72,23 @@ report by the number of branches, and the bug reports have not started yet.
 
 ## Docs
 
-The README is in good shape. What is missing is for the two audiences that are not you:
+The wiki covers playing, running and extending the mod, and the README points at it rather than
+restating it. What is left:
 
-- **A datapack guide.** All four registries with their full field lists and a worked example of
-  adding an effect, an augment and a themed tier. This is the mod's main selling point and it is
-  currently only inferable from the shipped JSON.
-- **A config reference.** Four options, each with what it changes and why you would touch it.
 - **Screenshots and a GIF.** Non-negotiable for a store page, and the GUI is the differentiator —
   the searchable picker and the side drawers are what makes this not just another beacon item.
-- **CHANGELOG** in Keep a Changelog form, since both platforms render release notes from it.
+  Nobody but you can take these.
+- **CHANGELOG**: keep it current as things land, since both platforms render release notes from it.
 
 ## Publishing
 
 Manual for the first release on both platforms — automating a pipeline before it has run once by
 hand is how you debug a pipeline instead of a mod.
 
-- **Modrinth**: fast, near-instant listing. Needs description, MIT licence, categories
-  (`utility`, `equipment`), gallery, and a source link.
+- **Modrinth**: fast, near-instant listing. Needs description, licence, categories
+  (`utility`, `equipment`), gallery, and a source link. The licence is a custom dual one, so pick
+  the custom option and point it at `LICENSE` — and paste the README's permissions block into the
+  description, since that is what pack authors and moderators actually read.
 - **CurseForge**: manual approval, typically a day or three. Read their file rules before the first
   upload; rejections are slow to round-trip.
 - Verify the jar first: JEI and Curios are `compileOnly` / `additionalRuntimeClasspath`, so neither
