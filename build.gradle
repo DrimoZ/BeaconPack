@@ -98,9 +98,11 @@ dependencies {
     devMods "mezz.jei:jei-${jei_minecraft_version}-neoforge:${jei_version}"
     devMods "top.theillusivec4.curios:curios-neoforge:${curios_version}"
 
-    // Curios is a soft dependency: compiled against, never required. The integration is isolated
-    // behind a load check so the mod runs identically without it.
+    // Both are soft dependencies: compiled against, never required. Each integration is isolated
+    // so the mod runs identically without them - Curios behind a load check, JEI behind a class
+    // only JEI itself ever loads.
     compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
+    compileOnly "mezz.jei:jei-${jei_minecraft_version}-neoforge:${jei_version}"
 
     // Pure-logic classes under core/ are plain Java and unit-testable.
     testImplementation platform('org.junit:junit-bom:5.10.2')

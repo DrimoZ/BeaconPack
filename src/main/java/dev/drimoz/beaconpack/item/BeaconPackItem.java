@@ -6,6 +6,7 @@ import dev.drimoz.beaconpack.core.BPRegistryKeys;
 import dev.drimoz.beaconpack.core.PackResolver;
 import dev.drimoz.beaconpack.core.PackStats;
 import dev.drimoz.beaconpack.core.EffectSlotConfig;
+import dev.drimoz.beaconpack.core.Durations;
 import dev.drimoz.beaconpack.core.PackState;
 import dev.drimoz.beaconpack.core.PackTierDef;
 import dev.drimoz.beaconpack.menu.PackMenuOpener;
@@ -143,7 +144,7 @@ public class BeaconPackItem extends Item {
             return;
         }
         tooltip.add(Component.translatable("beaconpack.gui.runtime",
-                        formatDuration((int) (state.fuel() / perSecond)))
+                        Durations.format((int) (state.fuel() / perSecond)))
                 .withStyle(ChatFormatting.DARK_GRAY));
     }
 
@@ -171,15 +172,6 @@ public class BeaconPackItem extends Item {
                 .orElse(null);
     }
 
-    private static String formatDuration(int seconds) {
-        if (seconds >= 3600) {
-            return (seconds / 3600) + " h";
-        }
-        if (seconds >= 60) {
-            return (seconds / 60) + " min";
-        }
-        return seconds + " s";
-    }
 
     /** A running pack glints. Cheapest possible "this is on" signal, visible from the hotbar. */
     @Override

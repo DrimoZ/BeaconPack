@@ -1,6 +1,7 @@
 package dev.drimoz.beaconpack.client;
 
 import dev.drimoz.beaconpack.BPConfig;
+import dev.drimoz.beaconpack.core.Durations;
 import dev.drimoz.beaconpack.core.BeaconEffectDef;
 import dev.drimoz.beaconpack.core.EffectSlotConfig;
 import dev.drimoz.beaconpack.core.PackResolver;
@@ -821,8 +822,8 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         double perSecond = PackResolver.fuelPerSecond(menu.state(), stats, effectLookup());
         if (perSecond > 0.0) {
             lines.add(Component.translatable("beaconpack.tip.fuel_worth",
-                            formatDuration((int) (perItem / perSecond)),
-                            formatDuration((int) (perItem * stack.getCount() / perSecond)))
+                            Durations.format((int) (perItem / perSecond)),
+                            Durations.format((int) (perItem * stack.getCount() / perSecond)))
                     .withStyle(ChatFormatting.GRAY));
         }
         // A denser fuel than the buffer can hold is never consumed, and that would otherwise look
@@ -1209,7 +1210,7 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
     private static String atCurrentDraw(int units, double perSecond) {
         return perSecond <= 0.0
                 ? Component.translatable("beaconpack.gui.idle").getString()
-                : formatDuration((int) (units / perSecond));
+                : Durations.format((int) (units / perSecond));
     }
 
     /** Fuel units still sitting in the fuel slot, not yet drawn into the buffer. */
@@ -1246,13 +1247,4 @@ public class BeaconPackScreen extends AbstractContainerScreen<BeaconPackMenu> {
         };
     }
 
-    static String formatDuration(int seconds) {
-        if (seconds >= 3600) {
-            return (seconds / 3600) + " h";
-        }
-        if (seconds >= 60) {
-            return (seconds / 60) + " min";
-        }
-        return seconds + " s";
-    }
 }
