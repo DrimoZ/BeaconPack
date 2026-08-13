@@ -23,10 +23,12 @@ neoForge {
     runs {
         client {
             client()
+            gameDirectory = project.file('run')
             systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
         }
         server {
             server()
+            gameDirectory = project.file('run')
             programArgument '--nogui'
             systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
         }
@@ -35,8 +37,14 @@ neoForge {
         gameTestServer {
             type = 'gameTestServer'
             systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
+            // Its own directory, so the dev-only mods copied into run/mods stay out of it. Sharing
+            // run/ meant Curios loaded here too and every test failed on its join-time sync packet,
+            // which a synthetic player's connection refuses - a result about the folder's contents,
+            // not about this mod.
+            gameDirectory = project.file('run-gametest')
         }
         data {
+            gameDirectory = project.file('run')
             // 1.21.1 has a single datagen run; clientData()/serverData() only exist from 1.21.4 on.
             data()
             programArguments.addAll '--mod', mod_id, '--all',
@@ -44,7 +52,8 @@ neoForge {
                     '--existing', file('src/main/resources/').absolutePath
         }
         configureEach {
-            gameDirectory = project.file('run')
+            // gameDirectory is set per run, not here: configureEach would overwrite the game test
+            // run's own directory depending on when each run is realised.
             logLevel = org.slf4j.event.Level.DEBUG
         }
     }
@@ -75,18 +84,23 @@ repositories {
     }
 }
 
+configurations {
+    // Mods to drop into the dev run folder. See copyDevMods below.
+    devMods
+}
+
 dependencies {
-    // JEI is a dev-time convenience only: it makes recipes and the augment variants browsable
-    // in-game. Nothing in the mod compiles against it, so it stays a runtime-only dependency
-    // and never turns into something players are required to install.
-    // additionalRuntimeClasspath, not runtimeOnly: ModDevGradle builds the run classpath from this
-    // configuration, and a runtimeOnly dependency never reaches the launched game.
-    additionalRuntimeClasspath "mezz.jei:jei-${jei_minecraft_version}-neoforge:${jei_version}"
+    // JEI and Curios, for the dev environment only. Neither is required to play.
+    //
+    // These go through the run folder rather than onto the run classpath. A jar on
+    // additionalRuntimeClasspath is loadable but is never registered as a mod - FML discovers mods
+    // from mods/, so both sat on the classpath and never appeared in the mod list at all.
+    devMods "mezz.jei:jei-${jei_minecraft_version}-neoforge:${jei_version}"
+    devMods "top.theillusivec4.curios:curios-neoforge:${curios_version}"
 
     // Curios is a soft dependency: compiled against, never required. The integration is isolated
     // behind a load check so the mod runs identically without it.
     compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
-    additionalRuntimeClasspath "top.theillusivec4.curios:curios-neoforge:${curios_version}"
 
     // Pure-logic classes under core/ are plain Java and unit-testable.
     testImplementation platform('org.junit:junit-bom:5.10.2')
@@ -95,6 +109,23 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+/**
+ * Puts the dev-only mods where FML will actually find them.
+ *
+ * Deliberately not wired to the game test run - and, more to the point, that run has its own game
+ * directory. Not wiring the task was not enough on its own: the jars stay in run/mods once copied,
+ * and every run shared that folder, so the tests loaded Curios anyway and all seven failed on its
+ * join-time sync packet.
+ */
+var copyDevMods = tasks.register('copyDevMods', Copy) {
+    from configurations.devMods
+    into file('run/mods')
+}
+
+tasks.matching { it.name in ['runClient', 'runServer'] }.configureEach {
+    dependsOn copyDevMods
 }
 
 // Expand gradle.properties into neoforge.mods.toml so versions live in one place.
