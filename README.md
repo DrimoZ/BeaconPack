@@ -5,6 +5,9 @@ defined in datapacks rather than in code.
 
 **NeoForge 1.21.1** · Java 21 · MIT
 
+📖 **[The wiki](https://github.com/DrimoZ/BeaconPack/wiki) is the reference** — player guide,
+config, datapack docs and FAQ. This README is the short version.
+
 ---
 
 ## What it does
@@ -80,7 +83,7 @@ four-segment meter comparing fuel costs.
 Four server-side options: whether fuel exists, whether the aura reaches players off your team,
 whether a real beacon makes an effect free, and whether reconfiguring needs a beacon nearby.
 
-**[Config reference →](CONFIG.md)**
+**[Config reference →](https://github.com/DrimoZ/BeaconPack/wiki/Configuration)**
 
 ---
 
@@ -117,8 +120,8 @@ Four datapack registries under `data/<namespace>/beaconpack/`:
 }
 ```
 
-**[Full datapack guide →](DATAPACK.md)** — every field of all four registries, with worked examples
-for adding an effect, an augment and a themed tier.
+**[Full datapack guide →](https://github.com/DrimoZ/BeaconPack/wiki/Datapack-Guide)** — every field
+of all four registries, with worked examples for adding an effect, an augment and a themed tier.
 
 The screen adapts on its own: effects live in a scrollable, searchable picker rather than a
 fixed grid, so declaring forty of them changes nothing about the layout. Effect icons come from
