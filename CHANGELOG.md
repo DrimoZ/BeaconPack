@@ -31,6 +31,18 @@ played it yet. Report anything odd on the [issue tracker](https://github.com/Dri
 ## Unreleased
 
 ### Added
+- EMI plugin, matching the JEI one: the fifteen augments are listed separately instead of
+  collapsing into a single entry, and a fuel category shows what each item is worth as runtime.
+- Fuel entries can be priced by an item **tag** as well as by a single item, so one line covers
+  every modded metal that follows the convention. Copper is now fuel, at 150 units.
+- A chime when an augment is fitted or pulled. Every button in the screen made a sound; the slot
+  that changes the most did not.
+
+### Fixed
+- EMI showed an on-screen error for every fuel row: rows built from a registry rather than from a
+  JSON recipe need EMI's synthetic-id form.
+
+### Added
 - Four Beacon Pack tiers projecting beacon effects from the inventory, configured through their
   own screen.
 - Seven augments: Range, Focus, Amplification, Efficiency, Capacity, Attunement and Discretion,

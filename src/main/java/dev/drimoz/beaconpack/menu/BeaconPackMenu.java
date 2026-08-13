@@ -467,6 +467,25 @@ public class BeaconPackMenu extends AbstractContainerMenu {
             return BPLookups.installedAugments(pack()).stream()
                     .noneMatch(other -> other.type().equals(instance.type()));
         }
+
+        /**
+         * Fitting or pulling an augment is the one action in this screen with no feedback at all -
+         * every button clicks, but a slot is silent, and slotting an augment changes what the pack
+         * does more than any button does.
+         *
+         * <p>Only on a real change of occupancy: {@code set} also runs while the menu syncs, and a
+         * chime on every sync would fire while nothing happened.
+         */
+        @Override
+        public void set(ItemStack stack) {
+            boolean wasEmpty = getItem().isEmpty();
+            super.set(stack);
+            if (!player.level().isClientSide() && wasEmpty != stack.isEmpty()) {
+                player.level().playSound(null, player.blockPosition(),
+                        SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS,
+                        0.6F, stack.isEmpty() ? 0.8F : 1.2F);
+            }
+        }
     }
 
     private class FuelSlot extends SlotItemHandler {
