@@ -57,7 +57,8 @@ sharing, or no particles at all.
 
 ### Fuel you can read
 
-Iron through netherite, priced per item by a datapack. The screen shows **remaining runtime**, not
+Copper through netherite, priced by a datapack — per item, or by a convention tag, so a modded
+metal is accepted without a file of its own. The screen shows **remaining runtime**, not
 a unit count: "4 h" answers the question you actually have. Each effect chooses its own audience —
 just you, your team, everyone nearby, or your pets — and sharing costs more. That is the main
 decision the mod asks of you.
@@ -75,8 +76,8 @@ file. See the [datapack guide](https://github.com/DrimoZ/BeaconPack/wiki/Datapac
 ### Compatibility
 
 - **Curios** (optional): wear a pack in the charm slot. Ships configured; nothing to set up.
-- **JEI** (optional): all fifteen augments listed separately, plus a fuel category showing what each
-  item is worth as runtime.
+- **JEI and EMI** (optional): all fifteen augments listed separately instead of collapsing into one,
+  plus a fuel category showing what each item is worth as runtime.
 - Server-side config, synced to clients. Required on both sides.
 
 ---
@@ -103,9 +104,9 @@ freely, but do not lift them into another project.
 - [ ] Create the project on the platform first; the jar cannot be uploaded to nothing.
 - [ ] Release type: **Beta**. It is tested but unplayed by anyone else.
 - [ ] Game version 1.21.1, loader NeoForge.
-- [ ] Mark Curios and JEI as **optional** dependencies, not required.
-- [ ] Changelog: paste the 0.9.0 section from `CHANGELOG.md`.
+- [ ] Mark Curios, JEI and EMI as **optional** dependencies, not required.
+- [ ] Changelog: paste the newest section from `CHANGELOG.md`.
 - [ ] Gallery: screenshots are still missing, and this is the one thing that decides whether anyone
       clicks. At minimum: the pack screen with a drawer open, the effect picker, and the JEI fuel
-      category.
+      category, and the EMI or JEI fuel category.
 - [ ] Link the wiki and the issue tracker.

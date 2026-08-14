@@ -154,8 +154,34 @@ var copyDevMods2 = tasks.register('copyDevMods2', Copy) {
     into file('run-client2/mods')
 }
 
+/**
+ * Ops both dev players on the dedicated server.
+ *
+ * Without this they join in survival with no permissions, which makes the server useless for
+ * testing anything - you cannot even give yourself a pack. The server rewrites ops.json when it
+ * stops, so this runs before every start rather than once.
+ *
+ * The UUIDs are the offline-mode ones: with online-mode=false the server derives a player's id from
+ * "OfflinePlayer:<name>" as a version 3 UUID, which is exactly what nameUUIDFromBytes produces.
+ */
+var devOps = tasks.register('devOps') {
+    doLast {
+        var entries = ['Dev', 'Dev2'].collect { name ->
+            var uuid = UUID.nameUUIDFromBytes("OfflinePlayer:${name}".getBytes('UTF-8'))
+            '  {"uuid": "' + uuid + '", "name": "' + name + '", "level": 4, ' +
+                    '"bypassesPlayerLimit": false}'
+        }
+        var file = project.file('run/ops.json')
+        file.parentFile.mkdirs()
+        file.text = '[\n' + entries.join(',\n') + '\n]\n'
+    }
+}
+
 tasks.matching { it.name in ['runClient', 'runServer'] }.configureEach {
     dependsOn copyDevMods
+}
+tasks.matching { it.name == 'runServer' }.configureEach {
+    dependsOn devOps
 }
 tasks.matching { it.name == 'runClient2' }.configureEach {
     dependsOn copyDevMods2

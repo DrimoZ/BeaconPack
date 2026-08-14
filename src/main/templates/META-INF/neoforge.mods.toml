@@ -33,3 +33,19 @@ type = "optional"
 versionRange = "*"
 ordering = "AFTER"
 side = "BOTH"
+
+# Declared so the loader and the store pages both show them as optional rather than leaving players
+# to guess. Neither is required, and the mod behaves identically without them.
+[[dependencies.${mod_id}]]
+modId = "jei"
+type = "optional"
+versionRange = "*"
+ordering = "AFTER"
+side = "CLIENT"
+
+[[dependencies.${mod_id}]]
+modId = "emi"
+type = "optional"
+versionRange = "*"
+ordering = "AFTER"
+side = "CLIENT"
