@@ -1,5 +1,7 @@
 # Store listing copy
 
+Live at <https://www.curseforge.com/minecraft/mc-mods/portables-beacons>.
+
 Paste-ready text for the CurseForge and Modrinth project pages. Not documentation — the
 [wiki](https://github.com/DrimoZ/PortableBeacons/wiki) is that.
 
@@ -101,7 +103,8 @@ freely, but do not lift them into another project.
 
 ## Upload checklist
 
-- [ ] Create the project on the platform first; the jar cannot be uploaded to nothing.
+- [x] CurseForge project created and renamed to Portable Beacons.
+- [ ] Modrinth project still to create.
 - [ ] Release type: **Release**. The aura is confirmed on a dedicated server with two players.
 - [ ] Game version 1.21.1, loader NeoForge.
 - [ ] Mark Curios, JEI and EMI as **optional** dependencies, not required.

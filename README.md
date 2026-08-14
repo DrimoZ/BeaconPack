@@ -5,6 +5,8 @@ defined in datapacks rather than in code.
 
 **NeoForge 1.21.1** · Java 21 · MIT
 
+**[Download on CurseForge](https://www.curseforge.com/minecraft/mc-mods/portables-beacons)**
+
 📖 **[The wiki](https://github.com/DrimoZ/PortableBeacons/wiki) is the reference** — player guide,
 config, datapack docs and FAQ. This README is the short version.
 
@@ -13,7 +15,7 @@ config, datapack docs and FAQ. This README is the short version.
 ## What it does
 
 A Portable Beacon sitting in your inventory projects beacon effects. Which effects, how far, how
-strong, and what it costs are all configured through the pack's own screen.
+strong, and what it costs are all configured through its own screen.
 
 | Tier | Effects | Amplitude | Aura range | Augment slots |
 |---|---|---|---|---|
@@ -27,8 +29,8 @@ worth much more than a fixed one at equal reach.
 
 ### Augments
 
-One augment of each type per pack, each with its own tiers. They are a single item whose identity
-comes from a datapack registry entry, so a pack can add new ones without any code.
+One augment of each type per beacon, each with its own tiers. They are a single item whose identity
+comes from a datapack registry entry, so a datapack can add new ones without any code.
 
 | Augment | Effect |
 |---|---|
@@ -40,29 +42,29 @@ comes from a datapack registry entry, so a pack can add new ones without any cod
 | Attunement | unlocks wider sharing modes |
 | Discretion | hides effect particles, and the status icon at tier II |
 
-### Themed packs
+### Themed beacons
 
-Cinder, Void and Tidal packs sit alongside tier III with narrower pools drawn from effects the
+Cinder, Void and Tidal beacons sit alongside tier III with narrower pools drawn from effects the
 beacon never offered. Carrying one instead of a tier IV is a trade, not a downgrade.
 
-| Pack | Pool | Edge |
+| Beacon | Pool | Edge |
 |---|---|---|
 | Cinder | Fire Resistance, Strength, Haste, Resistance | level II allowed |
 | Void | Slow Falling, Speed, Jump Boost, Night Vision | longest reach, 14 blocks |
 | Tidal | Water Breathing, Conduit Power, Dolphin's Grace, Night Vision | the only aquatic pool |
 
-They needed no new mechanics: a tier entry declares which effects it accepts, so a themed pack is
+They needed no new mechanics: a tier entry declares which effects it accepts, so a themed beacon is
 a data file plus an item — and a datapack can add more the same way.
 
 ### Fuel
 
 Each effect costs fuel per second, scaled by its level and by how widely it is shared. Iron,
-gold, emerald, diamond and netherite are worth increasing amounts; the pack draws from its own
+gold, emerald, diamond and netherite are worth increasing amounts; the beacon draws from its own
 fuel slot. Sharing an effect with allies costs more than keeping it to yourself, which is the
 main decision the mod asks you to make.
 
 A master switch stops all consumption instantly, and each effect can be turned off individually
-without losing its settings. An effect a real beacon is already providing is free, and the pack
+without losing its settings. An effect a real beacon is already providing is free, and the beacon
 refuses fuel its buffer cannot hold whole rather than burning most of a netherite ingot for
 nothing — which is what gives Capacity and the higher tiers a purpose.
 
@@ -73,7 +75,7 @@ no gauge, no runtime figures.
 
 Effects, their settings and the player's inventory are all the main panel carries. Stats, augments
 and fuel live in side tabs, because they are configured once and then left alone. Effects are
-picked from a searchable list filtered to what the pack accepts, with arrow-key navigation and a
+picked from a searchable list filtered to what the beacon accepts, with arrow-key navigation and a
 four-segment meter comparing fuel costs.
 
 ---
@@ -92,7 +94,7 @@ whether a real beacon makes an effect free, and whether reconfiguring needs a be
 The obvious failure mode for a mod like this is making the beacon block pointless. Three
 safeguards:
 
-1. Every pack tier consumes a Beacon block in its recipe.
+1. Every tier consumes a Beacon block in its recipe.
 2. Aura ranges stay well below the block's, so a placed beacon is still better for a base.
 3. `require_beacon_to_configure` (off by default) restricts changing effects to within 16 blocks
    of a lit beacon.
@@ -105,9 +107,9 @@ Four datapack registries under `data/<namespace>/portablebeacons/`:
 
 | Registry | Controls |
 |---|---|
-| `effect` | which effects a pack may project, their cost, level cap and minimum tier |
+| `effect` | which effects a beacon may project, their cost, level cap and minimum tier |
 | `augment` | augment types, their per-tier operations, colour and icon |
-| `tier` | base stats of each pack tier |
+| `tier` | base stats of each tier |
 | `fuel` | what an item is worth in fuel units |
 
 ```json
@@ -136,9 +138,8 @@ item.
 
 ## Compatibility
 
-**Curios** is optional. With it installed, a pack worn in the `charm` slot works exactly like one
-carried in the inventory — the binding ships with the mod, so nothing needs configuring. A pack in
-the inventory still wins if you somehow carry two. Without Curios, none of that code is ever
+**Curios** is optional. With it installed, a beacon worn in the `charm` slot works exactly like one
+carried in the inventory — the binding ships with the mod, so nothing needs configuring. One in the inventory still wins if you somehow carry two. Without Curios, none of that code is ever
 touched.
 
 ---
@@ -175,7 +176,7 @@ Requires JDK 21.
 ```
 
 Textures are generated rather than hand-drawn, so the GUI background stays in sync with the slot
-coordinates in `Portable BeaconsMenu`:
+coordinates in `PortableBeaconMenu`:
 
 ```bash
 java tools/GenerateTextures.java
