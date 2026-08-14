@@ -102,7 +102,7 @@ freely, but do not lift them into another project.
 ## Upload checklist
 
 - [ ] Create the project on the platform first; the jar cannot be uploaded to nothing.
-- [ ] Release type: **Beta**. It is tested but unplayed by anyone else.
+- [ ] Release type: **Release**. The aura is confirmed on a dedicated server with two players.
 - [ ] Game version 1.21.1, loader NeoForge.
 - [ ] Mark Curios, JEI and EMI as **optional** dependencies, not required.
 - [ ] Changelog: paste the newest section from `CHANGELOG.md`.

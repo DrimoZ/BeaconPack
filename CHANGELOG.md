@@ -28,7 +28,12 @@ played it yet. Report anything odd on the [issue tracker](https://github.com/Dri
   reached the code that opens the menu.
 - Two labels in the effect panel could run past the frame, and one was truncated to nonsense.
 
-## Unreleased
+## 1.0.0
+
+The aura has now been verified on a dedicated server with two players: an effect set to *Allies*
+reaches a second player, and *Team* excludes one who is not on the team. That exclusion cannot be
+observed in single player — there the carrier is trivially allied with everyone who exists — and it
+was the last thing standing between the beta and a release.
 
 ### Added
 - EMI plugin, matching the JEI one: the fifteen augments are listed separately instead of
@@ -37,6 +42,8 @@ played it yet. Report anything odd on the [issue tracker](https://github.com/Dri
   every modded metal that follows the convention. Copper is now fuel, at 150 units.
 - A chime when an augment is fitted or pulled. Every button in the screen made a sound; the slot
   that changes the most did not.
+- Curios, JEI and EMI are declared as optional dependencies, so the loader and the store pages say
+  so rather than leaving players to guess.
 
 ### Fixed
 - EMI showed an on-screen error for every fuel row: rows built from a registry rather than from a
