@@ -38,6 +38,30 @@ GUI and datapack hooks is easy to include, and the permissions block already say
 
 Then bump to 1.0.0 and change the release type. Nothing else is required.
 
+## Next session, in this order
+
+1. The second client run below — it closes a 1.0 criterion without waiting for anyone.
+2. Whatever else the release needs: screenshots, Modrinth, cutting 0.9.1.
+3. The renaming question, only after those.
+
+## Open question — rename to "Portable Beacon"?
+
+Clearer than "BeaconPack", which reads as a modpack. Worth doing, but the cost splits sharply in
+two and only one half is cheap.
+
+**The display name is free.** `mod_name`, the store pages, the wiki, the README, the creative tab
+and the item names are all just text. "Portable Beacon" could ship in the next release with no
+consequence beyond a changelog line.
+
+**The mod id is not.** `beaconpack` is baked into every datapack registry path, the item and
+advancement ids, the `#beaconpack:packs` tag, the data components stored on every pack in every
+existing world, and the CurseForge project. Changing it after publishing means every pack in every
+existing save becomes an unknown item. Addons and datapacks written against it break too.
+
+So: rename the display name if it reads better, keep the id. Mods do this routinely — the id is an
+internal name, not a brand. If the id truly must change, it belongs to a 2.0 with a migration, not
+to a patch.
+
 ## Deferred — a second client for multiplayer testing
 
 A second `runs` entry with its own game directory and username launches a second client against the
