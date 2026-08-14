@@ -25,9 +25,9 @@ both platforms read the page, not the repo.
 
 ## Description
 
-### BeaconPack
+### Portable Beacon
 
-A Beacon Pack in your inventory projects beacon effects on you, and — from tier II up — on the
+A Portable Beacon in your inventory projects beacon effects on you, and — from tier II up — on the
 people around you. Which effects, how far, how strong, and what it costs are all configured in the
 pack's own screen.
 
@@ -40,10 +40,10 @@ what you take with you.
 
 | Pack | Effects | Aura | Augments |
 |---|---|---|---|
-| Beacon Pack I | 1 | self only | — |
-| Beacon Pack II | 1 | 8 blocks | 1 |
-| Beacon Pack III | 2 | 12 blocks | 2 |
-| Beacon Pack IV | 2, one at level II | 16 blocks | 3 |
+| Portable Beacon I | 1 | self only | — |
+| Portable Beacon II | 1 | 8 blocks | 1 |
+| Portable Beacon III | 2 | 12 blocks | 2 |
+| Portable Beacon IV | 2, one at level II | 16 blocks | 3 |
 
 **Cinder**, **Void** and **Tidal** packs branch off tier II with narrow pools drawn from effects the
 vanilla beacon never offered — Fire Resistance, Slow Falling, Water Breathing, Conduit Power,
@@ -86,12 +86,12 @@ file. See the [datapack guide](https://github.com/DrimoZ/BeaconPack/wiki/Datapac
 
 **Modpacks: yes.** No permission needed, no message required, public or private, monetised or not,
 on any platform or launcher. If you are reading this to find out whether you may include
-BeaconPack, the answer is yes and you can stop reading.
+Portable Beacon, the answer is yes and you can stop reading.
 
 **Credit** is appreciated and never required.
 
 **Forks and addons: yes**, under the MIT terms. Please do not publish a fork under the name
-*BeaconPack* — the name is not covered by the licence, and two mods sharing one name only confuses
+*Portable Beacon* — the name is not covered by the licence, and two mods sharing one name only confuses
 players trying to work out which one broke their world.
 
 **Assets** — icons, GUI artwork, logo — are the one exception: redistribute them with the mod

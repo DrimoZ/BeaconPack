@@ -1,4 +1,4 @@
-# BeaconPack
+# Portable Beacon
 
 Beacon effects in an inventory item. Four tiers, augments you slot in, and a fuel cost — all
 defined in datapacks rather than in code.
@@ -12,7 +12,7 @@ config, datapack docs and FAQ. This README is the short version.
 
 ## What it does
 
-A Beacon Pack sitting in your inventory projects beacon effects. Which effects, how far, how
+A Portable Beacon sitting in your inventory projects beacon effects. Which effects, how far, how
 strong, and what it costs are all configured through the pack's own screen.
 
 | Tier | Effects | Amplitude | Aura range | Augment slots |
@@ -147,12 +147,12 @@ touched.
 
 **Modpacks: yes.** No permission needed, no message required, public or private,
 monetised or not, on any platform or launcher. If you are reading this to find out whether you may
-include BeaconPack, the answer is yes and you can stop reading.
+include Portable Beacon, the answer is yes and you can stop reading.
 
 **Credit** is appreciated and never required.
 
 **Forks and addons: yes**, under the MIT terms. Please do not publish a fork under the name
-*BeaconPack* — the name is not covered by the licence, and two mods sharing one name only confuses
+*Portable Beacon* — the name is not covered by the licence, and two mods sharing one name only confuses
 players trying to work out which one broke their world.
 
 **Assets** — icons, GUI artwork, logo — are the one exception: redistribute them with the mod

@@ -3,37 +3,16 @@
 All notable changes to this project are documented here, newest first.
 Versions follow `{mod version}+{minecraft version}`.
 
-## 0.9.0 — first public build
-
-Released as a **beta**: everything here works and is tested, but nobody outside the author has
-played it yet. Report anything odd on the [issue tracker](https://github.com/DrimoZ/BeaconPack/issues).
-
-### Added
-- Advancements: get a pack, fit an augment, then specialise or finish the ladder.
-- Fifteen languages: English, French, Spanish, German, Portuguese (BR), Russian, Simplified and
-  Traditional Chinese, Japanese, Korean, Polish, Italian, Dutch, Turkish, Ukrainian.
-- JEI plugin: augments are shown as the fifteen distinct items they are, and a fuel category lists
-  what each burnable item is worth as runtime.
-- A key bind (**B** by default) that opens the pack you are carrying or wearing, without holding it.
-
-### Changed
-- The pack screen's side tabs are split across both edges — power and stats on the left, augments
-  and fuel on the right — and open in place with a short animation instead of appearing as detached
-  panels. One drawer per side can be open at a time.
-- A pack worn in a Curios slot now takes priority over one loose in the inventory.
-- Built against NeoForge 21.1.248.
-
-### Fixed
-- A pack worn as a Curio could not be opened at all: the key bind's request was discarded before it
-  reached the code that opens the menu.
-- Two labels in the effect panel could run past the frame, and one was truncated to nonsense.
-
 ## 1.0.0
 
-The aura has now been verified on a dedicated server with two players: an effect set to *Allies*
-reaches a second player, and *Team* excludes one who is not on the team. That exclusion cannot be
-observed in single player — there the carrier is trivially allied with everyone who exists — and it
-was the last thing standing between the beta and a release.
+Renamed from **BeaconPack** to **Portable Beacon**. The old name read as a modpack, which is the one
+thing this is not. Only the display name changed: the mod id, item ids and datapack paths are all
+still `beaconpack`, so existing worlds, datapacks and addons are unaffected.
+
+The aura is now verified on a dedicated server with two players: an effect set to *Allies* reaches
+the second player, and *Team* excludes one who is not on the team. That exclusion cannot be observed
+in single player — there the carrier is trivially allied with everyone who exists — and it was the
+last thing standing between the beta and a release.
 
 ### Added
 - EMI plugin, matching the JEI one: the fifteen augments are listed separately instead of
@@ -49,27 +28,45 @@ was the last thing standing between the beta and a release.
 - EMI showed an on-screen error for every fuel row: rows built from a registry rather than from a
   JSON recipe need EMI's synthetic-id form.
 
+## 0.9.0 — first public build
+
+Released as a **beta**: everything worked and was tested, but nobody outside the author had played
+it yet. Report anything odd on the [issue tracker](https://github.com/DrimoZ/BeaconPack/issues).
+
 ### Added
-- Four Beacon Pack tiers projecting beacon effects from the inventory, configured through their
-  own screen.
+- Four beacon tiers projecting beacon effects from the inventory, configured through their own
+  screen.
 - Seven augments: Range, Focus, Amplification, Efficiency, Capacity, Attunement and Discretion,
-  one of each type per pack.
-- Three themed packs — Cinder, Void and Tidal — with effect pools drawn from effects the beacon
-  never offered.
-- Fuel: items are consumed per second of projection, priced by a datapack registry and reported
-  as remaining runtime rather than as points.
+  one of each type per beacon.
+- Three themed beacons — Cinder, Void and Tidal — with effect pools drawn from effects the vanilla
+  beacon never offered.
+- Fuel: items are consumed per second of projection, priced by a datapack registry and reported as
+  remaining runtime rather than as points.
 - Four datapack registries (`effect`, `augment`, `tier`, `fuel`), so effects, augments, tiers and
   fuel values can all be retuned or extended without code.
-- Server config for fuel, aura reach, free coverage near a real beacon, and an optional
-  requirement to stand near a lit beacon to reconfigure.
-- Optional Curios support: a pack worn in the `charm` slot works like one carried in the inventory.
-  A pack in the inventory still wins if you carry both.
+- Server config for fuel, aura reach, free coverage near a real beacon, and an optional requirement
+  to stand near a lit beacon to reconfigure.
+- Optional Curios support: one worn in the `charm` slot works like one carried in the inventory.
+- Advancements: get one, fit an augment, then specialise or finish the ladder.
+- Fifteen languages: English, French, Spanish, German, Portuguese (BR), Russian, Simplified and
+  Traditional Chinese, Japanese, Korean, Polish, Italian, Dutch, Turkish, Ukrainian.
+- JEI plugin, and a key bind (**B** by default) that opens the one you are carrying or wearing.
+
+### Changed
+- The screen's side tabs are split across both edges — power and stats on the left, augments and
+  fuel on the right — and open in place with a short animation instead of appearing as detached
+  panels. One drawer per side can be open at a time.
+- One worn in a Curios slot takes priority over one loose in the inventory.
+- Built against NeoForge 21.1.248.
 
 ### Fixed
+- One worn as a Curio could not be opened at all: the key bind's request was discarded before it
+  reached the code that opens the menu.
 - A modified client could send a negative slot or value in a configuration action. Every existing
   check was an upper bound, so it reached `List.set` / `List.remove` and threw on the server thread.
+- Two labels in the effect panel could run past the frame, and one was truncated to nonsense.
 
 ### Notes
 - Documentation lives in the [wiki](https://github.com/DrimoZ/BeaconPack/wiki).
-- Code is MIT; the artwork is reserved, with redistribution as part of the mod — modpacks
-  included — granted explicitly. See the README's Permissions section.
+- Code is MIT; the artwork is reserved, with redistribution as part of the mod — modpacks included —
+  granted explicitly. See the README's Permissions section.

@@ -12,11 +12,11 @@ have.
 
 YOU MAY, WITHOUT ASKING:
 
-  1. Redistribute these assets as part of an unmodified BeaconPack release.
+  1. Redistribute these assets as part of an unmodified Portable Beacon release.
      This explicitly includes modpacks, public or private, monetised or not,
      on any platform or launcher.
 
-  2. Redistribute them as part of a modified build of BeaconPack, provided the
+  2. Redistribute them as part of a modified build of Portable Beacon, provided the
      result is not presented as the original mod. See the note on the name
      below.
 
@@ -36,7 +36,7 @@ YOU MAY NOT, WITHOUT WRITTEN PERMISSION:
 
 ON THE NAME
 
-"BeaconPack" is not licensed by either file. You are free to fork the code, but
+"Portable Beacon", and the earlier name "BeaconPack", are not licensed by either file. You are free to fork the code, but
 please do not publish a fork under the same name - two different mods with one
 name only confuses players trying to work out which one broke their world.
 

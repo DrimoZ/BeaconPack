@@ -45,7 +45,7 @@ are in:
 
 ## Open question — rename to "Portable Beacon"?
 
-Clearer than "BeaconPack", which reads as a modpack. Worth doing, but the cost splits sharply in
+Clearer than "Portable Beacon", which reads as a modpack. Worth doing, but the cost splits sharply in
 two and only one half is cheap.
 
 **The display name is free.** `mod_name`, the store pages, the wiki, the README, the creative tab
