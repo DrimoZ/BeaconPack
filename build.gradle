@@ -26,6 +26,21 @@ neoForge {
             gameDirectory = project.file('run')
             systemProperty 'neoforge.enabledGameTestNamespaces', mod_id
         }
+        /**
+         * A second client, for the one thing a single client cannot show: whether the aura actually
+         * reaches another player.
+         *
+         * Its own game directory, for the reason the game test run needed one - runs that share
+         * run/ share run/mods and each other's saves. Its own username too, because the server
+         * rejects a second connection under a name already online.
+         *
+         * Usage: runServer, then runClient and runClient2, and connect both to localhost.
+         */
+        client2 {
+            client()
+            gameDirectory = project.file('run-client2')
+            programArguments.addAll '--username', 'Dev2'
+        }
         server {
             server()
             gameDirectory = project.file('run')
@@ -133,8 +148,17 @@ var copyDevMods = tasks.register('copyDevMods', Copy) {
     into file('run/mods')
 }
 
+// The second client has its own directory, so it needs its own copy.
+var copyDevMods2 = tasks.register('copyDevMods2', Copy) {
+    from configurations.devMods
+    into file('run-client2/mods')
+}
+
 tasks.matching { it.name in ['runClient', 'runServer'] }.configureEach {
     dependsOn copyDevMods
+}
+tasks.matching { it.name == 'runClient2' }.configureEach {
+    dependsOn copyDevMods2
 }
 
 // Expand gradle.properties into neoforge.mods.toml so versions live in one place.

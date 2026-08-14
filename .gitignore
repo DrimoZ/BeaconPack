@@ -27,3 +27,6 @@ Thumbs.db
 
 # Datagen output is committed on purpose (see build.gradle); only its cache is not.
 src/generated/resources/.cache/
+
+# Second dev client
+run-client2/
