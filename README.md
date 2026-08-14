@@ -1,11 +1,11 @@
-# Portable Beacon
+# Portable Beacons
 
 Beacon effects in an inventory item. Four tiers, augments you slot in, and a fuel cost — all
 defined in datapacks rather than in code.
 
 **NeoForge 1.21.1** · Java 21 · MIT
 
-📖 **[The wiki](https://github.com/DrimoZ/BeaconPack/wiki) is the reference** — player guide,
+📖 **[The wiki](https://github.com/DrimoZ/PortableBeacons/wiki) is the reference** — player guide,
 config, datapack docs and FAQ. This README is the short version.
 
 ---
@@ -83,7 +83,7 @@ four-segment meter comparing fuel costs.
 Four server-side options: whether fuel exists, whether the aura reaches players off your team,
 whether a real beacon makes an effect free, and whether reconfiguring needs a beacon nearby.
 
-**[Config reference →](https://github.com/DrimoZ/BeaconPack/wiki/Configuration)**
+**[Config reference →](https://github.com/DrimoZ/PortableBeacons/wiki/Configuration)**
 
 ---
 
@@ -101,7 +101,7 @@ safeguards:
 
 ## Data-driven
 
-Four datapack registries under `data/<namespace>/beaconpack/`:
+Four datapack registries under `data/<namespace>/portablebeacons/`:
 
 | Registry | Controls |
 |---|---|
@@ -111,7 +111,7 @@ Four datapack registries under `data/<namespace>/beaconpack/`:
 | `fuel` | what an item is worth in fuel units |
 
 ```json
-// data/mypack/beaconpack/effect/fire_resistance.json
+// data/mypack/portablebeacons/effect/fire_resistance.json
 {
   "effect": "minecraft:fire_resistance",
   "cost": 2.0,
@@ -120,7 +120,7 @@ Four datapack registries under `data/<namespace>/beaconpack/`:
 }
 ```
 
-**[Full datapack guide →](https://github.com/DrimoZ/BeaconPack/wiki/Datapack-Guide)** — every field
+**[Full datapack guide →](https://github.com/DrimoZ/PortableBeacons/wiki/Datapack-Guide)** — every field
 of all four registries, with worked examples for adding an effect, an augment and a themed tier.
 
 The screen adapts on its own: effects live in a scrollable, searchable picker rather than a
@@ -147,12 +147,12 @@ touched.
 
 **Modpacks: yes.** No permission needed, no message required, public or private,
 monetised or not, on any platform or launcher. If you are reading this to find out whether you may
-include Portable Beacon, the answer is yes and you can stop reading.
+include Portable Beacons, the answer is yes and you can stop reading.
 
 **Credit** is appreciated and never required.
 
 **Forks and addons: yes**, under the MIT terms. Please do not publish a fork under the name
-*Portable Beacon* — the name is not covered by the licence, and two mods sharing one name only confuses
+*Portable Beacons* — the name is not covered by the licence, and two mods sharing one name only confuses
 players trying to work out which one broke their world.
 
 **Assets** — icons, GUI artwork, logo — are the one exception: redistribute them with the mod
@@ -175,7 +175,7 @@ Requires JDK 21.
 ```
 
 Textures are generated rather than hand-drawn, so the GUI background stays in sync with the slot
-coordinates in `BeaconPackMenu`:
+coordinates in `Portable BeaconsMenu`:
 
 ```bash
 java tools/GenerateTextures.java

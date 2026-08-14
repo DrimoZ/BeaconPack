@@ -5,9 +5,14 @@ Versions follow `{mod version}+{minecraft version}`.
 
 ## 1.0.0
 
-Renamed from **BeaconPack** to **Portable Beacon**. The old name read as a modpack, which is the one
-thing this is not. Only the display name changed: the mod id, item ids and datapack paths are all
-still `beaconpack`, so existing worlds, datapacks and addons are unaffected.
+Renamed from **BeaconPack** to **Portable Beacons**, and renamed all the way down: the mod id, the
+item, recipe and advancement ids, the datapack paths, the item tag and the Java package are all
+`portablebeacons` now. The old name read as a modpack, which is the one thing this is not.
+
+**This breaks worlds saved with the 0.9.0 beta.** A beacon stored under the old id becomes an
+unknown item, and any datapack written against `beaconpack:` needs its ids updated. The beta was up
+for a day, so renaming now costs a handful of saves instead of every save the mod will ever touch —
+which is exactly why it had to happen before 1.0 and cannot happen after.
 
 The aura is now verified on a dedicated server with two players: an effect set to *Allies* reaches
 the second player, and *Team* excludes one who is not on the team. That exclusion cannot be observed
@@ -31,7 +36,7 @@ last thing standing between the beta and a release.
 ## 0.9.0 — first public build
 
 Released as a **beta**: everything worked and was tested, but nobody outside the author had played
-it yet. Report anything odd on the [issue tracker](https://github.com/DrimoZ/BeaconPack/issues).
+it yet. Report anything odd on the [issue tracker](https://github.com/DrimoZ/PortableBeacons/issues).
 
 ### Added
 - Four beacon tiers projecting beacon effects from the inventory, configured through their own
@@ -67,6 +72,6 @@ it yet. Report anything odd on the [issue tracker](https://github.com/DrimoZ/Bea
 - Two labels in the effect panel could run past the frame, and one was truncated to nonsense.
 
 ### Notes
-- Documentation lives in the [wiki](https://github.com/DrimoZ/BeaconPack/wiki).
+- Documentation lives in the [wiki](https://github.com/DrimoZ/PortableBeacons/wiki).
 - Code is MIT; the artwork is reserved, with redistribution as part of the mod — modpacks included —
   granted explicitly. See the README's Permissions section.

@@ -1,4 +1,7 @@
-# BeaconPack — Design (phase 1)
+# Portable Beacons — Design (phase 1)
+
+> Written under the mod's original name, BeaconPack, and renamed in place. The reasoning is
+> unchanged; only the identifiers moved.
 
 > Mod NeoForge 1.21.1. Objectif : **petit mod**, une seule idée, exécutée proprement et data-driven.
 > Ports prévus : 26.1 puis 26.2. Backport 1.20.1 possible → contrainte d'architecture (voir §9).
@@ -159,7 +162,7 @@ survolée dans le sélecteur) :
   pack et ouvre le menu lui-même (jamais le client qui décide de l'index).
 - Dans les deux cas, l'index du slot est mémorisé par le menu pour le verrouillage (cf. §9).
 - **Slots d'augment** : 3 slots physiques, ceux au-delà du tier sont rendus verrouillés
-  (`mayPlace()` → false, overlay cadenas). Filtre : `beaconpack:augment` uniquement, et
+  (`mayPlace()` → false, overlay cadenas). Filtre : `portablebeacons:augment` uniquement, et
   **refus d'un second augment du même type** (règle « 1 max par type » appliquée dans le slot,
   pas seulement en logique).
 - **Slot carburant** + jauge : quantité restante, consommation/s, autonomie estimée en clair.
@@ -191,8 +194,8 @@ Activé par défaut, désactivable (`require_fuel`).
 Puisqu'ils vont dans des slots, ce sont de vrais items. Pour rester data-driven **sans**
 exploser le nombre d'items enregistrés :
 
-> **Un seul item** `beaconpack:augment`, dont l'identité vient d'un composant
-> `beaconpack:augment_type` = `{ type: <id de registry datapack>, tier: 1..3 }`.
+> **Un seul item** `portablebeacons:augment`, dont l'identité vient d'un composant
+> `portablebeacons:augment_type` = `{ type: <id de registry datapack>, tier: 1..3 }`.
 
 Un modpack peut donc **ajouter** de nouveaux augments en datapack (entrée de registry +
 recette), sans code. L'onglet créatif énumère toutes les entrées enregistrées.
@@ -227,13 +230,13 @@ Chaque entrée déclare une liste d'opérations : `add_range`, `add_effect_slot`
 
 - 4 items distincts (`beacon_pack_t1..t4`) plutôt qu'un item + composant tier → recettes, tags
   et intégration JEI nettement plus simples.
-- **Tout l'état du pack dans un composant unique** `beaconpack:pack` :
+- **Tout l'état du pack dans un composant unique** `portablebeacons:pack` :
   effets sélectionnés, carburant restant, actif o/n, mode d'aura, et le contenu des slots
   (augments + carburant) via `ItemContainerContents`.
 - Inventaire item-backed : `ComponentItemHandler` (NeoForge) plutôt qu'un `SimpleContainer`
   copié/recopié — l'écriture retourne directement dans le composant du stack.
-- **4** registries datapack : `beaconpack/effect` (effets autorisés + coût), `beaconpack/augment`,
-  `beaconpack/tier`, `beaconpack/fuel`.
+- **4** registries datapack : `portablebeacons/effect` (effets autorisés + coût), `portablebeacons/augment`,
+  `portablebeacons/tier`, `portablebeacons/fuel`.
   Le carburant est passé de « tag + valeurs codées » à un registry à part entière : un tag sait
   seulement dire *« ceci est du carburant »*, il ne peut pas porter la valeur par item — et coder
   les valeurs en dur annulait l'intérêt d'avoir rendu tout le reste data-driven.

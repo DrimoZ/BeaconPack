@@ -1,6 +1,6 @@
 {
   "pack": {
-    "description": "BeaconPack",
+    "description": "Portable Beacons",
     "pack_format": 34,
     "supported_formats": [34, 48]
   }

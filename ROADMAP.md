@@ -43,17 +43,17 @@ are in:
 - **Still open:** one translation reviewed by a native speaker. Fifteen locales shipped and all
   fifteen are mine. The first correction from a real player outranks anything I wrote.
 
-## Open question — rename to "Portable Beacon"?
+## Open question — rename to "Portable Beacons"?
 
-Clearer than "Portable Beacon", which reads as a modpack. Worth doing, but the cost splits sharply in
+Clearer than "Portable Beacons", which reads as a modpack. Worth doing, but the cost splits sharply in
 two and only one half is cheap.
 
 **The display name is free.** `mod_name`, the store pages, the wiki, the README, the creative tab
-and the item names are all just text. "Portable Beacon" could ship in the next release with no
+and the item names are all just text. "Portable Beacons" could ship in the next release with no
 consequence beyond a changelog line.
 
-**The mod id is not.** `beaconpack` is baked into every datapack registry path, the item and
-advancement ids, the `#beaconpack:packs` tag, the data components stored on every pack in every
+**The mod id is not.** `portablebeacons` is baked into every datapack registry path, the item and
+advancement ids, the `#portablebeacons:packs` tag, the data components stored on every pack in every
 existing world, and the CurseForge project. Changing it after publishing means every pack in every
 existing save becomes an unknown item. Addons and datapacks written against it break too.
 

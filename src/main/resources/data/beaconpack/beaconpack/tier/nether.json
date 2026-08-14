@@ -1,7 +1,0 @@
-{
-  "level": 3, "effect_slots": 2, "augment_slots": 2, "base_range": 10.0,
-  "fuel_capacity": 10800, "max_amplifier": 1,
-  "effect_pool": [
-    "beaconpack:fire_resistance", "beaconpack:strength", "beaconpack:haste", "beaconpack:resistance"
-  ]
-}

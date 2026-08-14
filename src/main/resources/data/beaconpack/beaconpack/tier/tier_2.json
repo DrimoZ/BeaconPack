@@ -1,2 +1,0 @@
-{ "level": 2, "effect_slots": 1, "augment_slots": 1, "base_range": 8.0, "fuel_capacity": 3600, "max_amplifier": 0,
-  "effect_pool": [ "beaconpack:speed", "beaconpack:haste", "beaconpack:jump_boost", "beaconpack:resistance", "beaconpack:strength", "beaconpack:regeneration" ] }

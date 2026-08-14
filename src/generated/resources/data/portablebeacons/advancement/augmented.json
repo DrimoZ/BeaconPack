@@ -1,0 +1,33 @@
+{
+  "parent": "portablebeacons:root",
+  "criteria": {
+    "has_augment": {
+      "conditions": {
+        "items": [
+          {
+            "items": "portablebeacons:augment"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancement.portablebeacons.augmented.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "portablebeacons:augment"
+    },
+    "title": {
+      "translate": "advancement.portablebeacons.augmented.title"
+    }
+  },
+  "requirements": [
+    [
+      "has_augment"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

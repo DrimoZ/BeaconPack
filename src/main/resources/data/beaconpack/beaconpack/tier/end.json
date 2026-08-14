@@ -1,7 +1,0 @@
-{
-  "level": 3, "effect_slots": 2, "augment_slots": 2, "base_range": 14.0,
-  "fuel_capacity": 10800, "max_amplifier": 0,
-  "effect_pool": [
-    "beaconpack:slow_falling", "beaconpack:speed", "beaconpack:jump_boost", "beaconpack:night_vision"
-  ]
-}

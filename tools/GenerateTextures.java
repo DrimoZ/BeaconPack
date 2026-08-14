@@ -7,14 +7,14 @@ import java.io.IOException;
  * Generates the mod's placeholder textures.
  *
  * <p>Kept as a script rather than committed-only PNGs so the GUI background stays in sync with the
- * slot coordinates in BeaconPackMenu: change a constant there, change it here, re-run.
+ * slot coordinates in PortableBeaconMenu: change a constant there, change it here, re-run.
  *
  * <pre>java tools/GenerateTextures.java</pre>
  */
 public final class GenerateTextures {
 
-    private static final String GUI_DIR = "src/main/resources/assets/beaconpack/textures/gui";
-    private static final String ITEM_DIR = "src/main/resources/assets/beaconpack/textures/item";
+    private static final String GUI_DIR = "src/main/resources/assets/portablebeacons/textures/gui";
+    private static final String ITEM_DIR = "src/main/resources/assets/portablebeacons/textures/item";
     /** The mod list logo lives at the jar root, not under assets/. */
     private static final String ROOT_DIR = "src/main/resources";
 

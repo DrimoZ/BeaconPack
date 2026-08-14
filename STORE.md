@@ -1,7 +1,7 @@
 # Store listing copy
 
 Paste-ready text for the CurseForge and Modrinth project pages. Not documentation — the
-[wiki](https://github.com/DrimoZ/BeaconPack/wiki) is that.
+[wiki](https://github.com/DrimoZ/PortableBeacons/wiki) is that.
 
 ---
 
@@ -25,7 +25,7 @@ both platforms read the page, not the repo.
 
 ## Description
 
-### Portable Beacon
+### Portable Beacons
 
 A Portable Beacon in your inventory projects beacon effects on you, and — from tier II up — on the
 people around you. Which effects, how far, how strong, and what it costs are all configured in the
@@ -71,7 +71,7 @@ the screen rather than sitting there inert.
 Four datapack registries: which effects a pack may project and what they cost, what augments do,
 what each tier is worth, and what burns as fuel. The mod's own content ships through exactly that
 mechanism — there is no private path. Adding another mod's effect, or a whole themed pack, is a JSON
-file. See the [datapack guide](https://github.com/DrimoZ/BeaconPack/wiki/Datapack-Guide).
+file. See the [datapack guide](https://github.com/DrimoZ/PortableBeacons/wiki/Datapack-Guide).
 
 ### Compatibility
 
@@ -86,12 +86,12 @@ file. See the [datapack guide](https://github.com/DrimoZ/BeaconPack/wiki/Datapac
 
 **Modpacks: yes.** No permission needed, no message required, public or private, monetised or not,
 on any platform or launcher. If you are reading this to find out whether you may include
-Portable Beacon, the answer is yes and you can stop reading.
+Portable Beacons, the answer is yes and you can stop reading.
 
 **Credit** is appreciated and never required.
 
 **Forks and addons: yes**, under the MIT terms. Please do not publish a fork under the name
-*Portable Beacon* — the name is not covered by the licence, and two mods sharing one name only confuses
+*Portable Beacons* — the name is not covered by the licence, and two mods sharing one name only confuses
 players trying to work out which one broke their world.
 
 **Assets** — icons, GUI artwork, logo — are the one exception: redistribute them with the mod
