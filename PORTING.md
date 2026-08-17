@@ -1,0 +1,196 @@
+# Porting to the 26.x line
+
+Written before any code was touched. Its job is to say what the port actually is, so the decision
+to start it — or not to — is made with the size known rather than discovered halfway.
+
+Researched 17 August 2026 against the NeoForge primers, the NeoForged release notes and the
+dependency listings. Facts fetched from those sources are marked as such; everything else is my
+reading of this repository against them, and should be treated as an estimate until the compiler
+disagrees.
+
+---
+
+## 1. What "26.1" is
+
+Mojang moved to `year.drop.hotfix` versioning in December 2025. There is no 1.22 — the line
+continues as 26.1, 26.2, and so on.
+
+| | |
+|---|---|
+| **26.1** "Tiny Takeover" | released 24 March 2026 |
+| **26.2** "Chaos Cubed" | released 16 June 2026 |
+| 26.3 | announced, not out |
+
+NeoForge versions gained a fourth component to match: `26.1.2.95` means Minecraft 26.1 hotfix 2,
+NeoForge build 95. Latest as of today: **26.1.2.95** on the 26.1 line, **26.2.0.60** on 26.2.
+
+**This matters for the target.** 26.1 has been superseded for two months. Porting to it means
+shipping onto a version that is already one drop behind on the day it releases — and 26.1 → 26.2 is
+one further primer on top of the ten below, not a tenth of the work. See §6.
+
+## 2. This is not a version bump
+
+The mod is on **1.21.1**. The path to 26.1 crosses ten primers:
+
+`1.21.2` · `1.21.4` · `1.21.5` · `1.21.6` · `1.21.7` · `1.21.8` · `1.21.9` · `1.21.10` · `1.21.11` · `26.1`
+
+1.21.1 was the long-lived modding anchor, so almost nothing in the ecosystem moved for a year and
+then everything moved at once. The changes are not spread evenly across those ten: three of them
+(1.21.2, 1.21.4, 26.1) carry most of the damage, and all three land on this mod.
+
+## 3. Toolchain
+
+Verified from the NeoForge 26.1 release notes.
+
+| | now | 26.1 |
+|---|---|---|
+| Java | 21 | **25** |
+| Gradle | 8.8 | **9.1+** |
+| ModDevGradle | 2.0.78 | **2.0.141** |
+| Parchment | pinned to 1.21.1 | **removed** — Mojang dropped obfuscation, the real parameter names ship |
+
+Local JDK is already 26.0.1, so the toolchain is not a blocker. Parchment going away is a small
+gift: one less mapping to keep in sync, and the names in the decompiled source become authoritative.
+
+## 4. What breaks, by file
+
+Ordered by cost, not by directory.
+
+### The screen — the whole cost of this port
+
+`client/PortableBeaconScreen.java`, 1423 lines, 97 draw calls.
+
+Three separate refactors land on it:
+
+- **1.21.4** reorganised the widget hierarchy (`AbstractScrollWidget` split, `AbstractSelectionList`
+  scroll methods renamed). The effect picker is a scrollable searchable list — it sits directly on
+  the part that moved.
+- **1.21.5** replaced the rendering backend wholesale: shader JSONs became in-code `RenderPipeline`
+  objects, OpenGL is abstracted behind `GpuDevice` / `CommandEncoder` / `RenderPass`.
+- **26.1** split drawing into two phases. `GuiGraphics` became `GuiGraphicsExtractor`, and
+  `Screen#render` became `Screen#extractRenderState`. Drawing no longer happens inline during
+  render; a screen now *describes* what to draw and the engine renders it afterwards.
+
+That last one is the one that hurts. The drawer animation reads a clock and blits at an interpolated
+width inside the render call — that is exactly the shape the new model removes. The screen has to be
+restructured around state extraction, not patched. **Assume it is rewritten.** Realistically this is
+the majority of the port's hours, and everything else in this document is small next to it.
+
+The good news is that it is 1423 lines of *layout*, and layout survives: the coordinates, the tab
+geometry, the animation curve and the decisions that took several rounds of your feedback to get
+right are all still correct. It is the plumbing under them that is gone.
+
+### Items, models and datagen
+
+- **`registry/BPItems.java`** — 1.21.2 made `Item.Properties#setId` mandatory:
+  `new Item.Properties().setId(ResourceKey.create(Registries.ITEM, ...))`. Mechanical, every item.
+- **`datagen/BPItemModelProvider.java`** — 1.21.4 replaced the item model system entirely. Models
+  now live in `assets/<ns>/items/` as `ClientItem` definitions, `net.minecraft.data.models.*` moved
+  to `net.minecraft.client.data.models.*`, and `ItemModelGenerator` is gone. This provider is
+  rewritten, not adjusted. It is only 53 lines and the models are generated rather than hand-drawn,
+  so the cost is learning the new system once.
+- **`datagen/BPRecipeProvider.java` + `ComponentShapedRecipe.java`** — 26.1 turned `RecipeSerializer`
+  into a record of `MapCodec` + `StreamCodec`, killing the separate serializer class, and
+  `Recipe#assemble` lost its `HolderLookup$Provider`. `ComponentShapedRecipe` is a custom recipe
+  type, so it takes this change head-on. 51 lines, and the codec is already written — mostly
+  reshaping.
+- **`datagen/BPAdvancementProvider.java`** — advancement display now takes `ItemStackTemplate`
+  instead of `ItemStack`. Small.
+
+### Data components and state
+
+`registry/BPComponents.java`, `core/PackState.java`, `core/AugmentInstance.java`.
+
+26.1 changed *when* components initialise: they now come up at resource reload rather than at
+construction, via `Item.Properties#delayedComponent` / `delayedHolderComponent`. And `ItemStack` is
+being split — an immutable `ItemStackTemplate` for data files, with both it and `ItemStack`
+implementing a new `ItemInstance` interface.
+
+`PackState` and its codec are the single place serialization lives, which was the point of writing
+them that way. That bet gets tested here. Expect real work but confined to two or three files.
+
+### Datapack registries
+
+`registry/BPDatapackRegistries.java` and the `core/*Def` codecs.
+
+26.1 moved registries to holding `MapCodec` directly (`getType()` → `codec()`) and introduced a
+`Validatable` interface — `validate(ValidationContext)` — replacing ad-hoc validation. `FuelDef`
+currently validates through `Codec#validate` for its exactly-one-of-item-or-tag rule; that becomes
+the new interface. Moderate, and the JSON format the datapacks use should be unaffected — **the
+registries stay compatible for pack authors**, which is worth saying on the store page.
+
+### The parts that should be nearly free
+
+- **`core/`** — 13 files of pure model and arithmetic, touching only `Holder`, `TagKey`,
+  `BuiltInRegistries` and `Codec`. This is the layer written to survive exactly this, and it should.
+  If it doesn't, the architecture was wrong and that is worth knowing.
+- **`net/`** — the payload API has been stable since 1.20.5. Low risk.
+- **`menu/`** — `AbstractContainerMenu` and `Slot` are not called out in any primer I read. Assume
+  low, verify early, because the curio sentinel path is subtle enough that a silent behaviour change
+  would be expensive to find twice.
+- **lang, tags, advancement JSON** — carry over.
+
+### Gametests
+
+`gametest/BPGameTests.java`. The framework moved during the 1.21.x run; I have not pinned down where
+or how much. Unknown, and it is the thing that proves the rest of the port, so it should be checked
+before the port is planned in detail rather than after.
+
+## 5. Dependencies
+
+| | 1.21.1 today | 26.1 | |
+|---|---|---|---|
+| **Curios** | 9.5.1 | **15.0.0+26.1.2**, stable, 19 July 2026 | six major versions — the compat layer is small but it is being rewritten against an API I have not read |
+| **JEI** | 19.44 | **29.5.0.28** for 26.1.2 | ten major versions. `IRecipeCategory` / `ISubtypeInterpreter` will not have survived unchanged |
+| **EMI** | 1.1.24 | **none** | no 26.x NeoForge build on either CurseForge or Modrinth; the newest is still 1.1.24+1.21.1, from May 2026 |
+
+EMI is the one that changes scope rather than cost: with no 26.x NeoForge build to compile against,
+the plugin cannot come along. It is dropped from the 26.x files and re-added if and when one
+appears — the source stays in the repository, since deleting it would only mean writing it again.
+That is not worth delaying the port over, JEI covers the same need, but the 26.x files must stop
+listing EMI as an optional dependency or players will read it as broken rather than absent.
+
+## 6. The path: 26.1, then 26.2, then 26.3
+
+Settled: **26.1 first and shipped, 26.2 next, 26.3 when it lands.** Not a single jump to whatever is
+current.
+
+The reasoning is that the ten primers between 1.21.1 and 26.1 are the wall, and the wall does not
+get shorter by aiming further past it — but it does get harder to debug. Landing on 26.1 first means
+the screen rewrite is verified against one target before 26.2's delta is stacked on top of it. When
+something renders wrong, the question is *which of the ten changes did that*, and adding an eleventh
+to the same failure makes it strictly worse.
+
+It also means each drop gets a file rather than only the newest one, which is what actually serves
+players and modpack authors — a pack pinned to 26.1 is not helped by a 26.2-only build.
+
+The cost is real and worth stating: three ports instead of one, and the two follow-on hops are only
+cheap if the first one leaves the code in good shape. If 26.1 → 26.2 turns out to be another wall
+rather than a step, that is the moment to reconsider, not now.
+
+## 7. Feasibility
+
+**Feasible, and worth doing — but it is a port, not a bump.** The honest shape of it:
+
+- roughly half the work is one file, and that file is being rewritten rather than migrated
+- roughly a quarter is datagen and registration, which is mechanical once the new APIs are read
+- roughly a quarter is the three compat layers, one of which may simply be dropped
+- `core/`, which is the actual mod, should come through nearly untouched
+
+The one caution worth keeping in view: 1.0.0 shipped days ago and has no player reports yet, and a
+bug found on 1.21.1 is much cheaper to fix on one branch than on three. That is an argument for
+keeping `1.21.1` genuinely maintained, not an argument against starting — the 1.21.1 ecosystem is
+where it will stay, and every month there is a month of players who cannot install the mod at all.
+
+## 8. Branches
+
+One branch per game version, since each one keeps getting files rather than being replaced.
+
+| branch | what it is |
+|---|---|
+| `main` | documentation and planning, and 1.21.1 until the port lands. |
+| `1.21.1` | maintenance. Where a hotfix for players already on 1.0.0 goes, so it has somewhere to live once `main` moves on. |
+| `26.1` | the port. Branches from `main`. |
+| `26.2` | branches from `26.1` once it builds and runs — not before, or it is just an empty copy that drifts. |
+
+`26.3` the same way, when there is a 26.3.

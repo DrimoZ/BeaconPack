@@ -24,13 +24,9 @@ section and the listing copy are ready in [CHANGELOG.md](CHANGELOG.md) and [STOR
 **Watch the issue tracker.** This is the whole point of shipping. Until reports come in, every
 priority below is a guess, and a guess should lose to a real report every time.
 
-**Modrinth.** Not created yet. One upload, lists near-instantly, reaches a different crowd from
-CurseForge. Copy from [STORE.md](STORE.md); pick the custom licence option and point it at
-`LICENSE`.
-
-**Screenshots.** Still the single biggest thing standing between the page and a download, whichever
-platform. Three carry it: the beacon screen with a drawer open, the effect picker mid-search, and the
-JEI fuel category. A short GIF of a drawer opening would do more than any paragraph on the page.
+**Screenshots.** Still the single biggest thing standing between the page and a download. Three
+carry it: the beacon screen with a drawer open, the effect picker mid-search, and the JEI fuel
+category. A short GIF of a drawer opening would do more than any paragraph on the page.
 
 **Tell people it exists.** r/feedthebeast and r/MinecraftMods on a weekend, the NeoForged Discord's
 showcase channel. Modpack authors are the real growth channel — a small utility mod with a clean
@@ -64,18 +60,24 @@ If the id ever has to move again, it belongs to a 2.0 with a migration, not to a
 Nothing left here. EMI, fuel tags, the deprecations and the augment chime all shipped in 1.0.0.
 What comes next should come from a report, not from a guess.
 
-## Later — ports
+## Next — the 26.x line
 
-The order the code is shaped for: **1.21.1 → current 1.21.x → 1.20.1 backport**. `core/` and
-`PackState`'s codec are the only layers that should need thought on each hop.
+**1.21.1 → 26.1 → 26.2 → 26.3.** One hop at a time, a published file for each, rather than one jump
+to whatever is newest.
 
-Do not start before 1.0 has been in players' hands for a few weeks. Every extra branch multiplies
-each bug report by the number of branches, and reports have only just begun.
+This is a port, not a bump: ten primers separate 1.21.1 from 26.1, and the screen is rewritten
+rather than migrated. The full analysis — what breaks per file, what the dependencies do, what the
+toolchain needs — is in [PORTING.md](PORTING.md).
+
+`1.21.1` stays maintained throughout. Every extra branch multiplies each bug report by the number of
+branches, and reports have only just begun.
 
 ## Publishing mechanics
 
-Manual uploads for now. Once both platforms have accepted one by hand, `minotaur` (Modrinth) and
-`curseforge-gradle` can publish from a local Gradle task — no CI needed, which is consistent with
-this project not having any.
+CurseForge only, and deliberately — one page to keep current beats two kept half-current, and the
+audience this mod is aimed at is already there.
+
+Manual uploads for now. Once CurseForge has accepted one by hand, `curseforge-gradle` can publish
+from a local Gradle task — no CI needed, which is consistent with this project not having any.
 
 Keep the changelog current as things land: both platforms render release notes straight from it.

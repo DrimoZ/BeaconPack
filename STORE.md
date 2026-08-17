@@ -2,26 +2,25 @@
 
 Live at <https://www.curseforge.com/minecraft/mc-mods/portables-beacons>.
 
-Paste-ready text for the CurseForge and Modrinth project pages. Not documentation — the
+Paste-ready text for the CurseForge project page. Not documentation — the
 [wiki](https://github.com/DrimoZ/PortableBeacons/wiki) is that.
 
 ---
 
-## Short description (one line, both platforms)
+## Short description (one line)
 
 > Beacon effects in an inventory item. Four tiers, augments you slot in, and a fuel cost — all
 > defined in datapacks.
 
 ## Categories
 
-- CurseForge: *Adventure and RPG*, *Equipment*, *Utility & QoL*
-- Modrinth: *Utility*, *Equipment*
+*Adventure and RPG*, *Equipment*, *Utility & QoL*
 
 ## Licence field
 
 Custom. Point it at `LICENSE` in the repository: MIT for the code, all rights reserved for the
 artwork with redistribution granted. Paste the Permissions block below into the description too —
-both platforms read the page, not the repo.
+people read the page, not the repo.
 
 ---
 
@@ -104,12 +103,11 @@ freely, but do not lift them into another project.
 ## Upload checklist
 
 - [x] CurseForge project created and renamed to Portable Beacons.
-- [ ] Modrinth project still to create.
 - [ ] Release type: **Release**. The aura is confirmed on a dedicated server with two players.
 - [ ] Game version 1.21.1, loader NeoForge.
 - [ ] Mark Curios, JEI and EMI as **optional** dependencies, not required.
 - [ ] Changelog: paste the newest section from `CHANGELOG.md`.
 - [ ] Gallery: screenshots are still missing, and this is the one thing that decides whether anyone
-      clicks. At minimum: the pack screen with a drawer open, the effect picker, and the JEI fuel
-      category, and the EMI or JEI fuel category.
+      clicks. At minimum: the beacon screen with a drawer open, the effect picker, and the JEI fuel
+      category.
 - [ ] Link the wiki and the issue tracker.
