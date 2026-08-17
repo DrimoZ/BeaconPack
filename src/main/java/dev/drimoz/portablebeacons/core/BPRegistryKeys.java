@@ -2,7 +2,7 @@ package dev.drimoz.portablebeacons.core;
 
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * Keys of the three datapack registries that drive the whole mod.
@@ -29,8 +29,8 @@ public final class BPRegistryKeys {
     public static final ResourceKey<Registry<FuelDef>> FUEL =
             ResourceKey.createRegistryKey(id("fuel"));
 
-    public static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+    public static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(MOD_ID, path);
     }
 
     private BPRegistryKeys() {}

@@ -1,7 +1,7 @@
 package dev.drimoz.portablebeacons.core;
 
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -118,6 +118,6 @@ class SanitizeTest {
 
     private static ResourceKey<BeaconEffectDef> effectKey(String path) {
         return ResourceKey.create(BPRegistryKeys.EFFECT,
-                ResourceLocation.fromNamespaceAndPath("beaconpack", path));
+                Identifier.fromNamespaceAndPath("beaconpack", path));
     }
 }

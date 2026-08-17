@@ -14,7 +14,7 @@ import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
@@ -31,10 +31,10 @@ import java.util.List;
 @JeiPlugin
 public class PortableBeaconsJeiPlugin implements IModPlugin {
 
-    private static final ResourceLocation UID = BPRegistryKeys.id("jei");
+    private static final Identifier UID = BPRegistryKeys.id("jei");
 
     @Override
-    public ResourceLocation getPluginUid() {
+    public Identifier getPluginUid() {
         return UID;
     }
 
@@ -93,7 +93,7 @@ public class PortableBeaconsJeiPlugin implements IModPlugin {
         RegistryAccess access = minecraft.level.registryAccess();
 
         List<FuelEntry> entries = new ArrayList<>();
-        for (FuelDef def : access.registryOrThrow(BPRegistryKeys.FUEL)) {
+        for (FuelDef def : access.lookupOrThrow(BPRegistryKeys.FUEL)) {
             // One unit is one second of one basic effect kept to yourself - the scale the whole
             // GUI is written in, so the two agree by construction.
             List<ItemStack> items = def.item()

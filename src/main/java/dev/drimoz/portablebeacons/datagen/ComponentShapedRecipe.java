@@ -8,7 +8,7 @@ import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -29,7 +29,7 @@ import java.util.Map;
  */
 final class ComponentShapedRecipe {
 
-    static void save(RecipeOutput output, HolderLookup.Provider registries, ResourceLocation id,
+    static void save(RecipeOutput output, HolderLookup.Provider registries, Identifier id,
                      ItemStack result, ItemLike unlockedBy,
                      Map<Character, Ingredient> key, String... pattern) {
         ShapedRecipe recipe = new ShapedRecipe("", CraftingBookCategory.MISC,

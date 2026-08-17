@@ -20,7 +20,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
@@ -48,8 +48,8 @@ import java.util.Optional;
  */
 public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeaconMenu> {
 
-    private static final ResourceLocation TEXTURE =
-            ResourceLocation.fromNamespaceAndPath("beaconpack", "textures/gui/beacon_pack.png");
+    private static final Identifier TEXTURE =
+            Identifier.fromNamespaceAndPath("beaconpack", "textures/gui/beacon_pack.png");
     private static final int TEXTURE_SIZE = 512;
 
     static final int IMAGE_W = 194;

@@ -10,7 +10,7 @@ import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.world.level.ItemLike;
 import net.neoforged.neoforge.common.data.AdvancementProvider;
@@ -42,7 +42,7 @@ public class BPAdvancementProvider implements AdvancementProvider.AdvancementGen
                         description("root"),
                         // Reuses a vanilla background rather than shipping one: a bespoke tab
                         // texture for four advancements is not worth the kilobytes.
-                        ResourceLocation.withDefaultNamespace("textures/block/deepslate_bricks.png"),
+                        Identifier.withDefaultNamespace("textures/block/deepslate_bricks.png"),
                         AdvancementType.TASK,
                         true, true, false)
                 .addCriterion("has_pack", hasTaggedPack())
@@ -91,7 +91,7 @@ public class BPAdvancementProvider implements AdvancementProvider.AdvancementGen
         return Component.translatable("advancement." + PortableBeacons.MOD_ID + "." + name + ".description");
     }
 
-    private static ResourceLocation id(String name) {
-        return ResourceLocation.fromNamespaceAndPath(PortableBeacons.MOD_ID, name);
+    private static Identifier id(String name) {
+        return Identifier.fromNamespaceAndPath(PortableBeacons.MOD_ID, name);
     }
 }

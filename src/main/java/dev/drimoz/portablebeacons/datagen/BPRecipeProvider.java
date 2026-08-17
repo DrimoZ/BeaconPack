@@ -123,7 +123,7 @@ public class BPRecipeProvider extends RecipeProvider {
         }
     }
 
-    private static net.minecraft.resources.ResourceLocation key(ItemLike item) {
+    private static net.minecraft.resources.Identifier key(ItemLike item) {
         return BPRegistryKeys.id(net.minecraft.core.registries.BuiltInRegistries.ITEM
                 .getKey(item.asItem()).getPath());
     }

@@ -31,18 +31,18 @@ import java.util.List;
 public final class BPLookups {
 
     public static PackResolver.Lookup<AugmentDef> augments(RegistryAccess access) {
-        Registry<AugmentDef> registry = access.registryOrThrow(BPRegistryKeys.AUGMENT);
+        Registry<AugmentDef> registry = access.lookupOrThrow(BPRegistryKeys.AUGMENT);
         return registry::getOptional;
     }
 
     public static PackResolver.Lookup<BeaconEffectDef> effects(RegistryAccess access) {
-        Registry<BeaconEffectDef> registry = access.registryOrThrow(BPRegistryKeys.EFFECT);
+        Registry<BeaconEffectDef> registry = access.lookupOrThrow(BPRegistryKeys.EFFECT);
         return registry::getOptional;
     }
 
     @Nullable
     public static PackTierDef tier(RegistryAccess access, PortableBeaconItem item) {
-        return access.registryOrThrow(BPRegistryKeys.TIER).get(item.tier());
+        return access.lookupOrThrow(BPRegistryKeys.TIER).get(item.tier());
     }
 
     /**
@@ -53,7 +53,7 @@ public final class BPLookups {
      * inventing a second packet.
      */
     public static List<ResourceKey<BeaconEffectDef>> sortedEffectKeys(RegistryAccess access) {
-        return access.registryOrThrow(BPRegistryKeys.EFFECT).registryKeySet().stream()
+        return access.lookupOrThrow(BPRegistryKeys.EFFECT).registryKeySet().stream()
                 .sorted(Comparator.comparing(key -> key.location().toString()))
                 .toList();
     }
@@ -63,7 +63,7 @@ public final class BPLookups {
         // An item named directly wins over one matched through a tag, so a pack can price a single
         // metal without having to exclude it from whatever convention tag it belongs to.
         int viaTag = 0;
-        for (FuelDef def : access.registryOrThrow(BPRegistryKeys.FUEL)) {
+        for (FuelDef def : access.lookupOrThrow(BPRegistryKeys.FUEL)) {
             if (!def.matches(item)) {
                 continue;
             }

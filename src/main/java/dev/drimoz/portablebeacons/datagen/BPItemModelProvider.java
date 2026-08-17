@@ -4,7 +4,7 @@ import dev.drimoz.portablebeacons.PortableBeacons;
 import dev.drimoz.portablebeacons.core.BPRegistryKeys;
 import dev.drimoz.portablebeacons.registry.BPItems;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.client.model.generators.ItemModelBuilder;
 import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
@@ -47,7 +47,7 @@ public class BPItemModelProvider extends ItemModelProvider {
                 .texture("layer0", modLoc("item/" + name));
     }
 
-    private static String name(ResourceLocation id) {
+    private static String name(Identifier id) {
         return id.getPath();
     }
 }

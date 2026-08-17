@@ -89,7 +89,7 @@ public final class BPClientEvents {
                 return null;
             }
             return Minecraft.getInstance().level.registryAccess()
-                    .registryOrThrow(BPRegistryKeys.AUGMENT).get(instance.type());
+                    .lookupOrThrow(BPRegistryKeys.AUGMENT).get(instance.type());
         }
 
         private ModBus() {}
