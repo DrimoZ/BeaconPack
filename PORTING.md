@@ -182,7 +182,85 @@ bug found on 1.21.1 is much cheaper to fix on one branch than on three. That is 
 keeping `1.21.1` genuinely maintained, not an argument against starting — the 1.21.1 ecosystem is
 where it will stay, and every month there is a month of players who cannot install the mod at all.
 
-## 8. Branches
+## 8. What the compiler actually said
+
+The build config landed and `createMinecraftArtifacts` succeeded — 26.1.2.95 downloads, decompiles
+and patches cleanly. `compileJava` then produced **169 errors across 20 files**. Every replacement
+below was read out of `minecraft-patched-26.1.2.95-sources.jar` and the NeoForge 26.1.2.95 sources,
+not inferred from the primers.
+
+| file | errors |
+|---|---|
+| `client/PortableBeaconScreen` | 44 |
+| `gametest/BPGameTests` | 24 |
+| `datagen/BPAdvancementProvider` | 16 |
+| `datagen/BPItemModelProvider` | 13 |
+| `datagen/ComponentShapedRecipe` | 9 |
+| `compat/jei/PortableBeaconsJeiPlugin` | 8 |
+| `item/PortableBeaconItem` | 8 |
+| `datagen/BPDataGen` | 8 |
+| `registry/BPLookups` | 7 |
+| `client/BPClientEvents` | 7 |
+| the other 10 | 1–6 each |
+
+**`core/` came through almost untouched** — 3 errors in `BPRegistryKeys`, all of them the same
+rename, and nothing at all in `PackState`, the codecs or the arithmetic. That was the bet the layer
+was written to win, and it won.
+
+### The mechanical majority
+
+131 of the 169 are `cannot find symbol`, and most are one rename cascading:
+
+| 1.21.1 | 26.1 |
+|---|---|
+| `net.minecraft.resources.ResourceLocation` | **`net.minecraft.resources.Identifier`** — same factory methods (`fromNamespaceAndPath`, `parse`) |
+| `ResourceKey#location()` | `ResourceKey#identifier()` |
+| `HolderLookup.Provider#registryOrThrow(key)` | `#lookupOrThrow(key)` |
+| `ItemStack#getDescriptionId()` | `#getHoverName()`, which already returns a `Component` |
+| `Player#displayClientMessage(Component, boolean)` | gone; `sendSystemMessage(Component)` for chat, and the action bar goes through `ClientboundSetActionBarTextPacket` |
+| `mouseClicked(double, double, int)` | `mouseClicked(MouseButtonEvent, boolean doubleClick)` |
+| `keyPressed(int, int, int)` | `keyPressed(KeyEvent)` |
+| `imageWidth` / `imageHeight` | now final — set through the constructor |
+
+Input became event objects rather than loose primitives. Incidentally the new `mouseClicked` carries
+its own `doubleClick` flag, so whatever the screen does to detect double clicks can be deleted
+rather than migrated.
+
+### The one real decision: `IItemHandler`
+
+NeoForge replaced the item capability with a resource-based one. `Capabilities.ItemHandler.ITEM`
+is now `Capabilities.Item.ITEM`, typed `ResourceHandler<ItemResource>` instead of `IItemHandler`.
+
+`IItemHandler` still exists — but marked `@Deprecated(since = "1.21.9", forRemoval = true)`, with an
+explicit migration bridge, `IItemHandler.of(ResourceHandler<ItemResource>)`.
+
+So there are two ways through, and they differ in more than effort:
+
+- **Bridge.** Wrap at the capability boundary, leave the rest of the item code alone. Cheap now.
+  Deprecated *for removal*, so it is a debt with a due date somewhere in 26.2 or 26.3 — the exact
+  versions this plan already commits to porting to. It also carries a real constraint: the adapter's
+  javadoc warns that `insertItem` / `extractItem` open new root transactions and cannot be called
+  from inside a transactional context, and fuel is consumed every tick.
+- **Migrate.** Rewrite the item handling against `ResourceHandler<ItemResource>`. More work now,
+  and it is the shape the API is actually going to keep.
+
+Given that the plan is three ports rather than one, paying this once looks right — but it is a
+genuine fork and not mine to take silently.
+
+`ComponentItemHandler`, `SlotItemHandler` and `ItemContainerContents` all still exist, so the way the
+beacon stores its contents does not have to change; this is about the capability boundary only.
+
+### The parts that are rewrites, not renames
+
+- **The screen**, as predicted — 44 errors, and the count understates it. Renames aside, 26.1's
+  extract-then-render split is not something the compiler can point at.
+- **Datagen**, more than expected. `net.minecraft.advancements.critereon` no longer exists,
+  `net.neoforged.neoforge.client.model.generators` is gone with the old item model system,
+  `RecipeProvider` now has an abstract no-arg `buildRecipes()`, and recipes want `Recipe.CommonInfo`.
+  All four providers plus `BPDataGen` are affected.
+- **Gametests**, 24 errors, the area §4 flagged as unknown. Now measured, still unexamined.
+
+## 9. Branches
 
 One branch per game version, since each one keeps getting files rather than being replaced.
 
