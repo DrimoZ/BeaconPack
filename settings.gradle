@@ -7,8 +7,8 @@ pluginManagement {
 }
 
 plugins {
-    // Lets Gradle auto-provision a JDK 21 toolchain even if the system JDK differs.
-    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'
+    // Lets Gradle auto-provision a JDK 25 toolchain even if the system JDK differs.
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
 }
 
 rootProject.name = 'PortableBeacons'

@@ -1,24 +1,28 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
-    // ModDevGradle 2.x — the current NeoForge build plugin for 1.21.x
-    id 'net.neoforged.moddev' version '2.0.78'
+    // ModDevGradle 2.x — the current NeoForge build plugin
+    id 'net.neoforged.moddev' version '2.0.144'
 }
 
 version = "${mod_version}+${minecraft_version}"
 group = mod_group_id
 base { archivesName = mod_id }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+// 26.1 runs on Java 25.
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+
+// EMI has no 26.x NeoForge build to compile against. The plugin stays in the tree so it can come
+// back in a single commit the day one appears, rather than being written a second time.
+sourceSets.main.java {
+    exclude 'dev/drimoz/portablebeacons/compat/emi/**'
+}
 
 neoForge {
     version = project.neo_version
 
-    parchment {
-        // Human-readable parameter names. Purely a dev-time nicety.
-        minecraftVersion = '1.21.1'
-        mappingsVersion = '2024.11.17'
-    }
+    // No parchment block: Mojang dropped obfuscation in 26.1, so the real parameter names ship with
+    // the game and there is no mapping left to keep in sync.
 
     runs {
         client {
@@ -58,10 +62,19 @@ neoForge {
             // not about this mod.
             gameDirectory = project.file('run-gametest')
         }
-        data {
+        // Datagen is split in two from 1.21.4 on: the client run owns anything that needs assets
+        // (item models), the server run owns recipes, advancements and tags. The single data() run
+        // 1.21.1 used no longer exists.
+        clientData {
+            clientData()
             gameDirectory = project.file('run')
-            // 1.21.1 has a single datagen run; clientData()/serverData() only exist from 1.21.4 on.
-            data()
+            programArguments.addAll '--mod', mod_id, '--all',
+                    '--output', file('src/generated/resources/').absolutePath,
+                    '--existing', file('src/main/resources/').absolutePath
+        }
+        serverData {
+            serverData()
+            gameDirectory = project.file('run')
             programArguments.addAll '--mod', mod_id, '--all',
                     '--output', file('src/generated/resources/').absolutePath,
                     '--existing', file('src/main/resources/').absolutePath
@@ -97,10 +110,6 @@ repositories {
         name = 'TheIllusiveC4 (Curios)'
         url = 'https://maven.theillusivec4.top'
     }
-    maven {
-        name = 'TerraformersMC (EMI)'
-        url = 'https://maven.terraformersmc.com/releases'
-    }
 }
 
 configurations {
@@ -116,15 +125,12 @@ dependencies {
     // from mods/, so both sat on the classpath and never appeared in the mod list at all.
     devMods "mezz.jei:jei-${jei_minecraft_version}-neoforge:${jei_version}"
     devMods "top.theillusivec4.curios:curios-neoforge:${curios_version}"
-    devMods "dev.emi:emi-neoforge:${emi_version}"
 
     // Both are soft dependencies: compiled against, never required. Each integration is isolated
     // so the mod runs identically without them - Curios behind a load check, JEI behind a class
     // only JEI itself ever loads.
     compileOnly "top.theillusivec4.curios:curios-neoforge:${curios_version}"
     compileOnly "mezz.jei:jei-${jei_minecraft_version}-neoforge:${jei_version}"
-    // EMI publishes a separate :api artifact for compiling against; the full jar is runtime only.
-    compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
 
     // Pure-logic classes under core/ are plain Java and unit-testable.
     testImplementation platform('org.junit:junit-bom:5.10.2')
@@ -222,8 +228,11 @@ tasks.named('jar', Jar) {
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
-    options.release = 21
+    options.release = 25
     options.compilerArgs << '-Xlint:deprecation'
+    // javac stops reporting after 100 errors by default, which during a port hides most of the
+    // work behind the first hundred symptoms. Remove once the port compiles.
+    options.compilerArgs << '-Xmaxerrs' << '2000'
 }
 
 publishing {

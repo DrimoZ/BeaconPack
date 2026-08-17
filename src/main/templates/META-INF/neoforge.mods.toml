@@ -34,17 +34,13 @@ versionRange = "*"
 ordering = "AFTER"
 side = "BOTH"
 
-# Declared so the loader and the store pages both show them as optional rather than leaving players
-# to guess. Neither is required, and the mod behaves identically without them.
+# Declared so the loader and the store page both show it as optional rather than leaving players to
+# guess. It is not required, and the mod behaves identically without it.
+#
+# EMI is deliberately not listed here: there is no 26.x NeoForge build, so the plugin is not
+# compiled into this jar. Advertising it as optional would read as broken rather than absent.
 [[dependencies.${mod_id}]]
 modId = "jei"
-type = "optional"
-versionRange = "*"
-ordering = "AFTER"
-side = "CLIENT"
-
-[[dependencies.${mod_id}]]
-modId = "emi"
 type = "optional"
 versionRange = "*"
 ordering = "AFTER"
