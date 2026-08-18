@@ -3,6 +3,36 @@
 All notable changes to this project are documented here, newest first.
 Versions follow `{mod version}+{minecraft version}`.
 
+## Unreleased
+
+### Added
+- **Five trade-off augments.** The seven original ones are each a single pure operation, so every one
+  is strictly good and the only decision is which you lack room for. These spend one stat to buy
+  another, and so compete for a slot instead of queueing behind it.
+
+  | | Gains | Pays |
+  |---|---|---|
+  | **Overdrive** | +1 / +2 level ceiling | fuel ×1.6 / ×2.4 |
+  | **Projector** | +10 / +18 blocks | buffer ×0.5 / ×0.35 |
+  | **Miser** | fuel ×0.55 / ×0.4 | buffer ×0.5 / ×0.35 |
+  | **Reservoir** | buffer ×5 / ×8 | fuel ×1.2 / ×1.35 |
+  | **Herald** | +2 / +3 aura ranks | fuel ×1.8 / ×2.2 |
+
+  None of them needed new code: an augment entry already took several operations, and the resolver
+  already clamped every stat, so penalties were always expressible. Any datapack can do the same.
+- **A fourth augment slot on Beacon IV.**
+
+### Changed
+- **Fuel moved to container slot 0**, with augments after it. It used to sit *after* the augments, so
+  its index was derived from the augment count — meaning any future slot added by the mod would shift
+  it and turn the fuel in every saved beacon into an augment. Doing this now costs nothing, since the
+  id rename already breaks saves, and it means the layout is stable under the change this mod is
+  most likely to make again.
+
+  To be clear, since it is easy to confuse the two: a **datapack** moving `augment_slots` was never
+  dangerous and still is not. That field says how many slots are *usable*; the container's size is
+  fixed by the mod. Lowering it locks augments in place rather than losing them.
+
 ## 1.0.1+26.1.2 — the port
 
 Everything in 1.0.1 below, built for **Minecraft 26.1.2** on NeoForge 26.1.2.95 and Java 25.
