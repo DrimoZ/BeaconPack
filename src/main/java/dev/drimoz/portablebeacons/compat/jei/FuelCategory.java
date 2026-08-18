@@ -86,10 +86,10 @@ public class FuelCategory implements IRecipeCategory<FuelEntry> {
         graphics.text(font,
                 Component.translatable("portablebeacons.viewer.fuel_runtime",
                         Durations.format(entry.seconds())),
-                24, 4, 0xFFFFFF, false);
+                24, 4, 0xFFFFFFFF, false);
         graphics.text(font,
                 Component.translatable("portablebeacons.viewer.fuel_units", entry.units())
                         .withStyle(ChatFormatting.GRAY),
-                24, 15, 0xA0A0A0, false);
+                24, 15, 0xFFA0A0A0, false);
     }
 }

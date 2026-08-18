@@ -162,8 +162,10 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
     /** Above the item layer, which renders around z=150 and otherwise punches through the popup. */
     private static final long OPEN_ANIM_MS = 110L;
 
-    private static final int TEXT = 0x404040;
-    private static final int TEXT_DIM = 0x707070;
+    // Opaque, explicitly. Text colours are strict ARGB now: a bare 0xRRGGBB is alpha 0, which draws
+    // nothing at all rather than defaulting to opaque. Every label on this screen was invisible.
+    private static final int TEXT = 0xFF404040;
+    private static final int TEXT_DIM = 0xFF707070;
 
     private int focusedCase = 0;
     private boolean selectorOpen;
@@ -564,7 +566,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
                         0x90303030);
             }
             graphics.text(font, roman(slot.amplifier() + 1),
-                    x + CASE_SIZE - 9, CASE_Y + CASE_SIZE - 10, 0xFFFFFF, true);
+                    x + CASE_SIZE - 9, CASE_Y + CASE_SIZE - 10, 0xFFFFFFFF, true);
             // A shared effect looked identical to a private one, which hid the single most
             // expensive setting on the screen.
             if (slot.aura().isAura()) {
