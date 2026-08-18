@@ -29,7 +29,7 @@ public class BPItemTagProvider extends ItemTagsProvider {
 
     @Override
     protected void addTags(HolderLookup.Provider registries) {
-        var beacons = tag(BPTags.PACKS);
+        var beacons = tag(BPTags.BEACONS);
         BPItems.beacons().forEach(beacon -> beacons.add(beacon.get()));
     }
 }

@@ -54,11 +54,11 @@ public class PortableBeaconItem extends Item {
     }
 
     public static BeaconState stateOf(ItemStack stack) {
-        return stack.getOrDefault(BPComponents.PACK.get(), BeaconState.EMPTY);
+        return stack.getOrDefault(BPComponents.BEACON.get(), BeaconState.EMPTY);
     }
 
     public static void setState(ItemStack stack, BeaconState state) {
-        stack.set(BPComponents.PACK.get(), state);
+        stack.set(BPComponents.BEACON.get(), state);
     }
 
     @Override

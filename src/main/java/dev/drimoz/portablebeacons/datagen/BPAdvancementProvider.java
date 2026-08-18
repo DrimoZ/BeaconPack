@@ -76,7 +76,7 @@ public class BPAdvancementProvider implements AdvancementProvider.AdvancementGen
 
     private static Criterion<InventoryChangeTrigger.TriggerInstance> hasTaggedPack() {
         return InventoryChangeTrigger.TriggerInstance.hasItems(
-                ItemPredicate.Builder.item().of(BPTags.PACKS));
+                ItemPredicate.Builder.item().of(BPTags.BEACONS));
     }
 
     private static Criterion<InventoryChangeTrigger.TriggerInstance> has(ItemLike item) {

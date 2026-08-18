@@ -13,7 +13,7 @@ import net.neoforged.fml.ModList;
  * {@link #loaded()} and inside a nested class, so the classes are only ever resolved when the mod
  * is actually present - referencing them from this class directly would fail to link without it.
  *
- * <p>Packs bind to Curios' {@code charm} slot through a shipped tag rather than being left for the
+ * <p>Beacons bind to Curios' {@code charm} slot through a shipped tag rather than being left for the
  * beacon author to wire up. Declaring nothing was the tidier position, but it meant a player who
  * installed both mods found the integration simply did not work, with no way to tell that a
  * config file was missing. The binding is additive - {@code replace: false} on both files - so a
