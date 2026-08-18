@@ -1,7 +1,6 @@
 package dev.drimoz.portablebeacons;
 
 import dev.drimoz.portablebeacons.core.BPRegistryKeys;
-import dev.drimoz.portablebeacons.gametest.BPTestFunctions;
 import dev.drimoz.portablebeacons.registry.BPComponents;
 import dev.drimoz.portablebeacons.registry.BPCreativeTabs;
 import dev.drimoz.portablebeacons.registry.BPItems;
@@ -24,8 +23,5 @@ public class PortableBeacons {
 
         modContainer.registerConfig(ModConfig.Type.SERVER, BPConfig.SPEC);
 
-        // Unconditional, and harmless outside a test run: it only puts functions in a registry that
-        // nothing reads unless a test_instance names them.
-        BPTestFunctions.register();
     }
 }
