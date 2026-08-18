@@ -25,16 +25,13 @@ import java.util.List;
  *
  * @param maxTier    highest tier this augment exists in (1..3)
  * @param color      tint applied to the augment texture; alpha is forced opaque at render time
- * @param modelData  selects a model override, so each augment can have its own glyph. 0 falls back
- *                   to the generic gem, which is what a datapack-added augment gets for free
  * @param operations modifiers applied to the pack's resolved stats
  */
-public record AugmentDef(int maxTier, int color, int modelData, List<Operation> operations) {
+public record AugmentDef(int maxTier, int color, List<Operation> operations) {
 
     public static final Codec<AugmentDef> CODEC = RecordCodecBuilder.create(i -> i.group(
             Codec.intRange(1, 3).optionalFieldOf("max_tier", 3).forGetter(AugmentDef::maxTier),
             Codec.INT.optionalFieldOf("color", 0xFFFFFF).forGetter(AugmentDef::color),
-            Codec.INT.optionalFieldOf("model_data", 0).forGetter(AugmentDef::modelData),
             Operation.CODEC.listOf().fieldOf("operations").forGetter(AugmentDef::operations)
     ).apply(i, AugmentDef::new));
 

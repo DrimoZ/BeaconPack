@@ -2,17 +2,14 @@ package dev.drimoz.portablebeacons.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import dev.drimoz.portablebeacons.PortableBeacons;
-import dev.drimoz.portablebeacons.core.AugmentDef;
-import dev.drimoz.portablebeacons.core.AugmentInstance;
 import dev.drimoz.portablebeacons.core.BPRegistryKeys;
-import dev.drimoz.portablebeacons.item.AugmentItem;
 import dev.drimoz.portablebeacons.net.OpenPackPayload;
 import dev.drimoz.portablebeacons.registry.BPItems;
 import dev.drimoz.portablebeacons.registry.BPMenus;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.item.ItemProperties;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import dev.drimoz.portablebeacons.client.model.AugmentLook;
+import net.neoforged.neoforge.client.event.RegisterSelectItemModelPropertyEvent;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -21,7 +18,7 @@ import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.settings.KeyConflictContext;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
 public final class BPClientEvents {
@@ -32,12 +29,15 @@ public final class BPClientEvents {
      * <p>Its own category rather than the vanilla "Inventory" one: filed there it sat among twenty
      * vanilla binds and was effectively impossible to find, which reads as the bind not existing.
      */
+    /** Categories are objects now, not the free-form string the bind used to carry. */
+    public static final KeyMapping.Category CATEGORY =
+            new KeyMapping.Category(BPRegistryKeys.id("main"));
+
     public static final KeyMapping OPEN_PACK = new KeyMapping(
             "key.portablebeacons.open_pack",
             KeyConflictContext.IN_GAME,
-            InputConstants.Type.KEYSYM,
-            GLFW.GLFW_KEY_B,
-            "key.categories.portablebeacons");
+            InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_B),
+            CATEGORY);
 
     @EventBusSubscriber(modid = PortableBeacons.MOD_ID,
             value = Dist.CLIENT)
@@ -50,6 +50,7 @@ public final class BPClientEvents {
 
         @SubscribeEvent
         public static void registerKeys(RegisterKeyMappingsEvent event) {
+            event.registerCategory(CATEGORY);
             event.register(OPEN_PACK);
         }
 
@@ -58,38 +59,18 @@ public final class BPClientEvents {
          * datapack-added augment look distinct without shipping a model or a texture.
          */
         @SubscribeEvent
-        public static void registerColours(RegisterColorHandlersEvent.Item event) {
-            event.register((stack, tintIndex) -> {
-                AugmentDef def = definitionOf(stack);
-                // The alpha channel is honoured when tinting, so a plain 0xRRGGBB from the JSON
-                // renders the item fully transparent. Force it opaque.
-                return 0xFF000000 | (def == null ? 0xFFFFFF : def.color());
-            }, BPItems.AUGMENT.get());
+        public static void registerTintSources(RegisterColorHandlersEvent.ItemTintSources event) {
+            event.register(BPRegistryKeys.id("augment_colour"), AugmentLook.Tint.CODEC);
         }
 
         /**
-         * Exposes the augment's model_data as a model predicate, so each type gets its own glyph
-         * without needing a component on the stack - which would mean repeating the value in every
-         * recipe result as well as in the registry entry.
+         * The augment glyph is chosen by the model, keyed on the augment's registry key.
+         *
+         * <p>See {@link AugmentLook} for why that replaced the model_data integer.
          */
         @SubscribeEvent
-        public static void registerModelProperties(FMLClientSetupEvent event) {
-            event.enqueueWork(() -> ItemProperties.register(
-                    BPItems.AUGMENT.get(),
-                    BPRegistryKeys.id("augment_type"),
-                    (stack, level, entity, seed) -> {
-                        AugmentDef def = definitionOf(stack);
-                        return def == null ? 0.0F : def.modelData();
-                    }));
-        }
-
-        private static AugmentDef definitionOf(net.minecraft.world.item.ItemStack stack) {
-            AugmentInstance instance = AugmentItem.instanceOf(stack);
-            if (instance == null || Minecraft.getInstance().level == null) {
-                return null;
-            }
-            return Minecraft.getInstance().level.registryAccess()
-                    .lookupOrThrow(BPRegistryKeys.AUGMENT).get(instance.type());
+        public static void registerModelProperties(RegisterSelectItemModelPropertyEvent event) {
+            event.register(BPRegistryKeys.id("augment_type"), AugmentLook.TypeProperty.TYPE);
         }
 
         private ModBus() {}
@@ -104,7 +85,7 @@ public final class BPClientEvents {
             while (OPEN_PACK.consumeClick()) {
                 // No slot index: the server finds the pack itself, so a crafted packet cannot
                 // point the menu at an arbitrary stack.
-                PacketDistributor.sendToServer(new OpenPackPayload(OpenPackPayload.FIND_ANY));
+                ClientPacketDistributor.sendToServer(new OpenPackPayload(OpenPackPayload.FIND_ANY));
             }
         }
 
