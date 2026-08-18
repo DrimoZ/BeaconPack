@@ -5,7 +5,10 @@ import dev.drimoz.portablebeacons.core.BPRegistryKeys;
 import dev.drimoz.portablebeacons.core.BeaconTierDef;
 import dev.drimoz.portablebeacons.item.AugmentItem;
 import dev.drimoz.portablebeacons.item.PortableBeaconItem;
+import it.unimi.dsi.fastutil.objects.ReferenceLinkedOpenHashSet;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.Rarity;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -60,7 +63,16 @@ public final class BPItems {
         ResourceKey<BeaconTierDef> tier =
                 ResourceKey.create(BPRegistryKeys.TIER, BPRegistryKeys.id(tierPath));
         return ITEMS.registerItem(name, props ->
-                new PortableBeaconItem(props.stacksTo(1).rarity(rarity), tier));
+                new PortableBeaconItem(props.stacksTo(1).rarity(rarity)
+                        // The augment and fuel slots are backed by minecraft:container, and vanilla
+                        // now unpacks that into the tooltip by itself - a shulker-style list of the
+                        // contents, on every hover, whether or not shift is held. The beacon says
+                        // what it holds in its own words further down; this stops it being said
+                        // twice, once badly.
+                        .component(DataComponents.TOOLTIP_DISPLAY,
+                                new TooltipDisplay(false, new ReferenceLinkedOpenHashSet<>(
+                                        List.of(DataComponents.CONTAINER)))),
+                        tier));
     }
 
     private BPItems() {}
