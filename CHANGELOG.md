@@ -24,10 +24,39 @@ typing `/give` met a name the mod never uses out loud.
 datapack written against the old ids needs updating. Same reasoning as the rename itself: the ids
 are wrong now and will only get more expensive to fix, so it happens at 1.0.1 or never.
 
+The data component and the item tag moved too — `portablebeacons:pack` is now
+`portablebeacons:beacon`, and the tag `packs` is now `beacons`. A datapack naming either needs
+updating.
+
+### Fixed
+- **Attunement did nothing, on any beacon.** It raised the beacon's effective tier for the sharing
+  check, and every tier already cleared the threshold it raised — so there was never a mode left for
+  it to unlock. Sharing is now gated by an `aura_rank` on each tier, which Attunement adds to.
+
+  | Beacon | Shares unaided | + Attunement I | + Attunement II |
+  |---|---|---|---|
+  | I, II | self only | Team | Allies |
+  | III, IV, themed | Team | Allies | Allies and Pets |
+
+  This is a real balance change: sharing with every nearby player now costs an augment slot on every
+  beacon. It also makes Team meaningful, since it now sits *below* Allies on the ladder — narrower
+  reach, lower cost, the cheaper first step out of keeping everything to yourself.
+
+- **Amplification did nothing on the beacons that could hold it.** It lifts the beacon's level
+  ceiling, but each effect carries a second ceiling and the lower one wins — and every effect stopped
+  at level II while Beacon IV and Cinder already granted level II unaided. Speed, Haste, Jump Boost,
+  Resistance, Strength and Regeneration now allow level III, so the augment has somewhere to go. The
+  utility effects stay at level I, where a second level means nothing in vanilla.
+
 ### Changed
 - The GUI texture and the item textures are named after their items again.
 - Datagen runs in its own game folder, so a mod left in `run/mods` for a different Minecraft version
   can no longer stop the generator before it writes anything.
+
+### Notes
+- `aura_rank` is a new tier field, `0`–`3`, defaulting to `0`. Sharing was the one mechanic in the
+  mod that a datapack could not touch; it now is one. See the
+  [wiki](https://github.com/DrimoZ/PortableBeacons/wiki/Augments#attunement).
 
 ## 1.0.0
 

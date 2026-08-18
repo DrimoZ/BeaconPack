@@ -1,6 +1,6 @@
 {
   "level": 3, "effect_slots": 2, "augment_slots": 2, "base_range": 14.0,
-  "fuel_capacity": 10800, "max_amplifier": 0,
+  "fuel_capacity": 10800, "max_amplifier": 0, "aura_rank": 1,
   "effect_pool": [
     "portablebeacons:slow_falling", "portablebeacons:speed", "portablebeacons:jump_boost", "portablebeacons:night_vision"
   ]

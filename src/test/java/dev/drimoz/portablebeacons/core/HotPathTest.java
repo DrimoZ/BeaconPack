@@ -38,7 +38,7 @@ class HotPathTest {
                     new AugmentDef.Operation(AugmentDef.Type.MUL_FUEL, List.of(0.75, 0.6, 0.45)))));
 
     private static final BeaconTierDef TIER =
-            new BeaconTierDef(4, 2, 3, 16.0, 36000, 1, List.of(SPEED, HASTE));
+            new BeaconTierDef(4, 2, 3, 16.0, 36000, 1, 1, List.of(SPEED, HASTE));
 
     private static final List<AugmentInstance> INSTALLED = List.of(
             new AugmentInstance(augmentKey("range"), 3),

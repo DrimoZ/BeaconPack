@@ -108,7 +108,7 @@ class SanitizeTest {
     }
 
     private static BeaconTierDef tier(int level, int slots, List<ResourceKey<BeaconEffectDef>> pool) {
-        return new BeaconTierDef(level, slots, 3, 16.0, 12000, 1, pool);
+        return new BeaconTierDef(level, slots, 3, 16.0, 12000, 1, 1, pool);
     }
 
     private static EffectSlotConfig slot(ResourceKey<BeaconEffectDef> effect, int amplifier,
