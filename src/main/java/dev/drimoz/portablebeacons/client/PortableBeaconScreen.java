@@ -128,7 +128,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
      * Five, now that the stats moved to a drawer and freed the whole row. The beacon itself still
      * decides how many are unlocked; this is only how many the screen can lay out.
      */
-    private static final int MAX_CASES = 5;
+    private static final int MAX_CASES = BeaconStats.MAX_EFFECT_SLOTS;
 
     private static final int INFO_X = CONTENT_LEFT;
     private static final int INFO_Y = 78;

@@ -72,7 +72,7 @@ public final class BeaconResolver {
         }
 
         return new BeaconStats(
-                Math.max(0, effectSlots),
+                Math.clamp(effectSlots, 0, BeaconStats.MAX_EFFECT_SLOTS),
                 augmentSlots,
                 Math.max(0.0, range),
                 (int) Math.round(tier.fuelCapacity() * capacityMultiplier),
