@@ -10,6 +10,7 @@ import dev.drimoz.portablebeacons.core.Durations;
 import dev.drimoz.portablebeacons.core.PackState;
 import dev.drimoz.portablebeacons.core.PackTierDef;
 import dev.drimoz.portablebeacons.menu.PackMenuOpener;
+import dev.drimoz.portablebeacons.registry.BPLookups;
 import dev.drimoz.portablebeacons.registry.BPComponents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
@@ -20,18 +21,17 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.Mth;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.Optional;
 
 /** The portable beacon itself. One class, four registered instances, one per tier. */
@@ -62,26 +62,27 @@ public class PortableBeaconItem extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
         ItemStack held = player.getItemInHand(hand);
         if (player instanceof ServerPlayer serverPlayer && hand == InteractionHand.MAIN_HAND) {
-            PackMenuOpener.open(serverPlayer, player.getInventory().selected);
+            PackMenuOpener.open(serverPlayer, player.getInventory().getSelectedSlot());
         }
         // The offhand has no drawn slot to freeze, so it opens nothing rather than opening a menu
         // whose source stack the player could still move. It keeps working while carried.
-        return InteractionResultHolder.sidedSuccess(held, level.isClientSide());
+        return InteractionResult.SUCCESS;
     }
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context,
-                                List<Component> tooltip, TooltipFlag flag) {
+                                TooltipDisplay display, Consumer<Component> tooltip,
+                                TooltipFlag flag) {
         PackState state = stateOf(stack);
-        tooltip.add(Component.translatable(state.active()
+        tooltip.accept(Component.translatable(state.active()
                         ? "portablebeacons.gui.active" : "portablebeacons.gui.inactive")
                 .withStyle(state.active() ? ChatFormatting.GREEN : ChatFormatting.GRAY));
 
         if (!TooltipDetail.expanded()) {
-            tooltip.add(TooltipDetail.HINT);
+            tooltip.accept(TooltipDetail.HINT);
             return;
         }
         if (context.registries() == null) {
@@ -89,7 +90,7 @@ public class PortableBeaconItem extends Item {
         }
         context.registries().lookup(BPRegistryKeys.TIER)
                 .flatMap(lookup -> lookup.get(tier))
-                .ifPresent(holder -> tooltip.add(Component.translatable("portablebeacons.tip.pack_tier",
+                .ifPresent(holder -> tooltip.accept(Component.translatable("portablebeacons.tip.pack_tier",
                                 holder.value().level(),
                                 holder.value().effectSlots(),
                                 holder.value().augmentSlots())
@@ -98,7 +99,7 @@ public class PortableBeaconItem extends Item {
         // The configured effects, so a pack in a chest can be identified without opening it.
         context.registries().lookup(BPRegistryKeys.EFFECT).ifPresent(lookup -> {
             for (EffectSlotConfig slot : state.effects()) {
-                lookup.get(slot.effect()).ifPresent(holder -> tooltip.add(Component.empty()
+                lookup.get(slot.effect()).ifPresent(holder -> tooltip.accept(Component.empty()
                         .append(holder.value().effect().value().getDisplayName())
                         .append(" ")
                         .append(String.valueOf(slot.amplifier() + 1))
@@ -111,11 +112,11 @@ public class PortableBeaconItem extends Item {
         });
         // Installed augments, which were missing entirely: two packs of the same tier can behave
         // completely differently and looked identical in a chest.
-        List<AugmentInstance> augments = augmentsOf(stack);
+        List<AugmentInstance> augments = BPLookups.installedAugments(stack);
         for (AugmentInstance augment : augments) {
-            tooltip.add(Component.translatable("portablebeacons.tip.augment_line",
-                            Component.translatable("augment." + augment.type().location().getNamespace()
-                                    + "." + augment.type().location().getPath(),
+            tooltip.accept(Component.translatable("portablebeacons.tip.augment_line",
+                            Component.translatable("augment." + augment.type().identifier().getNamespace()
+                                    + "." + augment.type().identifier().getPath(),
                                     Component.translatable("portablebeacons.tier." + augment.tier())))
                     .withStyle(ChatFormatting.DARK_AQUA));
         }
@@ -127,7 +128,7 @@ public class PortableBeaconItem extends Item {
      * the datapack format, and only the time it buys is actionable.
      */
     private void appendRuntime(ItemStack stack, TooltipContext context, PackState state,
-                               List<Component> tooltip) {
+                               Consumer<Component> tooltip) {
         HolderLookup.Provider registries = context.registries();
         if (registries == null || state.fuel() <= 0 || !BPConfig.fuelEnabled()) {
             return;
@@ -136,31 +137,16 @@ public class PortableBeaconItem extends Item {
         if (tierDef == null) {
             return;
         }
-        PackStats stats = PackResolver.resolve(tierDef, augmentsOf(stack),
+        PackStats stats = PackResolver.resolve(tierDef, BPLookups.installedAugments(stack),
                 key -> Optional.ofNullable(lookup(registries, BPRegistryKeys.AUGMENT, key)));
         double perSecond = PackResolver.fuelPerSecond(state, stats,
                 key -> Optional.ofNullable(lookup(registries, BPRegistryKeys.EFFECT, key)));
         if (perSecond <= 0.0) {
             return;
         }
-        tooltip.add(Component.translatable("portablebeacons.gui.runtime",
+        tooltip.accept(Component.translatable("portablebeacons.gui.runtime",
                         Durations.format((int) (state.fuel() / perSecond)))
                 .withStyle(ChatFormatting.DARK_GRAY));
-    }
-
-    private static List<AugmentInstance> augmentsOf(ItemStack stack) {
-        IItemHandler handler = stack.getCapability(Capabilities.ItemHandler.ITEM);
-        if (handler == null) {
-            return List.of();
-        }
-        List<AugmentInstance> found = new ArrayList<>(AUGMENT_SLOTS);
-        for (int slot = 0; slot < Math.min(AUGMENT_SLOTS, handler.getSlots()); slot++) {
-            AugmentInstance instance = AugmentItem.instanceOf(handler.getStackInSlot(slot));
-            if (instance != null) {
-                found.add(instance);
-            }
-        }
-        return found;
     }
 
     @Nullable

@@ -9,13 +9,16 @@ import dev.drimoz.portablebeacons.core.PackResolver;
 import dev.drimoz.portablebeacons.core.PackTierDef;
 import dev.drimoz.portablebeacons.item.AugmentItem;
 import dev.drimoz.portablebeacons.item.PortableBeaconItem;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -42,7 +45,9 @@ public final class BPLookups {
 
     @Nullable
     public static PackTierDef tier(RegistryAccess access, PortableBeaconItem item) {
-        return access.lookupOrThrow(BPRegistryKeys.TIER).get(item.tier());
+        return access.lookupOrThrow(BPRegistryKeys.TIER).get(item.tier())
+                .map(Holder::value)
+                .orElse(null);
     }
 
     /**
@@ -54,7 +59,7 @@ public final class BPLookups {
      */
     public static List<ResourceKey<BeaconEffectDef>> sortedEffectKeys(RegistryAccess access) {
         return access.lookupOrThrow(BPRegistryKeys.EFFECT).registryKeySet().stream()
-                .sorted(Comparator.comparing(key -> key.location().toString()))
+                .sorted(Comparator.comparing(key -> key.identifier().toString()))
                 .toList();
     }
 
@@ -75,20 +80,36 @@ public final class BPLookups {
         return viaTag;
     }
 
-    /** The augments currently installed in a pack, read straight from its container component. */
-    public static List<AugmentInstance> installedAugments(ItemStack packStack) {
-        IItemHandler handler = packStack.getCapability(Capabilities.ItemHandler.ITEM);
+    /** The augments currently installed in a beacon, read straight from its container component. */
+    public static List<AugmentInstance> installedAugments(ItemStack beaconStack) {
+        ResourceHandler<ItemResource> handler = handlerOf(beaconStack);
         if (handler == null) {
             return List.of();
         }
         List<AugmentInstance> found = new ArrayList<>(PortableBeaconItem.AUGMENT_SLOTS);
-        for (int slot = 0; slot < Math.min(PortableBeaconItem.AUGMENT_SLOTS, handler.getSlots()); slot++) {
-            AugmentInstance instance = AugmentItem.instanceOf(handler.getStackInSlot(slot));
+        int slots = Math.min(PortableBeaconItem.AUGMENT_SLOTS, handler.size());
+        for (int slot = 0; slot < slots; slot++) {
+            AugmentInstance instance = AugmentItem.instanceOf(handler.getResource(slot));
             if (instance != null) {
                 found.add(instance);
             }
         }
         return found;
+    }
+
+    /**
+     * The beacon's own slots, as a resource handler.
+     *
+     * <p>{@link ItemAccess#forStack} mutates the stack it is given, which is the behaviour the
+     * augment and fuel slots have always relied on. It throws on an empty stack rather than
+     * returning nothing, so the guard is not optional.
+     */
+    @Nullable
+    public static ResourceHandler<ItemResource> handlerOf(ItemStack beaconStack) {
+        if (beaconStack.isEmpty()) {
+            return null;
+        }
+        return ItemAccess.forStack(beaconStack).getCapability(Capabilities.Item.ITEM);
     }
 
     private BPLookups() {}

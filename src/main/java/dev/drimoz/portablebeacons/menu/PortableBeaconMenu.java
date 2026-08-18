@@ -2,6 +2,7 @@ package dev.drimoz.portablebeacons.menu;
 
 import dev.drimoz.portablebeacons.BPConfig;
 import dev.drimoz.portablebeacons.BeaconProximity;
+import dev.drimoz.portablebeacons.ActionBar;
 import dev.drimoz.portablebeacons.compat.CuriosCompat;
 import dev.drimoz.portablebeacons.core.AuraMode;
 import dev.drimoz.portablebeacons.core.BeaconEffectDef;
@@ -25,10 +26,12 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.IItemHandlerModifiable;
-import net.neoforged.neoforge.items.SlotItemHandler;
+import net.neoforged.neoforge.transfer.DelegatingResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
+import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -108,7 +111,7 @@ public class PortableBeaconMenu extends AbstractContainerMenu {
                 ? CuriosCompat.findPack(playerInventory.player)
                 : playerInventory.getItem(packSlotIndex);
 
-        IItemHandler handler = new LivePackHandler();
+        ResourceHandler<ItemResource> handler = new LivePackHandler();
         for (int i = 0; i < PortableBeaconItem.AUGMENT_SLOTS; i++) {
             addSlot(new AugmentSlot(handler, i, FIRST_AUGMENT_SLOT_X + i * 18, AUGMENT_SLOT_Y));
         }
@@ -228,8 +231,8 @@ public class PortableBeaconMenu extends AbstractContainerMenu {
             return false;
         }
         if (isReconfiguration(action) && !canReconfigure()) {
-            who.displayClientMessage(
-                    Component.translatable("portablebeacons.msg.needs_beacon"), true);
+            ActionBar.send(who,
+                    Component.translatable("portablebeacons.msg.needs_beacon"));
             return false;
         }
         PackResolver.Lookup<BeaconEffectDef> lookup =
@@ -379,62 +382,25 @@ public class PortableBeaconMenu extends AbstractContainerMenu {
      * instance - leaving a bound handler writing into an orphaned copy. The augment and fuel slots
      * would then show contents that no longer exist.
      */
-    private class LivePackHandler implements IItemHandlerModifiable {
+    private class LivePackHandler extends DelegatingResourceHandler<ItemResource> {
 
-        /**
-         * Modifiable, not just {@link IItemHandler}: {@code SlotItemHandler#set} casts to
-         * {@link IItemHandlerModifiable} without checking, which is how the client applies the
-         * server's container contents.
-         */
-        private IItemHandlerModifiable delegate() {
-            IItemHandler handler = pack().getCapability(Capabilities.ItemHandler.ITEM);
-            return handler instanceof IItemHandlerModifiable modifiable ? modifiable : null;
-        }
-
-        @Override
-        public void setStackInSlot(int slot, ItemStack stack) {
-            IItemHandlerModifiable handler = delegate();
-            if (handler != null) {
-                handler.setStackInSlot(slot, stack);
-            }
-        }
-
-        @Override
-        public int getSlots() {
-            IItemHandlerModifiable handler = delegate();
-            return handler == null ? PortableBeaconItem.CONTAINER_SIZE : handler.getSlots();
-        }
-
-        @Override
-        public ItemStack getStackInSlot(int slot) {
-            IItemHandlerModifiable handler = delegate();
-            return handler == null ? ItemStack.EMPTY : handler.getStackInSlot(slot);
-        }
-
-        @Override
-        public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-            IItemHandlerModifiable handler = delegate();
-            return handler == null ? stack : handler.insertItem(slot, stack, simulate);
-        }
-
-        @Override
-        public ItemStack extractItem(int slot, int amount, boolean simulate) {
-            IItemHandlerModifiable handler = delegate();
-            return handler == null ? ItemStack.EMPTY : handler.extractItem(slot, amount, simulate);
-        }
-
-        @Override
-        public int getSlotLimit(int slot) {
-            IItemHandlerModifiable handler = delegate();
-            return handler == null ? 64 : handler.getSlotLimit(slot);
-        }
-
-        @Override
-        public boolean isItemValid(int slot, ItemStack stack) {
-            IItemHandlerModifiable handler = delegate();
-            return handler == null || handler.isItemValid(slot, stack);
+        LivePackHandler() {
+            super(() -> {
+                ResourceHandler<ItemResource> live = BPLookups.handlerOf(pack());
+                return live == null ? DETACHED : live;
+            });
         }
     }
+
+    /**
+     * Stands in when the pack is gone — dropped, moved, or a slot index that no longer holds one.
+     *
+     * <p>Right-sized rather than empty, so the slots stay where they are and simply read as empty.
+     * A zero-length handler would put every slot out of range instead, which is a crash rather than
+     * a closed menu. Nothing ever reads what is written here.
+     */
+    private static final ResourceHandler<ItemResource> DETACHED =
+            new ItemStacksResourceHandler(PortableBeaconItem.CONTAINER_SIZE);
 
     public void setVisibleDrawer(int drawer) {
         this.visibleDrawer = drawer;
@@ -444,10 +410,36 @@ public class PortableBeaconMenu extends AbstractContainerMenu {
         return visibleDrawer < 0 || visibleDrawer == drawer;
     }
 
+    /**
+     * Writes one slot outright, which a component-backed handler does not offer.
+     *
+     * <p>{@link ResourceHandlerSlot} needs a direct write to apply the server's contents on the
+     * client, and {@code ItemAccessItemHandler} exposes only insert and extract. So a set is "take
+     * out whatever is there, then put in what was asked for", both inside one transaction: an
+     * insert that gets refused rolls the extract back rather than leaving the slot emptied.
+     *
+     * <p>Nested under any transaction already running rather than always opening a root one, which
+     * would throw if this is ever reached from inside a transfer.
+     */
+    private static void setSlot(ResourceHandler<ItemResource> handler, int index,
+                                ItemResource resource, int amount) {
+        try (Transaction transaction = Transaction.open(Transaction.getCurrentOpenedTransaction())) {
+            int held = handler.getAmountAsInt(index);
+            if (held > 0) {
+                handler.extract(index, handler.getResource(index), held, transaction);
+            }
+            if (!resource.isEmpty() && amount > 0) {
+                handler.insert(index, resource, amount, transaction);
+            }
+            transaction.commit();
+        }
+    }
+
     /** Rejects a second augment of a type already installed, so the rule is visible, not hidden. */
-    private class AugmentSlot extends SlotItemHandler {
-        AugmentSlot(IItemHandler handler, int index, int x, int y) {
-            super(handler, index, x, y);
+    private class AugmentSlot extends ResourceHandlerSlot {
+        AugmentSlot(ResourceHandler<ItemResource> handler, int index, int x, int y) {
+            super(handler, (i, resource, amount) -> setSlot(handler, i, resource, amount),
+                    index, x, y);
         }
 
         @Override
@@ -473,13 +465,16 @@ public class PortableBeaconMenu extends AbstractContainerMenu {
          * every button clicks, but a slot is silent, and slotting an augment changes what the pack
          * does more than any button does.
          *
-         * <p>Only on a real change of occupancy: {@code set} also runs while the menu syncs, and a
-         * chime on every sync would fire while nothing happened.
+         * <p>Only on a real change of occupancy: this also runs while the menu syncs, and a chime
+         * on every sync would fire while nothing happened.
+         *
+         * <p>Hooked on {@code setStackCopy} rather than {@code set}, which {@link ResourceHandlerSlot}
+         * inherits final — it caches the stack around the write, so overriding it is not offered.
          */
         @Override
-        public void set(ItemStack stack) {
+        protected void setStackCopy(ItemStack stack) {
             boolean wasEmpty = getItem().isEmpty();
-            super.set(stack);
+            super.setStackCopy(stack);
             if (!player.level().isClientSide() && wasEmpty != stack.isEmpty()) {
                 player.level().playSound(null, player.blockPosition(),
                         SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS,
@@ -488,9 +483,10 @@ public class PortableBeaconMenu extends AbstractContainerMenu {
         }
     }
 
-    private class FuelSlot extends SlotItemHandler {
-        FuelSlot(IItemHandler handler, int index, int x, int y) {
-            super(handler, index, x, y);
+    private class FuelSlot extends ResourceHandlerSlot {
+        FuelSlot(ResourceHandler<ItemResource> handler, int index, int x, int y) {
+            super(handler, (i, resource, amount) -> setSlot(handler, i, resource, amount),
+                    index, x, y);
         }
 
         @Override

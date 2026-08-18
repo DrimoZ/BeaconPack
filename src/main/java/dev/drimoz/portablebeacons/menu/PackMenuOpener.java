@@ -32,7 +32,7 @@ public final class PackMenuOpener {
         }
         player.openMenu(new SimpleMenuProvider(
                         (id, inventory, who) -> new PortableBeaconMenu(id, inventory, slotIndex),
-                        Component.translatable(stack.getDescriptionId())),
+                        stack.getHoverName()),
                 buf -> buf.writeVarInt(slotIndex));
         return true;
     }

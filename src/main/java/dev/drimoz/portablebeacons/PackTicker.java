@@ -24,9 +24,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -148,9 +149,8 @@ public final class PackTicker {
      */
     private static void runDry(Player player, ItemStack pack, PackState state) {
         PortableBeaconItem.setState(pack, state.withActive(false));
-        player.displayClientMessage(
-                Component.translatable("portablebeacons.msg.out_of_fuel").withStyle(ChatFormatting.RED),
-                true);
+        ActionBar.send(player,
+                Component.translatable("portablebeacons.msg.out_of_fuel").withStyle(ChatFormatting.RED));
         player.level().playSound(null, player.blockPosition(),
                 SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.5F, 1.0F);
     }
@@ -165,11 +165,11 @@ public final class PackTicker {
         if (state.fuel() >= cost) {
             return state;
         }
-        IItemHandler handler = pack.getCapability(Capabilities.ItemHandler.ITEM);
-        if (handler == null || handler.getSlots() <= PortableBeaconItem.FUEL_SLOT) {
+        ResourceHandler<ItemResource> handler = BPLookups.handlerOf(pack);
+        if (handler == null || handler.size() <= PortableBeaconItem.FUEL_SLOT) {
             return state;
         }
-        ItemStack fuel = handler.getStackInSlot(PortableBeaconItem.FUEL_SLOT);
+        ItemResource fuel = handler.getResource(PortableBeaconItem.FUEL_SLOT);
         if (fuel.isEmpty()) {
             return state;
         }
@@ -177,7 +177,14 @@ public final class PackTicker {
         if (!FuelBudget.accepts(state.fuel(), units, stats.fuelCapacity())) {
             return state;
         }
-        handler.extractItem(PortableBeaconItem.FUEL_SLOT, 1, false);
+        // Closing without committing aborts, so a slot that will not give up its item leaves the
+        // buffer untouched rather than crediting fuel that was never burned.
+        try (Transaction transaction = Transaction.openRoot()) {
+            if (handler.extract(PortableBeaconItem.FUEL_SLOT, fuel, 1, transaction) != 1) {
+                return state;
+            }
+            transaction.commit();
+        }
         return state.withFuel(state.fuel() + units);
     }
 

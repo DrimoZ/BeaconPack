@@ -19,13 +19,13 @@ public final class TooltipDetail {
                     .withItalic(true));
 
     public static boolean expanded() {
-        return FMLEnvironment.dist == Dist.CLIENT && ClientOnly.shiftDown();
+        return FMLEnvironment.getDist() == Dist.CLIENT && ClientOnly.shiftDown();
     }
 
     /** Nested so the client-only class is never loaded on a dedicated server. */
     private static final class ClientOnly {
         static boolean shiftDown() {
-            return net.minecraft.client.gui.screens.Screen.hasShiftDown();
+            return net.minecraft.client.Minecraft.getInstance().hasShiftDown();
         }
 
         private ClientOnly() {}

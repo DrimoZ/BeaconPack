@@ -9,9 +9,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * The single item behind every augment. Its identity, colour and stats all come from the
@@ -29,27 +32,39 @@ public class AugmentItem extends Item {
     }
 
     /**
+     * The same read, without building an {@link ItemStack} first.
+     *
+     * <p>Slots are read as resources now, and this runs once per augment slot per tick - turning
+     * each one into a stack just to look at one component would allocate for nothing.
+     */
+    @Nullable
+    public static AugmentInstance instanceOf(ItemResource resource) {
+        return resource.get(BPComponents.AUGMENT.get());
+    }
+
+    /**
      * Names come from the registry key, so a datapack-added augment only needs a matching
      * translation key — no code, no model, no item registration.
      */
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context,
-                                List<Component> tooltip, TooltipFlag flag) {
+                                TooltipDisplay display, Consumer<Component> tooltip,
+                                TooltipFlag flag) {
         AugmentInstance instance = instanceOf(stack);
         if (instance == null || context.registries() == null) {
             return;
         }
         if (!TooltipDetail.expanded()) {
-            tooltip.add(TooltipDetail.HINT);
+            tooltip.accept(TooltipDetail.HINT);
             return;
         }
         context.registries().lookup(BPRegistryKeys.AUGMENT)
                 .flatMap(lookup -> lookup.get(instance.type()))
                 .ifPresent(holder -> {
                     for (AugmentDef.Operation op : holder.value().operations()) {
-                        tooltip.add(describe(op, instance.tier()));
+                        tooltip.accept(describe(op, instance.tier()));
                     }
-                    tooltip.add(Component.translatable("portablebeacons.tip.augment_rule")
+                    tooltip.accept(Component.translatable("portablebeacons.tip.augment_rule")
                             .withStyle(ChatFormatting.DARK_GRAY));
                 });
     }
@@ -71,8 +86,8 @@ public class AugmentItem extends Item {
             return super.getName(stack);
         }
         return Component.translatable(
-                "augment." + instance.type().location().getNamespace()
-                        + "." + instance.type().location().getPath(),
+                "augment." + instance.type().identifier().getNamespace()
+                        + "." + instance.type().identifier().getPath(),
                 Component.translatable("portablebeacons.tier." + instance.tier()));
     }
 }

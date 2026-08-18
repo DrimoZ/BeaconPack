@@ -63,7 +63,7 @@ public class PortableBeaconsJeiPlugin implements IModPlugin {
                         AugmentInstance instance = AugmentItem.instanceOf(stack);
                         return instance == null
                                 ? ""
-                                : instance.type().location() + "@" + instance.tier();
+                                : instance.type().identifier() + "@" + instance.tier();
                     }
                 });
     }
