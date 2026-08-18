@@ -11,7 +11,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.item.ItemStack;
+
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingRecipe;
@@ -33,17 +33,21 @@ import java.util.Map;
  */
 final class ComponentShapedRecipe {
 
+    /**
+     * The result is an {@link ItemStackTemplate}, never an {@code ItemStack}.
+     *
+     * <p>That is the whole point of the type: components are bound at resource reload now, and
+     * datagen runs before that, so constructing an {@code ItemStack} here fails with "Components
+     * not bound yet". A template carries the same components without needing them resolved.
+     */
     static void save(RecipeOutput output, HolderLookup.Provider registries, Identifier id,
-                     ItemStack result, ItemLike unlockedBy,
+                     ItemStackTemplate result, ItemLike unlockedBy,
                      Map<Character, Ingredient> key, String... pattern) {
-        // A recipe result is an ItemStackTemplate now - immutable, and resolvable before the
-        // registries are up, which is why the split happened. The components carry across intact.
         ShapedRecipe recipe = new ShapedRecipe(
                 new Recipe.CommonInfo(true),
                 new CraftingRecipe.CraftingBookInfo(CraftingBookCategory.MISC, ""),
                 ShapedRecipePattern.of(key, pattern),
-                new ItemStackTemplate(result.getItem(), result.getCount(),
-                        result.getComponentsPatch()));
+                result);
 
         ResourceKey<Recipe<?>> recipeKey = ResourceKey.create(Registries.RECIPE, id);
 

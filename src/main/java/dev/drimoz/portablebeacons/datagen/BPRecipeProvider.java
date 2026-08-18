@@ -9,7 +9,8 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
@@ -76,13 +77,13 @@ public class BPRecipeProvider extends RecipeProvider {
 
     private void pack(RecipeOutput output, HolderLookup.Provider lookup, ItemLike result,
                       Map<Character, Ingredient> key, String... pattern) {
-        ComponentShapedRecipe.save(output, lookup, key(result), new ItemStack(result),
+        ComponentShapedRecipe.save(output, lookup, key(result), new ItemStackTemplate(result.asItem()),
                 Items.BEACON, key, pattern);
     }
 
     private void themed(RecipeOutput output, HolderLookup.Provider lookup, ItemLike result,
                         ItemLike core, ItemLike material) {
-        ComponentShapedRecipe.save(output, lookup, key(result), new ItemStack(result), core, Map.of(
+        ComponentShapedRecipe.save(output, lookup, key(result), new ItemStackTemplate(result.asItem()), core, Map.of(
                         'C', Ingredient.of(core),
                         'M', Ingredient.of(material),
                         'P', Ingredient.of(BPItems.PACK_II.get()),
@@ -97,9 +98,12 @@ public class BPRecipeProvider extends RecipeProvider {
     private void augment(RecipeOutput output, HolderLookup.Provider lookup, String name,
                          ItemLike material, int maxTier) {
         for (int tier = 1; tier <= maxTier; tier++) {
-            ItemStack result = new ItemStack(BPItems.AUGMENT.get());
-            result.set(BPComponents.AUGMENT.get(), new AugmentInstance(
-                    ResourceKey.create(BPRegistryKeys.AUGMENT, BPRegistryKeys.id(name)), tier));
+            ItemStackTemplate result = new ItemStackTemplate(BPItems.AUGMENT.get(), 1,
+                    DataComponentPatch.builder()
+                            .set(BPComponents.AUGMENT.get(), new AugmentInstance(
+                                    ResourceKey.create(BPRegistryKeys.AUGMENT,
+                                            BPRegistryKeys.id(name)), tier))
+                            .build());
 
             Map<Character, Ingredient> key = switch (tier) {
                 case 1 -> Map.of('A', Ingredient.of(Items.AMETHYST_SHARD),

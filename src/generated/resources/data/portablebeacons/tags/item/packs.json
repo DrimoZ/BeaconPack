@@ -1,0 +1,11 @@
+{
+  "values": [
+    "portablebeacons:beacon_pack_i",
+    "portablebeacons:beacon_pack_ii",
+    "portablebeacons:beacon_pack_iii",
+    "portablebeacons:beacon_pack_iv",
+    "portablebeacons:nether_pack",
+    "portablebeacons:end_pack",
+    "portablebeacons:tidal_pack"
+  ]
+}
