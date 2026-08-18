@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * and was removed rather than left red or weakened into passing. That one annotation is covered by
  * the mod being played.
  *
- * <p>Run headlessly with {@code ./gradlew runGameTestServer}, or {@code /test run beaconpack} in a
+ * <p>Run headlessly with {@code ./gradlew runGameTestServer}, or {@code /test run portablebeacons} in a
  * client.
  */
 @GameTestHolder(PortableBeacons.MOD_ID)
@@ -140,7 +140,7 @@ public final class BPGameTests {
             ServerPlayer outsider = spawnPlayer(helper, cleanup);
 
             Scoreboard scoreboard = helper.getLevel().getScoreboard();
-            PlayerTeam team = scoreboard.addPlayerTeam("beaconpack_test_team");
+            PlayerTeam team = scoreboard.addPlayerTeam("portablebeacons_test_team");
             cleanup.add(() -> scoreboard.removePlayerTeam(team));
             scoreboard.addPlayerToTeam(carrier.getScoreboardName(), team);
 

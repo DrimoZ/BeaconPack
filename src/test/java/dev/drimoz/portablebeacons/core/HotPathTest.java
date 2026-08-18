@@ -81,11 +81,11 @@ class HotPathTest {
 
     private static ResourceKey<BeaconEffectDef> effectKey(String path) {
         return ResourceKey.create(BPRegistryKeys.EFFECT,
-                Identifier.fromNamespaceAndPath("beaconpack", path));
+                Identifier.fromNamespaceAndPath("portablebeacons", path));
     }
 
     private static ResourceKey<AugmentDef> augmentKey(String path) {
         return ResourceKey.create(BPRegistryKeys.AUGMENT,
-                Identifier.fromNamespaceAndPath("beaconpack", path));
+                Identifier.fromNamespaceAndPath("portablebeacons", path));
     }
 }

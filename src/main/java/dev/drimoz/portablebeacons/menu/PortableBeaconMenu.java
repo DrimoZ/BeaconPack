@@ -229,7 +229,7 @@ public class PortableBeaconMenu extends AbstractContainerMenu {
         }
         if (isReconfiguration(action) && !canReconfigure()) {
             who.displayClientMessage(
-                    Component.translatable("beaconpack.msg.needs_beacon"), true);
+                    Component.translatable("portablebeacons.msg.needs_beacon"), true);
             return false;
         }
         PackResolver.Lookup<BeaconEffectDef> lookup =

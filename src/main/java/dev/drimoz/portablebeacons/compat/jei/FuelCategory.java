@@ -25,7 +25,7 @@ import net.minecraft.world.item.ItemStack;
  * says an iron ingot is five minutes and a netherite ingot is eight hours, so the only way to find
  * out was to burn one and watch.
  *
- * <p>Rows come from the {@code beaconpack:fuel} registry, so a pack that adds its own fuels gets
+ * <p>Rows come from the {@code portablebeacons:fuel} registry, so a pack that adds its own fuels gets
  * them listed here with no further work.
  */
 public class FuelCategory implements IRecipeCategory<FuelEntry> {
@@ -51,7 +51,7 @@ public class FuelCategory implements IRecipeCategory<FuelEntry> {
 
     @Override
     public Component getTitle() {
-        return Component.translatable("beaconpack.viewer.fuel");
+        return Component.translatable("portablebeacons.viewer.fuel");
     }
 
     @Override
@@ -84,11 +84,11 @@ public class FuelCategory implements IRecipeCategory<FuelEntry> {
         // Time first and in white: it is the answer to the question people are asking. The unit
         // count is the same fact in the mod's own currency, so it is there but subdued.
         graphics.drawString(font,
-                Component.translatable("beaconpack.viewer.fuel_runtime",
+                Component.translatable("portablebeacons.viewer.fuel_runtime",
                         Durations.format(entry.seconds())),
                 24, 4, 0xFFFFFF, false);
         graphics.drawString(font,
-                Component.translatable("beaconpack.viewer.fuel_units", entry.units())
+                Component.translatable("portablebeacons.viewer.fuel_units", entry.units())
                         .withStyle(ChatFormatting.GRAY),
                 24, 15, 0xA0A0A0, false);
     }

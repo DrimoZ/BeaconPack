@@ -149,7 +149,7 @@ public final class PackTicker {
     private static void runDry(Player player, ItemStack pack, PackState state) {
         PortableBeaconItem.setState(pack, state.withActive(false));
         player.displayClientMessage(
-                Component.translatable("beaconpack.msg.out_of_fuel").withStyle(ChatFormatting.RED),
+                Component.translatable("portablebeacons.msg.out_of_fuel").withStyle(ChatFormatting.RED),
                 true);
         player.level().playSound(null, player.blockPosition(),
                 SoundEvents.BEACON_DEACTIVATE, SoundSource.PLAYERS, 0.5F, 1.0F);

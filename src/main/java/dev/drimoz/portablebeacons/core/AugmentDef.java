@@ -7,9 +7,9 @@ import net.minecraft.util.StringRepresentable;
 import java.util.List;
 
 /**
- * One entry of the {@code beaconpack:augment} datapack registry.
+ * One entry of the {@code portablebeacons:augment} datapack registry.
  * <p>
- * A single registered item ({@code beaconpack:augment}) carries a reference to one of these plus a
+ * A single registered item ({@code portablebeacons:augment}) carries a reference to one of these plus a
  * tier, so a datapack can introduce a brand new augment without any code — which would be
  * impossible if each augment were its own registered item.
  *

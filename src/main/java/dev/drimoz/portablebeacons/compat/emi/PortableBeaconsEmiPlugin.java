@@ -42,7 +42,7 @@ public class PortableBeaconsEmiPlugin implements EmiPlugin {
     }
 
     /**
-     * Rows come from the {@code beaconpack:fuel} registry, so a datapack's own fuels list
+     * Rows come from the {@code portablebeacons:fuel} registry, so a datapack's own fuels list
      * themselves. A tag-keyed entry becomes one row whose slot cycles through the tag.
      */
     private static void addFuels(EmiRegistry registry) {

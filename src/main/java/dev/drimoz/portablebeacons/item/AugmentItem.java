@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  * The single item behind every augment. Its identity, colour and stats all come from the
- * {@code beaconpack:augment} component pointing into the datapack registry.
+ * {@code portablebeacons:augment} component pointing into the datapack registry.
  */
 public class AugmentItem extends Item {
 
@@ -49,7 +49,7 @@ public class AugmentItem extends Item {
                     for (AugmentDef.Operation op : holder.value().operations()) {
                         tooltip.add(describe(op, instance.tier()));
                     }
-                    tooltip.add(Component.translatable("beaconpack.tip.augment_rule")
+                    tooltip.add(Component.translatable("portablebeacons.tip.augment_rule")
                             .withStyle(ChatFormatting.DARK_GRAY));
                 });
     }
@@ -60,7 +60,7 @@ public class AugmentItem extends Item {
         String formatted = value == Math.rint(value)
                 ? String.valueOf((int) value)
                 : String.format(java.util.Locale.ROOT, "%.2f", value);
-        return Component.translatable("beaconpack.op." + op.type().getSerializedName(), formatted)
+        return Component.translatable("portablebeacons.op." + op.type().getSerializedName(), formatted)
                 .withStyle(ChatFormatting.GRAY);
     }
 
@@ -73,6 +73,6 @@ public class AugmentItem extends Item {
         return Component.translatable(
                 "augment." + instance.type().location().getNamespace()
                         + "." + instance.type().location().getPath(),
-                Component.translatable("beaconpack.tier." + instance.tier()));
+                Component.translatable("portablebeacons.tier." + instance.tier()));
     }
 }

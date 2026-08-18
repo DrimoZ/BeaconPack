@@ -9,7 +9,7 @@ import net.minecraft.network.codec.StreamCodec;
 import java.util.List;
 
 /**
- * Everything a pack item remembers, held in the single {@code beaconpack:pack} data component.
+ * Everything a pack item remembers, held in the single {@code portablebeacons:pack} data component.
  *
  * <p>Slot contents (augments + fuel) are deliberately NOT here: they live in the vanilla
  * {@code minecraft:container} component so NeoForge's item-backed handler can write straight back

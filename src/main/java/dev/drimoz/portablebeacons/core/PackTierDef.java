@@ -7,7 +7,7 @@ import net.minecraft.resources.ResourceKey;
 import java.util.List;
 
 /**
- * One entry of the {@code beaconpack:tier} datapack registry: the base stats of a pack item,
+ * One entry of the {@code portablebeacons:tier} datapack registry: the base stats of a pack item,
  * before augments.
  *
  * <p>Ranges are deliberately far below the vanilla beacon's 20/30/40/50: a beacon that follows you

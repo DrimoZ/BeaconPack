@@ -14,7 +14,7 @@ import net.neoforged.fml.loading.FMLEnvironment;
 public final class TooltipDetail {
 
     public static final Component HINT =
-            Component.translatable("beaconpack.tip.hold_shift").withStyle(style -> style
+            Component.translatable("portablebeacons.tip.hold_shift").withStyle(style -> style
                     .withColor(net.minecraft.ChatFormatting.DARK_GRAY)
                     .withItalic(true));
 

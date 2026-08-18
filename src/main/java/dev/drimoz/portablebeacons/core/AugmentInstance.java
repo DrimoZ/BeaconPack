@@ -8,8 +8,8 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
 
 /**
- * What an augment item actually is: a pointer into the {@code beaconpack:augment} registry plus a
- * tier. Stored as a data component on the single {@code beaconpack:augment} item.
+ * What an augment item actually is: a pointer into the {@code portablebeacons:augment} registry plus a
+ * tier. Stored as a data component on the single {@code portablebeacons:augment} item.
  */
 public record AugmentInstance(ResourceKey<AugmentDef> type, int tier) {
 

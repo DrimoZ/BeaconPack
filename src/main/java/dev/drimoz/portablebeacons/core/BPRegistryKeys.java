@@ -13,19 +13,19 @@ import net.minecraft.resources.Identifier;
 public final class BPRegistryKeys {
     public static final String MOD_ID = "portablebeacons";
 
-    /** {@code data/<ns>/beaconpack/effect/<name>.json} — which effects a pack may project. */
+    /** {@code data/<ns>/portablebeacons/effect/<name>.json} — which effects a pack may project. */
     public static final ResourceKey<Registry<BeaconEffectDef>> EFFECT =
             ResourceKey.createRegistryKey(id("effect"));
 
-    /** {@code data/<ns>/beaconpack/augment/<name>.json} — augment types and their per-tier ops. */
+    /** {@code data/<ns>/portablebeacons/augment/<name>.json} — augment types and their per-tier ops. */
     public static final ResourceKey<Registry<AugmentDef>> AUGMENT =
             ResourceKey.createRegistryKey(id("augment"));
 
-    /** {@code data/<ns>/beaconpack/tier/<name>.json} — base stats of each pack tier. */
+    /** {@code data/<ns>/portablebeacons/tier/<name>.json} — base stats of each pack tier. */
     public static final ResourceKey<Registry<PackTierDef>> TIER =
             ResourceKey.createRegistryKey(id("tier"));
 
-    /** {@code data/<ns>/beaconpack/fuel/<name>.json} — item to fuel-unit values. */
+    /** {@code data/<ns>/portablebeacons/fuel/<name>.json} — item to fuel-unit values. */
     public static final ResourceKey<Registry<FuelDef>> FUEL =
             ResourceKey.createRegistryKey(id("fuel"));
 
