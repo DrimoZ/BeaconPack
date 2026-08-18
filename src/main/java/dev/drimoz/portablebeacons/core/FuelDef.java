@@ -12,7 +12,7 @@ import net.minecraft.world.item.Item;
 import java.util.Optional;
 
 /**
- * One entry of the {@code beaconpack:fuel} registry: what an item is worth when burned.
+ * One entry of the {@code portablebeacons:fuel} registry: what an item is worth when burned.
  *
  * <p>A registry rather than a tag on its own, because a tag can only say "this is fuel" — it cannot
  * carry the per-item value, and hardcoding the values would undo the point of making the rest

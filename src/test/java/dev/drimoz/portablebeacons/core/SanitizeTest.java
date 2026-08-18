@@ -118,6 +118,6 @@ class SanitizeTest {
 
     private static ResourceKey<BeaconEffectDef> effectKey(String path) {
         return ResourceKey.create(BPRegistryKeys.EFFECT,
-                ResourceLocation.fromNamespaceAndPath("beaconpack", path));
+                ResourceLocation.fromNamespaceAndPath("portablebeacons", path));
     }
 }

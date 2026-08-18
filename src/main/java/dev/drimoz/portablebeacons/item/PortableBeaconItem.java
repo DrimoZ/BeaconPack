@@ -77,7 +77,7 @@ public class PortableBeaconItem extends Item {
                                 List<Component> tooltip, TooltipFlag flag) {
         PackState state = stateOf(stack);
         tooltip.add(Component.translatable(state.active()
-                        ? "beaconpack.gui.active" : "beaconpack.gui.inactive")
+                        ? "portablebeacons.gui.active" : "portablebeacons.gui.inactive")
                 .withStyle(state.active() ? ChatFormatting.GREEN : ChatFormatting.GRAY));
 
         if (!TooltipDetail.expanded()) {
@@ -89,7 +89,7 @@ public class PortableBeaconItem extends Item {
         }
         context.registries().lookup(BPRegistryKeys.TIER)
                 .flatMap(lookup -> lookup.get(tier))
-                .ifPresent(holder -> tooltip.add(Component.translatable("beaconpack.tip.pack_tier",
+                .ifPresent(holder -> tooltip.add(Component.translatable("portablebeacons.tip.pack_tier",
                                 holder.value().level(),
                                 holder.value().effectSlots(),
                                 holder.value().augmentSlots())
@@ -104,7 +104,7 @@ public class PortableBeaconItem extends Item {
                         .append(String.valueOf(slot.amplifier() + 1))
                         .append(" - ")
                         .append(Component.translatable(
-                                "beaconpack.aura." + slot.aura().getSerializedName()))
+                                "portablebeacons.aura." + slot.aura().getSerializedName()))
                         .withStyle(slot.enabled() ? ChatFormatting.GRAY
                                 : ChatFormatting.DARK_GRAY)));
             }
@@ -113,10 +113,10 @@ public class PortableBeaconItem extends Item {
         // completely differently and looked identical in a chest.
         List<AugmentInstance> augments = augmentsOf(stack);
         for (AugmentInstance augment : augments) {
-            tooltip.add(Component.translatable("beaconpack.tip.augment_line",
+            tooltip.add(Component.translatable("portablebeacons.tip.augment_line",
                             Component.translatable("augment." + augment.type().location().getNamespace()
                                     + "." + augment.type().location().getPath(),
-                                    Component.translatable("beaconpack.tier." + augment.tier())))
+                                    Component.translatable("portablebeacons.tier." + augment.tier())))
                     .withStyle(ChatFormatting.DARK_AQUA));
         }
         appendRuntime(stack, context, state, tooltip);
@@ -143,7 +143,7 @@ public class PortableBeaconItem extends Item {
         if (perSecond <= 0.0) {
             return;
         }
-        tooltip.add(Component.translatable("beaconpack.gui.runtime",
+        tooltip.add(Component.translatable("portablebeacons.gui.runtime",
                         Durations.format((int) (state.fuel() / perSecond)))
                 .withStyle(ChatFormatting.DARK_GRAY));
     }

@@ -14,7 +14,7 @@ import net.minecraft.resources.ResourceKey;
  * configured but switched off, then turning it on before a fight, is the intended use — it avoids
  * both paying fuel for nothing and reconfiguring every time.
  *
- * @param effect    entry of the {@code beaconpack:effect} registry
+ * @param effect    entry of the {@code portablebeacons:effect} registry
  * @param amplifier 0 = level I
  */
 public record EffectSlotConfig(

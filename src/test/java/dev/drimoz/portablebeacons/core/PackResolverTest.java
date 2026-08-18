@@ -86,11 +86,11 @@ class PackResolverTest {
 
     private static ResourceKey<AugmentDef> augmentKey(String path) {
         return ResourceKey.create(BPRegistryKeys.AUGMENT,
-                ResourceLocation.fromNamespaceAndPath("beaconpack", path));
+                ResourceLocation.fromNamespaceAndPath("portablebeacons", path));
     }
 
     private static ResourceKey<BeaconEffectDef> effectKey(String path) {
         return ResourceKey.create(BPRegistryKeys.EFFECT,
-                ResourceLocation.fromNamespaceAndPath("beaconpack", path));
+                ResourceLocation.fromNamespaceAndPath("portablebeacons", path));
     }
 }

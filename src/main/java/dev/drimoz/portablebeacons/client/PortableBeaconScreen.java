@@ -49,7 +49,7 @@ import java.util.Optional;
 public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeaconMenu> {
 
     private static final ResourceLocation TEXTURE =
-            ResourceLocation.fromNamespaceAndPath("beaconpack", "textures/gui/beacon_pack.png");
+            ResourceLocation.fromNamespaceAndPath("portablebeacons", "textures/gui/beacon_pack.png");
     private static final int TEXTURE_SIZE = 512;
 
     static final int IMAGE_W = 194;
@@ -256,7 +256,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         PackState state = menu.state();
         PackStats stats = stats();
 
-        graphics.drawString(font, Component.translatable("beaconpack.gui.effects"),
+        graphics.drawString(font, Component.translatable("portablebeacons.gui.effects"),
                 CONTENT_LEFT, CASE_Y - 12, TEXT, false);
 
         updateSlotVisibility();
@@ -446,7 +446,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         // The panel itself is the open tab, drawn by drawTabs; only its contents belong here.
         int y = rightDrawer == Drawer.AUGMENTS ? AUGMENT_DRAWER_Y : FUEL_DRAWER_Y;
         graphics.drawString(font, Component.translatable(rightDrawer == Drawer.AUGMENTS
-                        ? "beaconpack.gui.augments" : "beaconpack.gui.fuel"),
+                        ? "portablebeacons.gui.augments" : "portablebeacons.gui.fuel"),
                 DRAWER_X + PANEL_TEXT_INSET, y + 6, TEXT, false);
 
         if (rightDrawer == Drawer.AUGMENTS) {
@@ -482,7 +482,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         int x = LEFT_TAB_X - PANEL_W + 8;
         // Stops short of the tab glyph, which sits at the panel's inner edge.
         int textW = PANEL_W - PANEL_TEXT_INSET - 8;
-        graphics.drawString(font, Component.translatable("beaconpack.gui.stats"),
+        graphics.drawString(font, Component.translatable("portablebeacons.gui.stats"),
                 x, STATS_TAB_Y + 6, TEXT, false);
 
         int y = STATS_TAB_Y + 20;
@@ -583,13 +583,13 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
      */
     private List<Component> summaryTooltip(PackState state, PackStats stats) {
         List<Component> lines = new ArrayList<>(3);
-        lines.add(Component.translatable("beaconpack.gui.range",
+        lines.add(Component.translatable("portablebeacons.gui.range",
                 String.format(Locale.ROOT, "%.0f", stats.range())));
         if (BPConfig.fuelEnabled()) {
-            lines.add(Component.translatable("beaconpack.gui.runtime", totalRuntime())
+            lines.add(Component.translatable("portablebeacons.gui.runtime", totalRuntime())
                     .withStyle(ChatFormatting.GRAY));
         }
-        lines.add(Component.translatable("beaconpack.gui.slots",
+        lines.add(Component.translatable("portablebeacons.gui.slots",
                         state.effects().size(), stats.effectSlots())
                 .withStyle(ChatFormatting.GRAY));
         return lines;
@@ -599,7 +599,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
                                int mouseX, int mouseY) {
         List<EffectSlotConfig> effects = state.effects();
         if (focusedCase >= effects.size()) {
-            graphics.drawString(font, Component.translatable("beaconpack.gui.empty_slot"),
+            graphics.drawString(font, Component.translatable("portablebeacons.gui.empty_slot"),
                     INFO_X + 8, INFO_Y + 10, TEXT_DIM, false);
             return;
         }
@@ -627,13 +627,13 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         // Labelled: the bare word "Self" next to a percentage read as if the two were related.
         String reach = slot.aura().isAura()
                 ? String.format(Locale.ROOT, "%.0f m", stats.range())
-                : Component.translatable("beaconpack.aura.self").getString();
+                : Component.translatable("portablebeacons.aura.self").getString();
         // Two independent facts, so they are placed independently: share from the left, reach
         // against the right edge, and the share truncated if the two would meet. Concatenating them
         // with spaces meant the pair ran past the panel as soon as either string grew - which is
         // every language whose words are longer than English's.
-        String shareText = Component.translatable("beaconpack.gui.share", share).getString();
-        String reachText = Component.translatable("beaconpack.gui.reach", reach).getString();
+        String shareText = Component.translatable("portablebeacons.gui.share", share).getString();
+        String reachText = Component.translatable("portablebeacons.gui.reach", reach).getString();
         int reachX = INFO_X + INFO_W - 6 - font.width(reachText);
         int shareX = INFO_X + 28;
         graphics.drawString(font,
@@ -645,7 +645,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         // and overloading that click with "open the picker" made every attempt to read a second
         // effect's details pop the selector instead.
         drawButton(graphics, ROW_X, ROW_CHANGE, ROW_W, BTN_H,
-                Component.translatable("beaconpack.gui.change_effect"),
+                Component.translatable("portablebeacons.gui.change_effect"),
                 within(mouseX, mouseY, ROW_X, ROW_CHANGE, ROW_W, BTN_H), true, false);
 
         drawButton(graphics, buttonX(0), ROW_SETTINGS, BTN_W, BTN_H,
@@ -654,10 +654,10 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
                 canAmplify(def, stats), false);
         drawButton(graphics, buttonX(1), ROW_SETTINGS, BTN_W, BTN_H,
                 Component.translatable(slot.enabled()
-                        ? "beaconpack.gui.active" : "beaconpack.gui.inactive"),
+                        ? "portablebeacons.gui.active" : "portablebeacons.gui.inactive"),
                 within(mouseX, mouseY, buttonX(1), ROW_SETTINGS, BTN_W, BTN_H), true, slot.enabled());
         drawButton(graphics, buttonX(2), ROW_SETTINGS, BTN_W, BTN_H,
-                Component.translatable("beaconpack.aura." + slot.aura().getSerializedName()),
+                Component.translatable("portablebeacons.aura." + slot.aura().getSerializedName()),
                 within(mouseX, mouseY, buttonX(2), ROW_SETTINGS, BTN_W, BTN_H),
                 stats.allowedAuraModes().size() > 1, slot.aura().isAura());
     }
@@ -811,7 +811,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         List<ResourceKey<BeaconEffectDef>> rows = visibleRows();
         if (rows.isEmpty()) {
             graphics.drawCenteredString(font,
-                    Component.translatable("beaconpack.gui.no_results"),
+                    Component.translatable("portablebeacons.gui.no_results"),
                     x + SELECTOR_W / 2, y + SEARCH_H + 16, 0xFF5A5A5A);
             return;
         }
@@ -864,7 +864,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         }
 
         drawScrollbar(graphics, x, y, rows.size());
-        String count = Component.translatable("beaconpack.gui.result_count", rows.size()).getString();
+        String count = Component.translatable("portablebeacons.gui.result_count", rows.size()).getString();
         graphics.drawString(font, count, x + 6, y + SELECTOR_H - 10, 0xFF5A5A5A, false);
     }
 
@@ -903,7 +903,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
 
         boolean empty = search.isEmpty();
         String shown = empty
-                ? Component.translatable("beaconpack.gui.search").getString()
+                ? Component.translatable("portablebeacons.gui.search").getString()
                 : search;
         graphics.drawString(font, shown, left + 4, y + 7, empty ? 0xFF6E6E6E : 0xFF2B2B2B, false);
         // No caret over the placeholder: it read as a stray character appended to the hint.
@@ -993,7 +993,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         PackStats stats = stats();
         double perSecond = PackResolver.fuelPerSecond(menu.state(), stats, effectLookup());
         if (perSecond > 0.0) {
-            lines.add(Component.translatable("beaconpack.tip.fuel_worth",
+            lines.add(Component.translatable("portablebeacons.tip.fuel_worth",
                             Durations.format((int) (perItem / perSecond)),
                             Durations.format((int) (perItem * stack.getCount() / perSecond)))
                     .withStyle(ChatFormatting.GRAY));
@@ -1001,7 +1001,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         // A denser fuel than the buffer can hold is never consumed, and that would otherwise look
         // like the pack ignoring it for no reason.
         if (perItem > stats.fuelCapacity()) {
-            lines.add(Component.translatable("beaconpack.tip.fuel_too_dense")
+            lines.add(Component.translatable("portablebeacons.tip.fuel_too_dense")
                     .withStyle(ChatFormatting.RED));
         }
         graphics.renderComponentTooltip(font, lines, mouseX, mouseY);
@@ -1027,11 +1027,11 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
                 List<Component> lines = new ArrayList<>(3);
                 lines.add(def.effect().value().getDisplayName());
                 if (def.minTier() > tierLevel()) {
-                    lines.add(Component.translatable("beaconpack.gui.locked_tier",
+                    lines.add(Component.translatable("portablebeacons.gui.locked_tier",
                             roman(def.minTier())).withStyle(ChatFormatting.RED));
                 } else {
-                    lines.add(Component.translatable("beaconpack.tip.cost_meter",
-                                    Component.translatable("beaconpack.cost." + costBand(def)))
+                    lines.add(Component.translatable("portablebeacons.tip.cost_meter",
+                                    Component.translatable("portablebeacons.cost." + costBand(def)))
                             .withStyle(ChatFormatting.GRAY));
                 }
                 graphics.renderComponentTooltip(font, lines, mouseX, mouseY);
@@ -1057,29 +1057,29 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         if (hitTab(x, y, false, POWER_TAB_Y)) {
             return List.of(
                     Component.translatable(menu.state().active()
-                            ? "beaconpack.gui.active" : "beaconpack.gui.inactive"),
-                    Component.translatable("beaconpack.tip.master")
+                            ? "portablebeacons.gui.active" : "portablebeacons.gui.inactive"),
+                    Component.translatable("portablebeacons.tip.master")
                             .withStyle(ChatFormatting.GRAY));
         }
         if (hitTab(x, y, false, STATS_TAB_Y)) {
-            return List.of(Component.translatable("beaconpack.gui.stats"));
+            return List.of(Component.translatable("portablebeacons.gui.stats"));
         }
         if (hitTab(x, y, true, AUGMENT_TAB_Y)) {
-            return List.of(Component.translatable("beaconpack.gui.augments"));
+            return List.of(Component.translatable("portablebeacons.gui.augments"));
         }
         if (BPConfig.fuelEnabled() && hitTab(x, y, true, fuelTabY())) {
-            return List.of(Component.translatable("beaconpack.gui.fuel"));
+            return List.of(Component.translatable("portablebeacons.gui.fuel"));
         }
         if (BPConfig.fuelEnabled() && rightDrawer == Drawer.FUEL
                 && within(x, y, GAUGE_X, GAUGE_Y, GAUGE_W, GAUGE_H)) {
             PackStats stats = stats();
             double perSecond = PackResolver.fuelPerSecond(menu.state(), stats, effectLookup());
             return List.of(
-                    Component.translatable("beaconpack.gui.fuel"),
-                    Component.translatable("beaconpack.tip.fuel_stored",
+                    Component.translatable("portablebeacons.gui.fuel"),
+                    Component.translatable("portablebeacons.tip.fuel_stored",
                             atCurrentDraw(menu.state().fuel(), perSecond))
                             .withStyle(ChatFormatting.GRAY),
-                    Component.translatable("beaconpack.tip.fuel_reserve",
+                    Component.translatable("portablebeacons.tip.fuel_reserve",
                             atCurrentDraw(reserveUnits(), perSecond))
                             .withStyle(ChatFormatting.GRAY));
         }
@@ -1091,7 +1091,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
             for (int i = stats().augmentSlots(); i < PortableBeaconItem.AUGMENT_SLOTS; i++) {
                 if (within(x, y, AUGMENT_SLOT_X + i * SLOT_SIZE, AUGMENT_SLOT_Y,
                         SLOT_SIZE, SLOT_SIZE)) {
-                    return List.of(Component.translatable("beaconpack.tip.augment_locked"));
+                    return List.of(Component.translatable("portablebeacons.tip.augment_locked"));
                 }
             }
         }
@@ -1101,16 +1101,16 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
             return List.of();
         }
         if (within(x, y, ROW_X, ROW_CHANGE, ROW_W, BTN_H)) {
-            return List.of(Component.translatable("beaconpack.tip.change_effect"));
+            return List.of(Component.translatable("portablebeacons.tip.change_effect"));
         }
         if (within(x, y, buttonX(0), ROW_SETTINGS, BTN_W, BTN_H)) {
-            return List.of(Component.translatable("beaconpack.tip.level"));
+            return List.of(Component.translatable("portablebeacons.tip.level"));
         }
         if (within(x, y, buttonX(1), ROW_SETTINGS, BTN_W, BTN_H)) {
-            return List.of(Component.translatable("beaconpack.tip.effect_toggle"));
+            return List.of(Component.translatable("portablebeacons.tip.effect_toggle"));
         }
         if (within(x, y, buttonX(2), ROW_SETTINGS, BTN_W, BTN_H)) {
-            return List.of(Component.translatable("beaconpack.tip.aura"));
+            return List.of(Component.translatable("portablebeacons.tip.aura"));
         }
         return List.of();
     }
@@ -1121,17 +1121,17 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
                 continue;
             }
             if (i >= stats().effectSlots()) {
-                return List.of(Component.translatable("beaconpack.tip.case_locked"));
+                return List.of(Component.translatable("portablebeacons.tip.case_locked"));
             }
             List<EffectSlotConfig> effects = menu.state().effects();
             if (i >= effects.size()) {
-                return List.of(Component.translatable("beaconpack.gui.empty_slot"));
+                return List.of(Component.translatable("portablebeacons.gui.empty_slot"));
             }
             EffectSlotConfig slot = effects.get(i);
             return effectLookup().get(slot.effect())
                     .<List<Component>>map(def -> List.of(
                             def.effect().value().getDisplayName(),
-                            Component.translatable("beaconpack.tip.case_clear")))
+                            Component.translatable("portablebeacons.tip.case_clear")))
                     .orElse(List.of());
         }
         return List.of();
@@ -1382,7 +1382,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
      */
     private static String atCurrentDraw(int units, double perSecond) {
         return perSecond <= 0.0
-                ? Component.translatable("beaconpack.gui.idle").getString()
+                ? Component.translatable("portablebeacons.gui.idle").getString()
                 : Durations.format((int) (units / perSecond));
     }
 

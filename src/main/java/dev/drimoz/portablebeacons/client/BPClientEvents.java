@@ -33,11 +33,11 @@ public final class BPClientEvents {
      * vanilla binds and was effectively impossible to find, which reads as the bind not existing.
      */
     public static final KeyMapping OPEN_PACK = new KeyMapping(
-            "key.beaconpack.open_pack",
+            "key.portablebeacons.open_pack",
             KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_B,
-            "key.categories.beaconpack");
+            "key.categories.portablebeacons");
 
     @EventBusSubscriber(modid = PortableBeacons.MOD_ID,
             value = Dist.CLIENT)

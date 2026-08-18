@@ -7,7 +7,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.effect.MobEffect;
 
 /**
- * One entry of the {@code beaconpack:effect} datapack registry: an effect a pack is allowed to
+ * One entry of the {@code portablebeacons:effect} datapack registry: an effect a pack is allowed to
  * project, and what it costs.
  *
  * <pre>{@code

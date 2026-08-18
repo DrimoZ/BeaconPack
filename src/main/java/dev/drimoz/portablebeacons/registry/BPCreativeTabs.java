@@ -21,7 +21,7 @@ public final class BPCreativeTabs {
 
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> MAIN = TABS.register(
             "main", () -> CreativeModeTab.builder()
-                    .title(Component.translatable("itemGroup.beaconpack"))
+                    .title(Component.translatable("itemGroup.portablebeacons"))
                     .icon(() -> new ItemStack(BPItems.PACK_IV.get()))
                     .displayItems((parameters, output) -> {
                         BPItems.packs().forEach(pack -> output.accept(pack.get()));

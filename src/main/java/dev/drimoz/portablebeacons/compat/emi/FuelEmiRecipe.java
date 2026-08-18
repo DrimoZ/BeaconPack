@@ -72,9 +72,9 @@ public class FuelEmiRecipe implements EmiRecipe {
         widgets.addSlot(input, 0, 4);
         // Time first and in white: it is the answer to the question people are asking. The unit
         // count is the same fact in the mod's own currency, so it is there but subdued.
-        widgets.addText(Component.translatable("beaconpack.viewer.fuel_runtime",
+        widgets.addText(Component.translatable("portablebeacons.viewer.fuel_runtime",
                 Durations.format(seconds)), 24, 5, 0xFFFFFF, false);
-        widgets.addText(Component.translatable("beaconpack.viewer.fuel_units", units)
+        widgets.addText(Component.translatable("portablebeacons.viewer.fuel_units", units)
                 .withStyle(ChatFormatting.GRAY), 24, 16, 0xA0A0A0, false);
     }
 }
