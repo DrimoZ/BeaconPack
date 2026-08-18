@@ -3,7 +3,7 @@
 All notable changes to this project are documented here, newest first.
 Versions follow `{mod version}+{minecraft version}`.
 
-## Unreleased
+## 1.1.0
 
 ### Added
 - **Seven augments, and four new levers to build them from.**
@@ -61,9 +61,9 @@ Versions follow `{mod version}+{minecraft version}`.
 - The advancement tab drew as missing texture. `ClientAsset.ResourceTexture` builds its own path, so
   passing a full one asked for `textures/textures/….png.png`.
 
-## 1.0.1+26.1.2 — the port
+## 1.1.0+26.1.2 — the port
 
-Everything in 1.0.1 below, built for **Minecraft 26.1.2** on NeoForge 26.1.2.95 and Java 25.
+Everything in 1.1.0 above, built for **Minecraft 26.1.2** on NeoForge 26.1.2.95 and Java 25.
 
 Ten primers separate 1.21.1 from 26.1 — 1.21.1 was the modding anchor for a year, so nothing moved
 and then everything did at once. `core/`, the layer with no dependency on components, packets or
