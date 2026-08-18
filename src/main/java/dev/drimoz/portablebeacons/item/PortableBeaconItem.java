@@ -25,8 +25,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
@@ -72,10 +70,7 @@ public class PortableBeaconItem extends Item {
         return InteractionResult.SUCCESS;
     }
 
-    @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context,
-                                TooltipDisplay display, Consumer<Component> tooltip,
-                                TooltipFlag flag) {
+    void appendTooltip(ItemStack stack, TooltipContext context, Consumer<Component> tooltip) {
         PackState state = stateOf(stack);
         tooltip.accept(Component.translatable(state.active()
                         ? "portablebeacons.gui.active" : "portablebeacons.gui.inactive")

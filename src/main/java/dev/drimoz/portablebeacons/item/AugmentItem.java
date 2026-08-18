@@ -8,8 +8,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.TooltipDisplay;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 
 import javax.annotation.Nullable;
@@ -46,10 +44,8 @@ public class AugmentItem extends Item {
      * Names come from the registry key, so a datapack-added augment only needs a matching
      * translation key — no code, no model, no item registration.
      */
-    @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context,
-                                TooltipDisplay display, Consumer<Component> tooltip,
-                                TooltipFlag flag) {
+    static void appendTooltip(ItemStack stack, TooltipContext context,
+                              Consumer<Component> tooltip) {
         AugmentInstance instance = instanceOf(stack);
         if (instance == null || context.registries() == null) {
             return;
