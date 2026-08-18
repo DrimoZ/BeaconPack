@@ -1,0 +1,9 @@
+{
+  "max_tier": 1,
+  "color": 16747546,
+  "operations": [
+    { "type": "add_range", "values": [12.0] },
+    { "type": "unlock_aura", "values": [1.0] },
+    { "type": "mul_fuel", "values": [1.9] }
+  ]
+}

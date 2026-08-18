@@ -109,7 +109,6 @@ public final class BeaconTicker {
                 PortableBeaconItem.stateOf(beacon), stats, effectLookup, tier);
 
         List<EffectSlotConfig> toApply = new ArrayList<>(state.effects().size());
-        double owed = 0.0;
         for (EffectSlotConfig slot : state.effects()) {
             if (!slot.enabled()) {
                 continue;
@@ -121,9 +120,11 @@ public final class BeaconTicker {
                 // free and paid every two seconds.
                 continue;
             }
-            owed += BeaconResolver.fuelPerSecond(slot, stats, effectLookup) * stats.fuelMultiplier();
             toApply.add(slot);
         }
+        // Billed through the resolver rather than summed here, so free slots and the movement
+        // multipliers apply to what is charged exactly as they do to what the screen displays.
+        double owed = BeaconResolver.fuelPerSecond(toApply, stats, effectLookup, isMoving(player));
 
         int cost = FuelBudget.costFor(owed, SECONDS_PER_INTERVAL);
         if (BPConfig.INSTANCE.requireFuel.get() && cost > 0) {
@@ -139,6 +140,19 @@ public final class BeaconTicker {
         for (EffectSlotConfig slot : toApply) {
             apply(player, slot, stats, effectLookup);
         }
+    }
+
+    /**
+     * Whether the carrier counts as travelling this tick.
+     *
+     * <p>Deliberately coarse — horizontal movement only, and a threshold well above the drift a
+     * standing player produces. An augment that pays out differently for moving and standing still
+     * must not flicker between the two because someone shifted their feet.
+     */
+    private static boolean isMoving(Player player) {
+        double dx = player.getX() - player.xOld;
+        double dz = player.getZ() - player.zOld;
+        return dx * dx + dz * dz > 0.0025;
     }
 
     /**

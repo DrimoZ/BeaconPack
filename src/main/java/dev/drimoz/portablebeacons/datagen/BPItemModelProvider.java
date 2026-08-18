@@ -34,7 +34,7 @@ public class BPItemModelProvider extends ModelProvider {
     /** The built-in augments, by registry name. Order is presentational only. */
     private static final String[] AUGMENTS = {
             "range", "focus", "amplification", "efficiency", "capacity", "attunement", "discretion",
-            "overdrive", "projector", "miser", "reservoir", "herald"
+            "communion", "wellspring", "wayfarer", "sentinel", "vanguard", "prism", "recluse"
     };
 
     public BPItemModelProvider(PackOutput output) {

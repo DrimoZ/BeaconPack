@@ -22,6 +22,10 @@ public record BeaconStats(
         int fuelCapacity,
         int maxAmplifier,
         double fuelMultiplier,
+        double auraCostMultiplier,
+        int freeEffectSlots,
+        double movingCostMultiplier,
+        double stillCostMultiplier,
         Set<AuraMode> allowedAuraModes,
         boolean hideParticles,
         boolean hideIcon

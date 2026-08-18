@@ -1,0 +1,8 @@
+{
+  "max_tier": 1,
+  "color": 5636095,
+  "operations": [
+    { "type": "free_effect_slot", "values": [1.0] },
+    { "type": "mul_fuel", "values": [1.6] }
+  ]
+}

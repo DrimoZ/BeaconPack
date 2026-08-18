@@ -74,13 +74,18 @@ public class BPRecipeProvider extends RecipeProvider {
         augment(output, lookup, "attunement", Items.ECHO_SHARD, 2);
         augment(output, lookup, "discretion", Items.PHANTOM_MEMBRANE, 2);
 
-        // The trade-off augments. Each buys one stat by spending another, so they compete with the
-        // plain ones for a slot rather than replacing them.
-        augment(output, lookup, "overdrive", Items.BLAZE_POWDER, 2);
-        augment(output, lookup, "projector", Items.END_ROD, 2);
-        augment(output, lookup, "miser", Items.EMERALD, 2);
-        augment(output, lookup, "reservoir", Items.COPPER_BLOCK, 2);
-        augment(output, lookup, "herald", Items.GOAT_HORN, 2);
+        // Augments built on the economy rather than on a stat: they change which strategy is
+        // affordable, so they compete with the seven above instead of extending them.
+        augment(output, lookup, "communion", Items.GOAT_HORN, 2);
+        augment(output, lookup, "wellspring", Items.NAUTILUS_SHELL, 1);
+        augment(output, lookup, "wayfarer", Items.RABBIT_FOOT, 2);
+        augment(output, lookup, "sentinel", Items.SHIELD, 2);
+
+        // Combinations: several gains across different axes for one cost, so what they really buy
+        // is a slot back — the scarcest thing a beacon has.
+        augment(output, lookup, "vanguard", Items.END_ROD, 1);
+        augment(output, lookup, "prism", Items.AMETHYST_CLUSTER, 1);
+        augment(output, lookup, "recluse", Items.SCULK_SENSOR, 1);
     }
 
     private void beacon(RecipeOutput output, HolderLookup.Provider lookup, ItemLike result,

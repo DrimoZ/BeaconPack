@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": "minecraft:amethyst_shard",
+    "M": "minecraft:end_rod"
+  },
+  "pattern": [
+    " A ",
+    "AMA",
+    " A "
+  ],
+  "result": {
+    "components": {
+      "portablebeacons:augment": {
+        "type": "portablebeacons:vanguard"
+      }
+    },
+    "id": "portablebeacons:augment"
+  }
+}

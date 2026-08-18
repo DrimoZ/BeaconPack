@@ -3,6 +3,7 @@ package dev.drimoz.portablebeacons.core;
 import net.minecraft.resources.ResourceKey;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
@@ -36,6 +37,10 @@ public final class BeaconResolver {
         double capacityMultiplier = 1.0;
         int maxAmplifier = tier.maxAmplifier();
         double fuelMultiplier = 1.0;
+        double auraCostMultiplier = 1.0;
+        int freeEffectSlots = 0;
+        double movingCostMultiplier = 1.0;
+        double stillCostMultiplier = 1.0;
         int auraTierBonus = 0;
         int concealment = 0;
 
@@ -56,6 +61,10 @@ public final class BeaconResolver {
                     case MUL_FUEL -> fuelMultiplier *= value;
                     case MUL_CAPACITY -> capacityMultiplier *= value;
                     case UNLOCK_AURA -> auraTierBonus += (int) value;
+                    case MUL_AURA_COST -> auraCostMultiplier *= value;
+                    case FREE_EFFECT_SLOT -> freeEffectSlots += (int) value;
+                    case MUL_COST_MOVING -> movingCostMultiplier *= value;
+                    case MUL_COST_STILL -> stillCostMultiplier *= value;
                     // Highest wins rather than summing: this value names a behaviour, so adding
                     // two of them would be meaningless.
                     case HIDE_EFFECTS -> concealment = Math.max(concealment, (int) value);
@@ -78,6 +87,10 @@ public final class BeaconResolver {
                 (int) Math.round(tier.fuelCapacity() * capacityMultiplier),
                 Math.clamp(maxAmplifier, 0, 3),
                 Math.max(0.0, fuelMultiplier),
+                Math.max(0.0, auraCostMultiplier),
+                Math.max(0, freeEffectSlots),
+                Math.max(0.0, movingCostMultiplier),
+                Math.max(0.0, stillCostMultiplier),
                 auraModes,
                 concealment >= 1,
                 concealment >= 2);
@@ -107,14 +120,52 @@ public final class BeaconResolver {
     public static double fuelPerSecond(BeaconState state,
                                        BeaconStats stats,
                                        Lookup<BeaconEffectDef> effectLookup) {
-        if (!state.active()) {
-            return 0.0;
+        return fuelPerSecond(state, stats, effectLookup, false);
+    }
+
+    /**
+     * Total fuel units per second.
+     *
+     * <p>{@code moving} picks between the two context multipliers. Both default to 1.0, so a beacon
+     * with no such augment costs the same either way and callers need not care.
+     *
+     * <p>Free slots are applied to the <em>most expensive</em> effects rather than the first ones.
+     * Taking them in configured order would make the augment's worth depend on the order the player
+     * happened to set the effects in, which is not a decision — just a thing to get right or wrong
+     * without being told.
+     */
+    public static double fuelPerSecond(BeaconState state,
+                                       BeaconStats stats,
+                                       Lookup<BeaconEffectDef> effectLookup,
+                                       boolean moving) {
+        return state.active()
+                ? fuelPerSecond(state.effects(), stats, effectLookup, moving)
+                : 0.0;
+    }
+
+    /**
+     * The bill for a given set of effects.
+     *
+     * <p>Takes the list rather than the state so the ticker can pass the ones it is actually
+     * applying — it drops any a real beacon already covers, and a free slot must be spent on
+     * something being charged for.
+     */
+    public static double fuelPerSecond(List<EffectSlotConfig> slots,
+                                       BeaconStats stats,
+                                       Lookup<BeaconEffectDef> effectLookup,
+                                       boolean moving) {
+        List<Double> costs = new ArrayList<>(slots.size());
+        for (EffectSlotConfig slot : slots) {
+            costs.add(fuelPerSecond(slot, stats, effectLookup));
         }
+        costs.sort(Comparator.reverseOrder());
+
         double total = 0.0;
-        for (EffectSlotConfig slot : state.effects()) {
-            total += fuelPerSecond(slot, stats, effectLookup);
+        for (int i = stats.freeEffectSlots(); i < costs.size(); i++) {
+            total += costs.get(i);
         }
-        return total * stats.fuelMultiplier();
+        double context = moving ? stats.movingCostMultiplier() : stats.stillCostMultiplier();
+        return total * stats.fuelMultiplier() * context;
     }
 
     /** Per-effect cost, excluding the beacon-wide {@link BeaconStats#fuelMultiplier()}. */
@@ -128,7 +179,12 @@ public final class BeaconResolver {
         if (maybeDef.isEmpty()) {
             return 0.0;
         }
-        double base = maybeDef.get().costPerSecond(slot.amplifier(), slot.aura());
+        // The sharing surcharge is separated out so an augment can discount it alone: everything
+        // else here scales what an effect costs you, this scales what it costs to give away.
+        double shared = slot.aura().isAura()
+                ? 1.0 + (slot.aura().costMultiplier() - 1.0) * stats.auraCostMultiplier()
+                : 1.0;
+        double base = maybeDef.get().costPerSecond(slot.amplifier(), AuraMode.SELF) * shared;
         return slot.aura().isAura() ? base * rangeFactor(stats.range()) : base;
     }
 

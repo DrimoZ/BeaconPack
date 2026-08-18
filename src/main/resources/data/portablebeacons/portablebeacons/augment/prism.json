@@ -1,0 +1,9 @@
+{
+  "max_tier": 1,
+  "color": 13378082,
+  "operations": [
+    { "type": "add_effect_slot", "values": [1.0] },
+    { "type": "add_amplifier", "values": [1.0] },
+    { "type": "mul_fuel", "values": [2.2] }
+  ]
+}

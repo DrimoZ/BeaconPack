@@ -180,7 +180,7 @@ public class PortableBeaconMenu extends AbstractContainerMenu {
         RegistryAccess access = player.level().registryAccess();
         BeaconTierDef tier = tierDef();
         if (tier == null) {
-            return new BeaconStats(0, 0, 0.0, 0, 0, 1.0,
+            return new BeaconStats(0, 0, 0.0, 0, 0, 1.0, 1.0, 0, 1.0, 1.0,
                     java.util.EnumSet.of(AuraMode.SELF), false, false);
         }
         return BeaconResolver.resolve(

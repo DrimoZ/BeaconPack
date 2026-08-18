@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": "minecraft:amethyst_shard",
+    "M": "minecraft:goat_horn"
+  },
+  "pattern": [
+    " A ",
+    "AMA",
+    " A "
+  ],
+  "result": {
+    "components": {
+      "portablebeacons:augment": {
+        "type": "portablebeacons:communion"
+      }
+    },
+    "id": "portablebeacons:augment"
+  }
+}

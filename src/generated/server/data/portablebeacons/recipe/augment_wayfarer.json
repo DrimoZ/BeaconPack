@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": "minecraft:amethyst_shard",
+    "M": "minecraft:rabbit_foot"
+  },
+  "pattern": [
+    " A ",
+    "AMA",
+    " A "
+  ],
+  "result": {
+    "components": {
+      "portablebeacons:augment": {
+        "type": "portablebeacons:wayfarer"
+      }
+    },
+    "id": "portablebeacons:augment"
+  }
+}

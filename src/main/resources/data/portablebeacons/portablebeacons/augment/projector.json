@@ -1,8 +1,0 @@
-{
-  "max_tier": 2,
-  "color": 3381759,
-  "operations": [
-    { "type": "add_range", "values": [16.0, 24.0] },
-    { "type": "mul_capacity", "values": [0.5, 0.35] }
-  ]
-}

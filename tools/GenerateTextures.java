@@ -85,7 +85,8 @@ public final class GenerateTextures {
         // One glyph per built-in augment, selected by a model override. A datapack-added augment
         // declares no model_data and falls back to the plain gem above.
         String[] glyphs = {"range", "focus", "amplification", "efficiency", "capacity", "attunement",
-                "discretion", "overdrive", "projector", "miser", "reservoir", "herald"};
+                "discretion",
+                "communion", "wellspring", "wayfarer", "sentinel", "vanguard", "prism", "recluse"};
         for (String glyph : glyphs) {
             ImageIO.write(augmentIcon(glyph), "PNG",
                     new File(ITEM_DIR + "/augment_" + glyph + ".png"));
@@ -291,6 +292,64 @@ public final class GenerateTextures {
                 fill(image, 10, 6, 1, 1, ink);
                 fill(image, 11, 8, 1, 1, ink);
                 fill(image, 10, 10, 1, 1, ink);
+            }
+            // Three points joined: sharing, made cheap.
+            case "communion" -> {
+                fill(image, 7, 3, 2, 2, ink);
+                fill(image, 4, 9, 2, 2, ink);
+                fill(image, 10, 9, 2, 2, ink);
+                fill(image, 6, 5, 1, 4, ink);
+                fill(image, 9, 5, 1, 4, ink);
+                fill(image, 6, 11, 4, 1, ink);
+            }
+            // A source with ripples spreading below it: one effect that costs nothing.
+            case "wellspring" -> {
+                fill(image, 7, 3, 2, 3, ink);
+                fill(image, 5, 7, 6, 1, ink);
+                fill(image, 4, 9, 8, 1, ink);
+                fill(image, 3, 11, 10, 1, ink);
+            }
+            // A boot in motion: cheap while travelling.
+            case "wayfarer" -> {
+                fill(image, 6, 3, 3, 6, ink);
+                fill(image, 6, 9, 6, 2, ink);
+                fill(image, 3, 5, 2, 1, ink);
+                fill(image, 3, 8, 2, 1, ink);
+            }
+            // A tower: cheap while holding a position.
+            case "sentinel" -> {
+                fill(image, 5, 3, 6, 1, ink);
+                fill(image, 5, 5, 1, 1, ink);
+                fill(image, 7, 5, 2, 1, ink);
+                fill(image, 10, 5, 1, 1, ink);
+                fill(image, 6, 4, 4, 8, ink);
+            }
+            // An arrow breaking out of a ring: reach and audience in one slot.
+            case "vanguard" -> {
+                fill(image, 4, 6, 1, 4, ink);
+                fill(image, 5, 4, 1, 2, ink);
+                fill(image, 5, 10, 1, 2, ink);
+                fill(image, 6, 3, 3, 1, ink);
+                fill(image, 6, 12, 3, 1, ink);
+                fill(image, 6, 7, 6, 2, ink);
+                fill(image, 10, 5, 2, 2, ink);
+                fill(image, 10, 9, 2, 2, ink);
+            }
+            // A wedge splitting one beam into three.
+            case "prism" -> {
+                fill(image, 3, 7, 3, 2, ink);
+                fill(image, 6, 4, 2, 8, ink);
+                fill(image, 9, 4, 3, 1, ink);
+                fill(image, 9, 7, 3, 1, ink);
+                fill(image, 9, 10, 3, 1, ink);
+            }
+            // A shut door: everything kept in, nothing given out.
+            case "recluse" -> {
+                fill(image, 4, 3, 8, 1, ink);
+                fill(image, 4, 4, 1, 9, ink);
+                fill(image, 11, 4, 1, 9, ink);
+                fill(image, 5, 12, 6, 1, ink);
+                fill(image, 9, 7, 1, 2, ink);
             }
             default -> { }
         }

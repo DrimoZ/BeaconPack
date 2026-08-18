@@ -1,0 +1,8 @@
+{
+  "max_tier": 2,
+  "color": 6750156,
+  "operations": [
+    { "type": "mul_aura_cost", "values": [0.5, 0.3] },
+    { "type": "mul_fuel", "values": [1.35, 1.5] }
+  ]
+}

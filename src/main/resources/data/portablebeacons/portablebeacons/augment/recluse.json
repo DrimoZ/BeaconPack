@@ -1,0 +1,10 @@
+{
+  "max_tier": 1,
+  "color": 6711039,
+  "operations": [
+    { "type": "mul_fuel", "values": [0.35] },
+    { "type": "mul_capacity", "values": [3.0] },
+    { "type": "hide_effects", "values": [1.0] },
+    { "type": "unlock_aura", "values": [-2.0] }
+  ]
+}

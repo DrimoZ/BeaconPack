@@ -89,62 +89,86 @@
       {
         "model": {
           "type": "minecraft:model",
-          "model": "portablebeacons:item/augment_overdrive",
+          "model": "portablebeacons:item/augment_communion",
           "tints": [
             {
               "type": "portablebeacons:augment_colour"
             }
           ]
         },
-        "when": "portablebeacons:overdrive"
+        "when": "portablebeacons:communion"
       },
       {
         "model": {
           "type": "minecraft:model",
-          "model": "portablebeacons:item/augment_projector",
+          "model": "portablebeacons:item/augment_wellspring",
           "tints": [
             {
               "type": "portablebeacons:augment_colour"
             }
           ]
         },
-        "when": "portablebeacons:projector"
+        "when": "portablebeacons:wellspring"
       },
       {
         "model": {
           "type": "minecraft:model",
-          "model": "portablebeacons:item/augment_miser",
+          "model": "portablebeacons:item/augment_wayfarer",
           "tints": [
             {
               "type": "portablebeacons:augment_colour"
             }
           ]
         },
-        "when": "portablebeacons:miser"
+        "when": "portablebeacons:wayfarer"
       },
       {
         "model": {
           "type": "minecraft:model",
-          "model": "portablebeacons:item/augment_reservoir",
+          "model": "portablebeacons:item/augment_sentinel",
           "tints": [
             {
               "type": "portablebeacons:augment_colour"
             }
           ]
         },
-        "when": "portablebeacons:reservoir"
+        "when": "portablebeacons:sentinel"
       },
       {
         "model": {
           "type": "minecraft:model",
-          "model": "portablebeacons:item/augment_herald",
+          "model": "portablebeacons:item/augment_vanguard",
           "tints": [
             {
               "type": "portablebeacons:augment_colour"
             }
           ]
         },
-        "when": "portablebeacons:herald"
+        "when": "portablebeacons:vanguard"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "portablebeacons:item/augment_prism",
+          "tints": [
+            {
+              "type": "portablebeacons:augment_colour"
+            }
+          ]
+        },
+        "when": "portablebeacons:prism"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "portablebeacons:item/augment_recluse",
+          "tints": [
+            {
+              "type": "portablebeacons:augment_colour"
+            }
+          ]
+        },
+        "when": "portablebeacons:recluse"
       }
     ],
     "fallback": {
