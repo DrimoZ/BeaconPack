@@ -15,9 +15,13 @@ import dev.drimoz.portablebeacons.registry.BPLookups;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
@@ -27,7 +31,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.SlotItemHandler;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -156,7 +160,6 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
     /** Gap between the case and the popup, so the two read as related but distinct. */
     private static final int SELECTOR_OFFSET = 6;
     /** Above the item layer, which renders around z=150 and otherwise punches through the popup. */
-    private static final int SELECTOR_Z = 300;
     private static final long OPEN_ANIM_MS = 110L;
 
     private static final int TEXT = 0x404040;
@@ -193,9 +196,8 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
     }
 
     public PortableBeaconScreen(PortableBeaconMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title);
-        this.imageWidth = IMAGE_W;
-        this.imageHeight = IMAGE_H;
+        // The size goes through the constructor: both fields are final now.
+        super(menu, inventory, title, IMAGE_W, IMAGE_H);
         this.titleLabelX = CONTENT_LEFT;
         this.titleLabelY = 10;
         this.inventoryLabelX = CONTENT_LEFT;
@@ -222,15 +224,23 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
     // ------------------------------------------------------------------ rendering
 
     @Override
-    protected void renderBg(GuiGraphics graphics, float partialTick, int mouseX, int mouseY) {
-        graphics.blit(TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight,
-                TEXTURE_SIZE, TEXTURE_SIZE);
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY,
+                                  float partialTick) {
+        super.extractBackground(graphics, mouseX, mouseY, partialTick);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, leftPos, topPos, 0.0F, 0.0F,
+                imageWidth, imageHeight, TEXTURE_SIZE, TEXTURE_SIZE);
     }
 
+    /**
+     * Drawing is recorded rather than executed now — the screen describes a frame and the engine
+     * renders it afterwards. The calls are the same ones; only the moment they run changed, so the
+     * drawer animation still reads the clock here and gets a fresh width every frame.
+     */
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY,
+                                   float partialTick) {
         frameStats = null;
-        super.render(graphics, mouseX, mouseY, partialTick);
+        super.extractRenderState(graphics, mouseX, mouseY, partialTick);
         if (selectorOpen) {
             renderSelectorTooltip(graphics, mouseX, mouseY);
             return;
@@ -240,15 +250,15 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         }
         List<Component> tooltip = tooltipAt(mouseX - leftPos, mouseY - topPos);
         if (tooltip.isEmpty()) {
-            renderTooltip(graphics, mouseX, mouseY);
+            super.extractTooltip(graphics, mouseX, mouseY);
         } else {
-            graphics.renderComponentTooltip(font, tooltip, mouseX, mouseY);
+            graphics.setComponentTooltipForNextFrame(font, tooltip, mouseX, mouseY);
         }
     }
 
     @Override
-    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-        super.renderLabels(graphics, mouseX, mouseY);
+    protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+        super.extractLabels(graphics, mouseX, mouseY);
 
         int localX = mouseX - leftPos;
         int localY = mouseY - topPos;
@@ -256,7 +266,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         PackState state = menu.state();
         PackStats stats = stats();
 
-        graphics.drawString(font, Component.translatable("portablebeacons.gui.effects"),
+        graphics.text(font, Component.translatable("portablebeacons.gui.effects"),
                 CONTENT_LEFT, CASE_Y - 12, TEXT, false);
 
         updateSlotVisibility();
@@ -271,7 +281,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         }
     }
 
-    private void drawTabs(GuiGraphics graphics, PackState state, int mouseX, int mouseY) {
+    private void drawTabs(GuiGraphicsExtractor graphics, PackState state, int mouseX, int mouseY) {
         // Left column: the two controls that govern the pack.
         boolean powerHovered = hitTab(mouseX, mouseY, false, POWER_TAB_Y);
         // Never expanded - power is a switch, not a drawer. Passing "is the pack on" as the
@@ -357,7 +367,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
      * <p>The accent stripe on the outer edge is what tells the four apart at a glance; the icons
      * alone are small and all the same grey.
      */
-    private void drawTab(GuiGraphics graphics, boolean right, int y, int height,
+    private void drawTab(GuiGraphicsExtractor graphics, boolean right, int y, int height,
                          float openness, boolean hovered) {
         int width = lerp(TAB_W, PANEL_W, openness);
         boolean open = openness > 0.99F;
@@ -390,7 +400,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
      * <p>Every glyph is a silhouette in one colour with a single darker shadow. The previous ones
      * mixed a mid grey with a near-white highlight, which at this size just looked muddy.
      */
-    private static void drawTabBars(GuiGraphics graphics, int cx, int cy, int c) {
+    private static void drawTabBars(GuiGraphicsExtractor graphics, int cx, int cy, int c) {
         int shadow = shade(c);
         graphics.fill(cx - 9, cy + 7, cx + 10, cy + 9, shadow);
         graphics.fill(cx - 8, cy + 1, cx - 3, cy + 7, c);
@@ -399,7 +409,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
     }
 
     /** A cut gem: wide shoulders, tapered foot, with one facet picked out. */
-    private static void drawTabGem(GuiGraphics graphics, int cx, int cy, int c) {
+    private static void drawTabGem(GuiGraphicsExtractor graphics, int cx, int cy, int c) {
         int shadow = shade(c);
         graphics.fill(cx - 6, cy - 7, cx + 6, cy - 4, c);
         graphics.fill(cx - 8, cy - 4, cx + 8, cy + 1, c);
@@ -409,7 +419,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
     }
 
     /** A flame: narrow tip, full body, with a hollow core so it is not a solid blob. */
-    private static void drawTabFlame(GuiGraphics graphics, int cx, int cy, int c) {
+    private static void drawTabFlame(GuiGraphicsExtractor graphics, int cx, int cy, int c) {
         int shadow = shade(c);
         graphics.fill(cx - 2, cy - 8, cx + 2, cy - 5, c);
         graphics.fill(cx - 3, cy - 5, cx + 3, cy - 2, c);
@@ -432,7 +442,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
      * <p>The slots inside it sit at fixed coordinates; a closed drawer hides them from rendering and
      * from hit-testing instead of moving them, because {@code Slot.x} is final.
      */
-    private void drawDrawer(GuiGraphics graphics, PackState state, PackStats stats,
+    private void drawDrawer(GuiGraphicsExtractor graphics, PackState state, PackStats stats,
                             int mouseX, int mouseY) {
         // The two sides are independent, so each is drawn on its own terms. Contents appear only
         // once the panel holding them has finished growing, or they would be drawn outside it.
@@ -445,7 +455,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         }
         // The panel itself is the open tab, drawn by drawTabs; only its contents belong here.
         int y = rightDrawer == Drawer.AUGMENTS ? AUGMENT_DRAWER_Y : FUEL_DRAWER_Y;
-        graphics.drawString(font, Component.translatable(rightDrawer == Drawer.AUGMENTS
+        graphics.text(font, Component.translatable(rightDrawer == Drawer.AUGMENTS
                         ? "portablebeacons.gui.augments" : "portablebeacons.gui.fuel"),
                 DRAWER_X + PANEL_TEXT_INSET, y + 6, TEXT, false);
 
@@ -458,14 +468,14 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
                             AUGMENT_SLOT_Y + SLOT_SIZE - 1, 0x80000000);
                     drawPadlock(graphics, x + SLOT_SIZE / 2, AUGMENT_SLOT_Y + 8, 0xFF8A8A8A);
                 } else if (slotStack(i).isEmpty()) {
-                    graphics.drawCenteredString(font, "+", x + SLOT_SIZE / 2, AUGMENT_SLOT_Y + 5,
+                    graphics.centeredText(font, "+", x + SLOT_SIZE / 2, AUGMENT_SLOT_Y + 5,
                             0xFFA0A0A0);
                 }
             }
         } else {
             slotFrame(graphics, FUEL_SLOT_X, FUEL_SLOT_Y);
             graphics.fill(GAUGE_X, GAUGE_Y, GAUGE_X + GAUGE_W, GAUGE_Y + GAUGE_H, 0xFF8B8B8B);
-            graphics.renderOutline(GAUGE_X, GAUGE_Y, GAUGE_W, GAUGE_H, 0xFF373737);
+            graphics.outline(GAUGE_X, GAUGE_Y, GAUGE_W, GAUGE_H, 0xFF373737);
             drawFuel(graphics, state, stats);
         }
     }
@@ -477,17 +487,17 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
      * for the same row. In a drawer they get labels, room to breathe, and the case row gets the
      * whole width back.
      */
-    private void drawStatsDrawer(GuiGraphics graphics, PackState state, PackStats stats) {
+    private void drawStatsDrawer(GuiGraphicsExtractor graphics, PackState state, PackStats stats) {
         // Opens leftward, so its text is laid out from the panel's far edge inwards.
         int x = LEFT_TAB_X - PANEL_W + 8;
         // Stops short of the tab glyph, which sits at the panel's inner edge.
         int textW = PANEL_W - PANEL_TEXT_INSET - 8;
-        graphics.drawString(font, Component.translatable("portablebeacons.gui.stats"),
+        graphics.text(font, Component.translatable("portablebeacons.gui.stats"),
                 x, STATS_TAB_Y + 6, TEXT, false);
 
         int y = STATS_TAB_Y + 20;
         for (Component line : summaryTooltip(state, stats)) {
-            graphics.drawString(font, font.plainSubstrByWidth(line.getString(), textW),
+            graphics.text(font, font.plainSubstrByWidth(line.getString(), textW),
                     x, y, TEXT_DIM, false);
             y += 11;
         }
@@ -498,7 +508,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
      * screen wherever its case happens to be; the drawers no longer use it, because an open tab
      * draws its own body.
      */
-    private static void panel(GuiGraphics graphics, int x, int y, int w, int h) {
+    private static void panel(GuiGraphicsExtractor graphics, int x, int y, int w, int h) {
         graphics.fill(x, y - 1, x + w + 1, y + h + 1, 0xFF1B1B1B);
         graphics.fill(x, y, x + w, y + h, 0xFFC6C6C6);
         graphics.fill(x, y, x + w - 1, y + 1, 0xFFFFFFFF);
@@ -507,7 +517,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         graphics.fill(x + w - 1, y, x + w, y + h, 0xFF555555);
     }
 
-    private static void slotFrame(GuiGraphics graphics, int x, int y) {
+    private static void slotFrame(GuiGraphicsExtractor graphics, int x, int y) {
         graphics.fill(x, y, x + SLOT_SIZE, y + SLOT_SIZE, 0xFF8B8B8B);
         graphics.fill(x, y, x + SLOT_SIZE, y + 1, 0xFF373737);
         graphics.fill(x, y, x + 1, y + SLOT_SIZE, 0xFF373737);
@@ -516,7 +526,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
     }
 
     /** The universal power mark: a broken ring with a stroke through the gap. */
-    private static void drawPowerGlyph(GuiGraphics graphics, int cx, int cy, int colour) {
+    private static void drawPowerGlyph(GuiGraphicsExtractor graphics, int cx, int cy, int colour) {
         graphics.fill(cx - 1, cy - 9, cx + 2, cy - 1, colour);
         graphics.fill(cx - 7, cy - 5, cx - 4, cy + 4, colour);
         graphics.fill(cx + 4, cy - 5, cx + 7, cy + 4, colour);
@@ -525,7 +535,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         graphics.fill(cx + 3, cy - 6, cx + 7, cy - 3, colour);
     }
 
-    private void drawCases(GuiGraphics graphics, PackState state, PackStats stats,
+    private void drawCases(GuiGraphicsExtractor graphics, PackState state, PackStats stats,
                            int mouseX, int mouseY) {
         List<EffectSlotConfig> effects = state.effects();
         for (int i = 0; i < visibleCases(stats); i++) {
@@ -540,10 +550,10 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
                 continue;
             }
             if (i == focusedCase) {
-                graphics.renderOutline(x - 1, CASE_Y - 1, CASE_SIZE + 2, CASE_SIZE + 2, 0xFFFFDD55);
+                graphics.outline(x - 1, CASE_Y - 1, CASE_SIZE + 2, CASE_SIZE + 2, 0xFFFFDD55);
             }
             if (i >= effects.size()) {
-                graphics.drawCenteredString(font, "+", x + CASE_SIZE / 2, CASE_Y + 9, TEXT_DIM);
+                graphics.centeredText(font, "+", x + CASE_SIZE / 2, CASE_Y + 9, TEXT_DIM);
                 continue;
             }
 
@@ -553,13 +563,13 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
                 graphics.fill(x + 2, CASE_Y + 2, x + CASE_SIZE - 2, CASE_Y + CASE_SIZE - 2,
                         0x90303030);
             }
-            graphics.drawString(font, roman(slot.amplifier() + 1),
+            graphics.text(font, roman(slot.amplifier() + 1),
                     x + CASE_SIZE - 9, CASE_Y + CASE_SIZE - 10, 0xFFFFFF, true);
             // A shared effect looked identical to a private one, which hid the single most
             // expensive setting on the screen.
             if (slot.aura().isAura()) {
                 graphics.fill(x + 3, CASE_Y + 3, x + 7, CASE_Y + 7, 0xFF6FA8DC);
-                graphics.renderOutline(x + 3, CASE_Y + 3, 4, 4, 0xFF20364C);
+                graphics.outline(x + 3, CASE_Y + 3, 4, 4, 0xFF20364C);
             }
         }
     }
@@ -595,11 +605,11 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         return lines;
     }
 
-    private void drawInfoPanel(GuiGraphics graphics, PackState state, PackStats stats,
+    private void drawInfoPanel(GuiGraphicsExtractor graphics, PackState state, PackStats stats,
                                int mouseX, int mouseY) {
         List<EffectSlotConfig> effects = state.effects();
         if (focusedCase >= effects.size()) {
-            graphics.drawString(font, Component.translatable("portablebeacons.gui.empty_slot"),
+            graphics.text(font, Component.translatable("portablebeacons.gui.empty_slot"),
                     INFO_X + 8, INFO_Y + 10, TEXT_DIM, false);
             return;
         }
@@ -613,7 +623,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         // The icon repeated beside the name ties the panel to the case it describes; without it,
         // nothing said which of the cases above these controls belonged to.
         drawEffectIcon(graphics, slot.effect(), INFO_X + 7, INFO_Y + 6);
-        graphics.drawString(font, Component.empty()
+        graphics.text(font, Component.empty()
                         .append(def.effect().value().getDisplayName())
                         .append(" ")
                         .append(roman(slot.amplifier() + 1)),
@@ -636,10 +646,10 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         String reachText = Component.translatable("portablebeacons.gui.reach", reach).getString();
         int reachX = INFO_X + INFO_W - 6 - font.width(reachText);
         int shareX = INFO_X + 28;
-        graphics.drawString(font,
+        graphics.text(font,
                 font.plainSubstrByWidth(shareText, Math.max(0, reachX - shareX - 6)),
                 shareX, INFO_Y + 19, TEXT_DIM, false);
-        graphics.drawString(font, reachText, reachX, INFO_Y + 19, TEXT_DIM, false);
+        graphics.text(font, reachText, reachX, INFO_Y + 19, TEXT_DIM, false);
 
         // Explicit rather than "click the case again": re-clicking the case is how you focus it,
         // and overloading that click with "open the picker" made every attempt to read a second
@@ -666,14 +676,14 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         return ROW_X + index * (BTN_W + BTN_GAP);
     }
 
-    private void drawFuel(GuiGraphics graphics, PackState state, PackStats stats) {
+    private void drawFuel(GuiGraphicsExtractor graphics, PackState state, PackStats stats) {
         int capacity = Math.max(1, stats.fuelCapacity());
         int filled = (int) ((GAUGE_W - 4) * Math.min(1.0, state.fuel() / (double) capacity));
         graphics.fill(GAUGE_X + 2, GAUGE_Y + 2, GAUGE_X + 2 + filled, GAUGE_Y + GAUGE_H - 2,
                 0xFF3FA34D);
 
         String label = totalRuntime();
-        graphics.drawString(font, label,
+        graphics.text(font, label,
                 GAUGE_X + (GAUGE_W - font.width(label)) / 2, GAUGE_Y + 4, 0xFFFFFFFF, true);
     }
 
@@ -737,7 +747,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
      * A padlock rather than a question mark: "?" reads as unknown content, when the slot is simply
      * not unlocked yet. A lock is the universally understood shape for that.
      */
-    private static void drawPadlock(GuiGraphics graphics, int cx, int cy, int colour) {
+    private static void drawPadlock(GuiGraphicsExtractor graphics, int cx, int cy, int colour) {
         graphics.fill(cx - 2, cy - 5, cx + 2, cy - 4, colour);
         graphics.fill(cx - 3, cy - 4, cx - 2, cy - 1, colour);
         graphics.fill(cx + 1, cy - 4, cx + 2, cy - 1, colour);
@@ -781,16 +791,14 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         return elapsed >= OPEN_ANIM_MS ? 1.0F : elapsed / (float) OPEN_ANIM_MS;
     }
 
-    private void drawSelector(GuiGraphics graphics, int mouseX, int mouseY) {
-        // Raised above the item layer: slot contents are drawn at a higher z than renderLabels, so
-        // without this the inventory's items show straight through the popup.
-        graphics.pose().pushPose();
-        graphics.pose().translate(0.0F, 0.0F, SELECTOR_Z);
+    private void drawSelector(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+        // The pose is a 2D matrix now, so there is no z to lift the popup by. It does not need one:
+        // extraction records draw calls in order and the engine replays them in that order, so
+        // being drawn last is what puts the popup on top.
         drawSelectorBody(graphics, mouseX, mouseY);
-        graphics.pose().popPose();
     }
 
-    private void drawSelectorBody(GuiGraphics graphics, int mouseX, int mouseY) {
+    private void drawSelectorBody(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         int x = selectorX;
         int y = selectorY;
         float progress = openProgress();
@@ -810,7 +818,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
 
         List<ResourceKey<BeaconEffectDef>> rows = visibleRows();
         if (rows.isEmpty()) {
-            graphics.drawCenteredString(font,
+            graphics.centeredText(font,
                     Component.translatable("portablebeacons.gui.no_results"),
                     x + SELECTOR_W / 2, y + SEARCH_H + 16, 0xFF5A5A5A);
             return;
@@ -853,7 +861,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
                 // row and left the effect's own name truncated to nothing.
                 String tag = roman(def.minTier());
                 int tagX = listRight - font.width(tag) - 4;
-                graphics.drawString(font, tag, tagX, rowY + 5, 0xFF8B3A3A, false);
+                graphics.text(font, tag, tagX, rowY + 5, 0xFF8B3A3A, false);
                 drawPadlock(graphics, tagX - 8, rowY + 9, 0xFF8B3A3A);
                 drawName(graphics, def, x, rowY, font.width(tag) + 20, 0xFF6E6E6E);
             } else {
@@ -865,16 +873,16 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
 
         drawScrollbar(graphics, x, y, rows.size());
         String count = Component.translatable("portablebeacons.gui.result_count", rows.size()).getString();
-        graphics.drawString(font, count, x + 6, y + SELECTOR_H - 10, 0xFF5A5A5A, false);
+        graphics.text(font, count, x + 6, y + SELECTOR_H - 10, 0xFF5A5A5A, false);
     }
 
     /** Truncated against whatever the right-hand column leaves, never assumed to fit. */
-    private void drawName(GuiGraphics graphics, BeaconEffectDef def, int x, int rowY,
+    private void drawName(GuiGraphicsExtractor graphics, BeaconEffectDef def, int x, int rowY,
                           int reserved, int colour) {
         int available = SELECTOR_W - 24 - reserved;
         String name = font.plainSubstrByWidth(
                 def.effect().value().getDisplayName().getString(), available);
-        graphics.drawString(font, name, x + 24, rowY + 6, colour, false);
+        graphics.text(font, name, x + 24, rowY + 6, colour, false);
     }
 
     /**
@@ -883,7 +891,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
      * <p>The player never needs the absolute figure here - only whether this effect is cheaper than
      * that one - and a comparison is what a meter reads as at a glance.
      */
-    private void drawCostMeter(GuiGraphics graphics, int x, int y, double ratio) {
+    private void drawCostMeter(GuiGraphicsExtractor graphics, int x, int y, double ratio) {
         int lit = Mth.clamp((int) Math.ceil(ratio * 4), 1, 4);
         for (int i = 0; i < 4; i++) {
             int colour = i < lit ? (lit >= 4 ? 0xFFD86A5A : lit >= 3 ? 0xFFD8B45A : 0xFF6ABF6A)
@@ -893,7 +901,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
     }
 
     /** A sunken field, matching how vanilla renders anything you type into. */
-    private void drawSearchField(GuiGraphics graphics, int x, int y) {
+    private void drawSearchField(GuiGraphicsExtractor graphics, int x, int y) {
         int left = x + 4;
         int right = x + SELECTOR_W - 4;
         graphics.fill(left, y + 4, right, y + SEARCH_H - 2, 0xFF8B8B8B);
@@ -905,7 +913,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         String shown = empty
                 ? Component.translatable("portablebeacons.gui.search").getString()
                 : search;
-        graphics.drawString(font, shown, left + 4, y + 7, empty ? 0xFF6E6E6E : 0xFF2B2B2B, false);
+        graphics.text(font, shown, left + 4, y + 7, empty ? 0xFF6E6E6E : 0xFF2B2B2B, false);
         // No caret over the placeholder: it read as a stray character appended to the hint.
         if (!empty && (System.currentTimeMillis() / 500) % 2 == 0) {
             int caret = left + 5 + font.width(search);
@@ -914,7 +922,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
     }
 
     /** Sunken track, raised thumb - the same construction as vanilla's creative-tab scrollbar. */
-    private void drawScrollbar(GuiGraphics graphics, int x, int y, int total) {
+    private void drawScrollbar(GuiGraphicsExtractor graphics, int x, int y, int total) {
         if (total <= VISIBLE_ROWS) {
             return;
         }
@@ -932,13 +940,13 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
                 0xFF555555);
     }
 
-    private void drawEffectIcon(GuiGraphics graphics, ResourceKey<BeaconEffectDef> key, int x, int y) {
+    private void drawEffectIcon(GuiGraphicsExtractor graphics, ResourceKey<BeaconEffectDef> key, int x, int y) {
         effectLookup().get(key).ifPresent(def -> {
             // Straight from the vanilla effect atlas, so any registered effect - vanilla, another
             // mod's, or one added by a datapack - shows its own icon with no texture from us.
-            TextureAtlasSprite sprite =
-                    Minecraft.getInstance().getMobEffectTextures().get(def.effect());
-            graphics.blit(x, y, 0, 16, 16, sprite);
+            // Effect icons are GUI sprites now rather than an atlas this screen samples itself.
+            graphics.blitSprite(RenderPipelines.GUI_TEXTURED,
+                    Gui.getMobEffectSprite(def.effect()), x, y, 16, 16);
         });
     }
 
@@ -949,7 +957,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
      * control and "this setting is off" on the next. Colour now means state, and only a dimmed,
      * unhoverable face means unavailable.
      */
-    private void drawButton(GuiGraphics graphics, int x, int y, int w, int h,
+    private void drawButton(GuiGraphicsExtractor graphics, int x, int y, int w, int h,
                             Component label, boolean hovered, boolean available, boolean on) {
         int background;
         int textColour = 0xFFFFFFFF;
@@ -962,7 +970,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
             background = hovered ? 0xFF8797AC : 0xFF6E6E6E;
         }
         graphics.fill(x, y, x + w, y + h, background);
-        graphics.renderOutline(x, y, w, h, 0xFF2B2B2B);
+        graphics.outline(x, y, w, h, 0xFF2B2B2B);
         // Highlight along the top edge so the control reads as raised, i.e. as pressable.
         if (available) {
             graphics.fill(x + 1, y + 1, x + w - 1, y + 2, 0x33FFFFFF);
@@ -970,13 +978,13 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         // Truncated defensively: a translated label that overflows used to run past the button and
         // under the frame.
         String text = font.plainSubstrByWidth(label.getString(), w - 6);
-        graphics.drawString(font, text, x + (w - font.width(text)) / 2, y + (h - 8) / 2,
+        graphics.text(font, text, x + (w - font.width(text)) / 2, y + (h - 8) / 2,
                 textColour, false);
     }
 
     // ------------------------------------------------------------------ tooltips
 
-    private boolean renderFuelSlotTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
+    private boolean renderFuelSlotTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         if (!(hoveredSlot instanceof SlotItemHandler handler)
                 || handler.getSlotIndex() != PortableBeaconItem.FUEL_SLOT
                 || !hoveredSlot.hasItem()) {
@@ -1004,7 +1012,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
             lines.add(Component.translatable("portablebeacons.tip.fuel_too_dense")
                     .withStyle(ChatFormatting.RED));
         }
-        graphics.renderComponentTooltip(font, lines, mouseX, mouseY);
+        graphics.setComponentTooltipForNextFrame(font, lines, mouseX, mouseY);
         return true;
     }
 
@@ -1014,7 +1022,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
      * <p>The meter compares effects at a glance, but nothing on screen said what it measured - a
      * row of bars with no legend is a puzzle, not information.
      */
-    private void renderSelectorTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
+    private void renderSelectorTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         int x = mouseX - leftPos;
         int y = mouseY - topPos;
         List<ResourceKey<BeaconEffectDef>> rows = visibleRows();
@@ -1034,7 +1042,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
                                     Component.translatable("portablebeacons.cost." + costBand(def)))
                             .withStyle(ChatFormatting.GRAY));
                 }
-                graphics.renderComponentTooltip(font, lines, mouseX, mouseY);
+                graphics.setComponentTooltipForNextFrame(font, lines, mouseX, mouseY);
             });
             return;
         }
@@ -1140,7 +1148,10 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
     // ------------------------------------------------------------------ interaction
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        double mouseX = event.x();
+        double mouseY = event.y();
+        int button = event.button();
         int x = (int) mouseX - leftPos;
         int y = (int) mouseY - topPos;
 
@@ -1168,7 +1179,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         if (handleCaseClick(x, y, button) || handleInfoClick(x, y)) {
             return true;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(event, doubleClick);
     }
 
     private boolean handleCaseClick(int x, int y, int button) {
@@ -1252,22 +1263,22 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
     }
 
     @Override
-    public boolean charTyped(char codePoint, int modifiers) {
+    public boolean charTyped(CharacterEvent event) {
         if (selectorOpen && search.length() < 24) {
-            search += codePoint;
+            search += event.codepointAsString();
             scroll = 0;
             highlighted = 0;
             return true;
         }
-        return super.charTyped(codePoint, modifiers);
+        return super.charTyped(event);
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+    public boolean keyPressed(KeyEvent event) {
         if (!selectorOpen) {
-            return super.keyPressed(keyCode, scanCode, modifiers);
+            return super.keyPressed(event);
         }
-        switch (keyCode) {
+        switch (event.key()) {
             case GLFW.GLFW_KEY_ESCAPE -> selectorOpen = false;
             case GLFW.GLFW_KEY_BACKSPACE -> {
                 if (!search.isEmpty()) {
@@ -1310,7 +1321,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
 
     private void send(int action, int slot, int value) {
         click();
-        PacketDistributor.sendToServer(new PackActionPayload(action, slot, value));
+        ClientPacketDistributor.sendToServer(new PackActionPayload(action, slot, value));
     }
 
     /**
