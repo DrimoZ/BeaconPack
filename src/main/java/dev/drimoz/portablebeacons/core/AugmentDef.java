@@ -25,7 +25,7 @@ import java.util.List;
  *
  * @param maxTier    highest tier this augment exists in (1..3)
  * @param color      tint applied to the augment texture; alpha is forced opaque at render time
- * @param operations modifiers applied to the pack's resolved stats
+ * @param operations modifiers applied to the beacon's resolved stats
  */
 public record AugmentDef(int maxTier, int color, List<Operation> operations) {
 
@@ -62,7 +62,7 @@ public record AugmentDef(int maxTier, int color, List<Operation> operations) {
         ADD_AMPLIFIER("add_amplifier"),
         MUL_FUEL("mul_fuel"),
         MUL_CAPACITY("mul_capacity"),
-        /** Unlocks aura modes whose {@code minTier} the pack alone would not satisfy. */
+        /** Unlocks aura modes whose {@code minTier} the beacon alone would not satisfy. */
         UNLOCK_AURA("unlock_aura"),
         /**
          * Hides the swirl at 1, and the status icon as well at 2.

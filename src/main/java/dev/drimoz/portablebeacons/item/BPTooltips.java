@@ -14,7 +14,7 @@ import net.neoforged.neoforge.event.RegisterTooltipAppendersEvent;
  * now rather than from an override on the item.
  *
  * <p>The obvious reading of that is to make the data components implement {@code TooltipProvider},
- * which is what vanilla does — but {@code PackState} and {@code AugmentInstance} live in
+ * which is what vanilla does — but {@code BeaconState} and {@code AugmentInstance} live in
  * {@code core}, the layer with no dependency on components, rendering or {@code Component}. An
  * appender is an interface this layer can implement directly, so the text stays where it already
  * was and {@code core} stays what it is.

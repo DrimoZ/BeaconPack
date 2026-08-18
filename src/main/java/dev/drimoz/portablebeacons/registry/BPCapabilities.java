@@ -22,7 +22,7 @@ public final class BPCapabilities {
 
     @SubscribeEvent
     public static void register(RegisterCapabilitiesEvent event) {
-        for (DeferredItem<PortableBeaconItem> beacon : BPItems.packs()) {
+        for (DeferredItem<PortableBeaconItem> beacon : BPItems.beacons()) {
             event.registerItem(
                     Capabilities.Item.ITEM,
                     (stack, access) -> new ItemAccessItemHandler(

@@ -21,13 +21,13 @@ import net.minecraft.world.item.Item;
 import java.util.function.Consumer;
 
 /**
- * A short advancement branch: get a pack, kit it out, specialise.
+ * A short advancement branch: get a beacon, kit it out, specialise.
  *
  * <p>Four entries, not a tree. The mod has one item family and no progression of its own beyond the
  * crafting ladder, so a long chain would be padding - and the recipe-unlock advancements that ship
  * alongside these are already hidden ones the player never sees.
  *
- * <p>Every trigger is "you have the item", which is the honest condition: the packs are craftable,
+ * <p>Every trigger is "you have the item", which is the honest condition: the beacons are craftable,
  * but a modpack may hand them out, and an advancement that only fires on crafting would silently
  * never trigger there.
  */
@@ -38,7 +38,7 @@ public class BPAdvancementProvider implements AdvancementSubProvider {
 
         AdvancementHolder root = Advancement.Builder.advancement()
                 .display(
-                        BPItems.PACK_I.get(),
+                        BPItems.BEACON_I.get(),
                         title("root"),
                         description("root"),
                         // Reuses a vanilla background rather than shipping one: a bespoke tab
@@ -58,19 +58,19 @@ public class BPAdvancementProvider implements AdvancementSubProvider {
 
         Advancement.Builder.advancement()
                 .parent(root)
-                .display(BPItems.PACK_IV.get(), title("tier_four"), description("tier_four"),
+                .display(BPItems.BEACON_IV.get(), title("tier_four"), description("tier_four"),
                         null, AdvancementType.CHALLENGE, true, true, false)
-                .addCriterion("has_pack_iv", has(BPItems.PACK_IV.get()))
+                .addCriterion("has_pack_iv", has(BPItems.BEACON_IV.get()))
                 .save(saver, id("tier_four"));
 
         // Any one of the three, because they are alternatives rather than a set to collect.
         Advancement.Builder.advancement()
                 .parent(root)
-                .display(BPItems.PACK_TIDAL.get(), title("themed"), description("themed"),
+                .display(BPItems.BEACON_TIDAL.get(), title("themed"), description("themed"),
                         null, AdvancementType.GOAL, true, true, false)
-                .addCriterion("has_cinder", has(BPItems.PACK_NETHER.get()))
-                .addCriterion("has_void", has(BPItems.PACK_END.get()))
-                .addCriterion("has_tidal", has(BPItems.PACK_TIDAL.get()))
+                .addCriterion("has_cinder", has(BPItems.BEACON_CINDER.get()))
+                .addCriterion("has_void", has(BPItems.BEACON_VOID.get()))
+                .addCriterion("has_tidal", has(BPItems.BEACON_TIDAL.get()))
                 .requirements(net.minecraft.advancements.AdvancementRequirements.Strategy.OR)
                 .save(saver, id("themed"));
     }

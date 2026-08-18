@@ -24,7 +24,7 @@ import net.minecraft.resources.ResourceLocation;
 public class PortableBeaconsEmiPlugin implements EmiPlugin {
 
     public static final EmiRecipeCategory FUEL = new EmiRecipeCategory(
-            BPRegistryKeys.id("fuel"), EmiStack.of(BPItems.PACK_II.get()));
+            BPRegistryKeys.id("fuel"), EmiStack.of(BPItems.BEACON_II.get()));
 
     @Override
     public void register(EmiRegistry registry) {
@@ -34,9 +34,9 @@ public class PortableBeaconsEmiPlugin implements EmiPlugin {
         registry.setDefaultComparison(BPItems.AUGMENT.get(), c -> Comparison.compareComponents());
 
         registry.addCategory(FUEL);
-        // Every pack is a workstation for it, so the category is reachable from the item a player
+        // Every beacon is a workstation for it, so the category is reachable from the item a player
         // is actually holding when the question occurs to them.
-        BPItems.packs().forEach(pack -> registry.addWorkstation(FUEL, EmiStack.of(pack.get())));
+        BPItems.beacons().forEach(beacon -> registry.addWorkstation(FUEL, EmiStack.of(beacon.get())));
 
         addFuels(registry);
     }

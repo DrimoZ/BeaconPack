@@ -11,8 +11,8 @@ class FuelBudgetTest {
 
     @Test
     void aDrawBelowOneUnitPerTickStillCosts() {
-        // Rounded down this would be free forever, and a pack running on an empty buffer looks
-        // exactly like a pack that is broken.
+        // Rounded down this would be free forever, and a beacon running on an empty buffer looks
+        // exactly like a beacon that is broken.
         assertEquals(1, FuelBudget.costFor(0.1, 2.0));
     }
 

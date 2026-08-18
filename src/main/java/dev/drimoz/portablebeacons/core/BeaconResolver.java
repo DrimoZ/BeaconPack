@@ -14,7 +14,7 @@ import java.util.function.Function;
  * <p>Keeping this layer pure is what makes the numbers testable in plain JUnit, and what keeps a
  * 1.20.1 backport down to rewriting the serialization rather than the behaviour.
  */
-public final class PackResolver {
+public final class BeaconResolver {
 
     /** How definitions are looked up, so this class never touches a registry directly. */
     @FunctionalInterface
@@ -27,7 +27,7 @@ public final class PackResolver {
     }
 
     /** Applies every augment to a tier's base stats. Unknown augment keys are ignored. */
-    public static PackStats resolve(PackTierDef tier,
+    public static BeaconStats resolve(BeaconTierDef tier,
                                     List<AugmentInstance> augments,
                                     Lookup<AugmentDef> augmentLookup) {
         int effectSlots = tier.effectSlots();
@@ -71,7 +71,7 @@ public final class PackResolver {
             }
         }
 
-        return new PackStats(
+        return new BeaconStats(
                 Math.max(0, effectSlots),
                 augmentSlots,
                 Math.max(0.0, range),
@@ -104,8 +104,8 @@ public final class PackResolver {
      * <p>Range only enters the cost of effects that actually project ({@link AuraMode#isAura()}),
      * which is why the info panel can show a believable per-line cost instead of one opaque total.
      */
-    public static double fuelPerSecond(PackState state,
-                                       PackStats stats,
+    public static double fuelPerSecond(BeaconState state,
+                                       BeaconStats stats,
                                        Lookup<BeaconEffectDef> effectLookup) {
         if (!state.active()) {
             return 0.0;
@@ -117,9 +117,9 @@ public final class PackResolver {
         return total * stats.fuelMultiplier();
     }
 
-    /** Per-effect cost, excluding the pack-wide {@link PackStats#fuelMultiplier()}. */
+    /** Per-effect cost, excluding the beacon-wide {@link BeaconStats#fuelMultiplier()}. */
     public static double fuelPerSecond(EffectSlotConfig slot,
-                                       PackStats stats,
+                                       BeaconStats stats,
                                        Lookup<BeaconEffectDef> effectLookup) {
         if (!slot.enabled()) {
             return 0.0;
@@ -143,13 +143,13 @@ public final class PackResolver {
     /**
      * Drops or clamps anything the current tier and augments no longer permit — trimming excess
      * effect slots, capping amplifiers, and falling back to {@link AuraMode#SELF} for modes that
-     * are no longer unlocked. Called whenever an augment is removed, so a downgraded pack can never
+     * are no longer unlocked. Called whenever an augment is removed, so a downgraded beacon can never
      * keep projecting what it can no longer pay for.
      */
-    public static PackState sanitize(PackState state,
-                                     PackStats stats,
+    public static BeaconState sanitize(BeaconState state,
+                                     BeaconStats stats,
                                      Lookup<BeaconEffectDef> effectLookup,
-                                     PackTierDef tier) {
+                                     BeaconTierDef tier) {
         List<EffectSlotConfig> kept = new ArrayList<>(stats.effectSlots());
         for (EffectSlotConfig slot : state.effects()) {
             if (kept.size() >= stats.effectSlots()) {
@@ -171,5 +171,5 @@ public final class PackResolver {
                 .withCapacity(stats.fuelCapacity());
     }
 
-    private PackResolver() {}
+    private BeaconResolver() {}
 }

@@ -5,8 +5,8 @@ import dev.drimoz.portablebeacons.core.AugmentInstance;
 import dev.drimoz.portablebeacons.core.BPRegistryKeys;
 import dev.drimoz.portablebeacons.core.BeaconEffectDef;
 import dev.drimoz.portablebeacons.core.FuelDef;
-import dev.drimoz.portablebeacons.core.PackResolver;
-import dev.drimoz.portablebeacons.core.PackTierDef;
+import dev.drimoz.portablebeacons.core.BeaconResolver;
+import dev.drimoz.portablebeacons.core.BeaconTierDef;
 import dev.drimoz.portablebeacons.item.AugmentItem;
 import dev.drimoz.portablebeacons.item.PortableBeaconItem;
 import net.minecraft.core.Holder;
@@ -33,18 +33,18 @@ import java.util.List;
  */
 public final class BPLookups {
 
-    public static PackResolver.Lookup<AugmentDef> augments(RegistryAccess access) {
+    public static BeaconResolver.Lookup<AugmentDef> augments(RegistryAccess access) {
         Registry<AugmentDef> registry = access.lookupOrThrow(BPRegistryKeys.AUGMENT);
         return registry::getOptional;
     }
 
-    public static PackResolver.Lookup<BeaconEffectDef> effects(RegistryAccess access) {
+    public static BeaconResolver.Lookup<BeaconEffectDef> effects(RegistryAccess access) {
         Registry<BeaconEffectDef> registry = access.lookupOrThrow(BPRegistryKeys.EFFECT);
         return registry::getOptional;
     }
 
     @Nullable
-    public static PackTierDef tier(RegistryAccess access, PortableBeaconItem item) {
+    public static BeaconTierDef tier(RegistryAccess access, PortableBeaconItem item) {
         return access.lookupOrThrow(BPRegistryKeys.TIER).get(item.tier())
                 .map(Holder::value)
                 .orElse(null);
@@ -65,7 +65,7 @@ public final class BPLookups {
 
     /** Fuel units the given item is worth, or 0 if it is not fuel. */
     public static int fuelValue(RegistryAccess access, Item item) {
-        // An item named directly wins over one matched through a tag, so a pack can price a single
+        // An item named directly wins over one matched through a tag, so a beacon can price a single
         // metal without having to exclude it from whatever convention tag it belongs to.
         int viaTag = 0;
         for (FuelDef def : access.lookupOrThrow(BPRegistryKeys.FUEL)) {

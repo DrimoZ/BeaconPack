@@ -13,22 +13,22 @@ import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 /**
- * A configuration change made in the pack screen.
+ * A configuration change made in the beacon screen.
  *
  * <p>Deliberately not {@code clickMenuButton}: vanilla's container-button packet serialises the
  * button id as a single byte, so anything packed into a wider int silently arrives truncated - and
  * a truncated id decodes as a different action rather than as an error.
  */
-public record PackActionPayload(int action, int slot, int value) implements CustomPacketPayload {
+public record BeaconActionPayload(int action, int slot, int value) implements CustomPacketPayload {
 
-    public static final Type<PackActionPayload> TYPE = new Type<>(BPRegistryKeys.id("pack_action"));
+    public static final Type<BeaconActionPayload> TYPE = new Type<>(BPRegistryKeys.id("pack_action"));
 
-    public static final StreamCodec<io.netty.buffer.ByteBuf, PackActionPayload> STREAM_CODEC =
+    public static final StreamCodec<io.netty.buffer.ByteBuf, BeaconActionPayload> STREAM_CODEC =
             StreamCodec.composite(
-                    ByteBufCodecs.VAR_INT, PackActionPayload::action,
-                    ByteBufCodecs.VAR_INT, PackActionPayload::slot,
-                    ByteBufCodecs.VAR_INT, PackActionPayload::value,
-                    PackActionPayload::new);
+                    ByteBufCodecs.VAR_INT, BeaconActionPayload::action,
+                    ByteBufCodecs.VAR_INT, BeaconActionPayload::slot,
+                    ByteBufCodecs.VAR_INT, BeaconActionPayload::value,
+                    BeaconActionPayload::new);
 
     @Override
     public Type<? extends CustomPacketPayload> type() {
@@ -42,7 +42,7 @@ public record PackActionPayload(int action, int slot, int value) implements Cust
             PayloadRegistrar registrar = event.registrar("1");
             registrar.playToServer(TYPE, STREAM_CODEC, (payload, context) ->
                     context.enqueueWork(() -> {
-                        // Routed through the open menu, so it can only ever touch the pack the
+                        // Routed through the open menu, so it can only ever touch the beacon the
                         // player already has open.
                         if (context.player() instanceof ServerPlayer player
                                 && player.containerMenu instanceof PortableBeaconMenu menu) {

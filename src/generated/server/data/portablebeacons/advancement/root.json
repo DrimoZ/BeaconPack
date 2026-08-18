@@ -4,7 +4,7 @@
       "conditions": {
         "items": [
           {
-            "items": "#portablebeacons:packs"
+            "items": "#portablebeacons:beacons"
           }
         ]
       },

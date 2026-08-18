@@ -7,7 +7,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.effect.MobEffect;
 
 /**
- * One entry of the {@code portablebeacons:effect} datapack registry: an effect a pack is allowed to
+ * One entry of the {@code portablebeacons:effect} datapack registry: an effect a beacon is allowed to
  * project, and what it costs.
  *
  * <pre>{@code
@@ -22,7 +22,7 @@ import net.minecraft.world.effect.MobEffect;
  * @param effect                  the projected mob effect
  * @param cost                    base fuel units per second at amplifier 0, self-only
  * @param maxAmplifier            highest amplifier this effect may be raised to (0 = level I only)
- * @param minTier                 lowest pack tier that may select it
+ * @param minTier                 lowest beacon tier that may select it
  * @param amplifierCostMultiplier cost factor applied per amplifier level above 0
  */
 public record BeaconEffectDef(

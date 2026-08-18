@@ -10,7 +10,7 @@ import net.neoforged.neoforge.common.data.ItemTagsProvider;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * The beacon item tag, filled from {@link BPItems#packs()} so it cannot fall behind the registry.
+ * The beacon item tag, filled from {@link BPItems#beacons()} so it cannot fall behind the registry.
  */
 public class BPItemTagProvider extends ItemTagsProvider {
 
@@ -22,6 +22,6 @@ public class BPItemTagProvider extends ItemTagsProvider {
     @Override
     protected void addTags(HolderLookup.Provider registries) {
         var beacons = tag(BPTags.PACKS);
-        BPItems.packs().forEach(beacon -> beacons.add(beacon.get()));
+        BPItems.beacons().forEach(beacon -> beacons.add(beacon.get()));
     }
 }

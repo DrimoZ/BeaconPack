@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceKey;
 /**
  * The contents of one effect slot in the GUI.
  *
- * <p>{@code enabled} is per effect and separate from the pack's master switch: keeping Strength
+ * <p>{@code enabled} is per effect and separate from the beacon's master switch: keeping Strength
  * configured but switched off, then turning it on before a fight, is the intended use — it avoids
  * both paying fuel for nothing and reconfiguring every time.
  *

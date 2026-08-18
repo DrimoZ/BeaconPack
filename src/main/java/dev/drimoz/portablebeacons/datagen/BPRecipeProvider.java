@@ -21,7 +21,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Every recipe and its unlock advancement.
  *
- * <p>Written here rather than as JSON because the shapes repeat: four tiers and three themed packs
+ * <p>Written here rather than as JSON because the shapes repeat: four tiers and three themed beacons
  * share one pattern, and the augment tiers share two more. Forty hand-written files were forty
  * chances to mistype an item id that nothing would catch until a player noticed a missing recipe.
  */
@@ -40,27 +40,27 @@ public class BPRecipeProvider extends RecipeProvider {
 
         // Every tier consumes a Beacon block, which is what keeps the vanilla beacon on the
         // progression path instead of being replaced by its own portable version.
-        pack(output, lookup, BPItems.PACK_I.get(), Map.of(
+        beacon(output, lookup, BPItems.BEACON_I.get(), Map.of(
                 'I', Ingredient.of(Items.IRON_INGOT),
                 'B', Ingredient.of(Items.BEACON)), " I ", "IBI", " I ");
-        pack(output, lookup, BPItems.PACK_II.get(), Map.of(
+        beacon(output, lookup, BPItems.BEACON_II.get(), Map.of(
                 'G', Ingredient.of(Items.GOLD_INGOT),
-                'P', Ingredient.of(BPItems.PACK_I.get()),
+                'P', Ingredient.of(BPItems.BEACON_I.get()),
                 'B', Ingredient.of(Items.BEACON)), " G ", "GPG", " B ");
-        pack(output, lookup, BPItems.PACK_III.get(), Map.of(
+        beacon(output, lookup, BPItems.BEACON_III.get(), Map.of(
                 'S', Ingredient.of(Items.NETHER_STAR),
                 'D', Ingredient.of(Items.DIAMOND),
-                'P', Ingredient.of(BPItems.PACK_II.get()),
+                'P', Ingredient.of(BPItems.BEACON_II.get()),
                 'B', Ingredient.of(Items.BEACON)), " S ", "DPD", " B ");
-        pack(output, lookup, BPItems.PACK_IV.get(), Map.of(
+        beacon(output, lookup, BPItems.BEACON_IV.get(), Map.of(
                 'S', Ingredient.of(Items.NETHER_STAR),
                 'N', Ingredient.of(Items.NETHERITE_INGOT),
-                'P', Ingredient.of(BPItems.PACK_III.get()),
+                'P', Ingredient.of(BPItems.BEACON_III.get()),
                 'B', Ingredient.of(Items.BEACON)), " S ", "NPN", " B ");
 
-        themed(output, lookup, BPItems.PACK_NETHER.get(), Items.BLAZE_ROD, Items.MAGMA_CREAM);
-        themed(output, lookup, BPItems.PACK_END.get(), Items.DRAGON_BREATH, Items.ENDER_EYE);
-        themed(output, lookup, BPItems.PACK_TIDAL.get(), Items.HEART_OF_THE_SEA,
+        themed(output, lookup, BPItems.BEACON_CINDER.get(), Items.BLAZE_ROD, Items.MAGMA_CREAM);
+        themed(output, lookup, BPItems.BEACON_VOID.get(), Items.DRAGON_BREATH, Items.ENDER_EYE);
+        themed(output, lookup, BPItems.BEACON_TIDAL.get(), Items.HEART_OF_THE_SEA,
                 Items.PRISMARINE_CRYSTALS);
 
         // Each augment tier is crafted from raw materials rather than by upgrading the previous
@@ -75,7 +75,7 @@ public class BPRecipeProvider extends RecipeProvider {
         augment(output, lookup, "discretion", Items.PHANTOM_MEMBRANE, 2);
     }
 
-    private void pack(RecipeOutput output, HolderLookup.Provider lookup, ItemLike result,
+    private void beacon(RecipeOutput output, HolderLookup.Provider lookup, ItemLike result,
                       Map<Character, Ingredient> key, String... pattern) {
         ComponentShapedRecipe.save(output, lookup, key(result), new ItemStackTemplate(result.asItem()),
                 Items.BEACON, key, pattern);
@@ -86,7 +86,7 @@ public class BPRecipeProvider extends RecipeProvider {
         ComponentShapedRecipe.save(output, lookup, key(result), new ItemStackTemplate(result.asItem()), core, Map.of(
                         'C', Ingredient.of(core),
                         'M', Ingredient.of(material),
-                        'P', Ingredient.of(BPItems.PACK_II.get()),
+                        'P', Ingredient.of(BPItems.BEACON_II.get()),
                         'B', Ingredient.of(Items.BEACON)),
                 " C ", "MPM", " B ");
     }

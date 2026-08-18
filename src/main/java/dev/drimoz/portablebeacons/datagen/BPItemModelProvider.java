@@ -42,7 +42,7 @@ public class BPItemModelProvider extends ModelProvider {
 
     @Override
     protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
-        BPItems.packs().forEach(beacon ->
+        BPItems.beacons().forEach(beacon ->
                 itemModels.generateFlatItem(beacon.get(), ModelTemplates.FLAT_ITEM));
 
         List<SelectItemModel.SwitchCase<ResourceKey<AugmentDef>>> cases =
@@ -57,7 +57,7 @@ public class BPItemModelProvider extends ModelProvider {
         }
 
         // The fallback is the untyped augment, which is what a stack with no component - or one
-        // naming an augment this pack does not define - should look like.
+        // naming an augment this beacon does not define - should look like.
         itemModels.itemModelOutput.accept(BPItems.AUGMENT.get(), ItemModelUtils.select(
                 AugmentLook.TypeProperty.INSTANCE,
                 ItemModelUtils.tintedModel(flatModel(itemModels, "augment"),

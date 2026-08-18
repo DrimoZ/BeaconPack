@@ -40,7 +40,7 @@ class FuelDefTest {
 
     @Test
     void zeroUnitsIsRejected() {
-        // A fuel worth nothing would be consumed for no gain, which reads in game as the pack
+        // A fuel worth nothing would be consumed for no gain, which reads in game as the beacon
         // eating items at random.
         assertTrue(parse("{\"item\": \"minecraft:iron_ingot\", \"units\": 0}").error().isPresent());
     }

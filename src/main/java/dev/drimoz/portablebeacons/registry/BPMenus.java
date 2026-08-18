@@ -13,8 +13,8 @@ public final class BPMenus {
     public static final DeferredRegister<MenuType<?>> MENUS =
             DeferredRegister.create(Registries.MENU, PortableBeacons.MOD_ID);
 
-    /** Extra data is just the pack's inventory slot index; the client reads the stack from there. */
-    public static final DeferredHolder<MenuType<?>, MenuType<PortableBeaconMenu>> BEACON_PACK =
+    /** Extra data is just the beacon's inventory slot index; the client reads the stack from there. */
+    public static final DeferredHolder<MenuType<?>, MenuType<PortableBeaconMenu>> BEACON =
             MENUS.register("beacon",
                     () -> IMenuTypeExtension.create(PortableBeaconMenu::new));
 

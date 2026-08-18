@@ -16,9 +16,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * The point of keeping {@code core} free of components, packets and rendering: the balance maths
  * can be exercised without launching Minecraft.
  */
-class PackResolverTest {
+class BeaconResolverTest {
 
-    private static final PackTierDef TIER_4 = new PackTierDef(4, 2, 3, 16.0, 12000, 1, List.of());
+    private static final BeaconTierDef TIER_4 = new BeaconTierDef(4, 2, 3, 16.0, 12000, 1, List.of());
 
     private static final ResourceKey<AugmentDef> RANGE = augmentKey("range");
     private static final ResourceKey<AugmentDef> FOCUS = augmentKey("focus");
@@ -28,13 +28,13 @@ class PackResolverTest {
     private static final AugmentDef FOCUS_DEF = new AugmentDef(1, 0, List.of(
             new AugmentDef.Operation(AugmentDef.Type.ADD_EFFECT_SLOT, List.of(1.0))));
 
-    private static final PackResolver.Lookup<AugmentDef> AUGMENTS = lookup(Map.of(
+    private static final BeaconResolver.Lookup<AugmentDef> AUGMENTS = lookup(Map.of(
             RANGE, RANGE_DEF,
             FOCUS, FOCUS_DEF));
 
     @Test
     void augmentsStackAcrossTypes() {
-        PackStats stats = PackResolver.resolve(TIER_4,
+        BeaconStats stats = BeaconResolver.resolve(TIER_4,
                 List.of(new AugmentInstance(RANGE, 2), new AugmentInstance(FOCUS, 1)),
                 AUGMENTS);
 
@@ -44,7 +44,7 @@ class PackResolverTest {
 
     @Test
     void duplicateAugmentTypeIsIgnored() {
-        PackStats stats = PackResolver.resolve(TIER_4,
+        BeaconStats stats = BeaconResolver.resolve(TIER_4,
                 List.of(new AugmentInstance(RANGE, 3), new AugmentInstance(RANGE, 3)),
                 AUGMENTS);
 
@@ -53,7 +53,7 @@ class PackResolverTest {
 
     @Test
     void augmentTierIsClampedToItsDeclaredMaximum() {
-        PackStats stats = PackResolver.resolve(TIER_4,
+        BeaconStats stats = BeaconResolver.resolve(TIER_4,
                 List.of(new AugmentInstance(FOCUS, 3)),
                 AUGMENTS);
 
@@ -62,8 +62,8 @@ class PackResolverTest {
 
     @Test
     void tierOneCannotProject() {
-        PackStats stats = PackResolver.resolve(
-                new PackTierDef(1, 1, 0, 0.0, 600, 0, List.of()), List.of(), AUGMENTS);
+        BeaconStats stats = BeaconResolver.resolve(
+                new BeaconTierDef(1, 1, 0, 0.0, 600, 0, List.of()), List.of(), AUGMENTS);
 
         assertTrue(stats.allows(AuraMode.SELF));
         assertFalse(stats.allows(AuraMode.ALLIES));
@@ -71,16 +71,16 @@ class PackResolverTest {
 
     @Test
     void inactivePackCostsNothing() {
-        PackState state = new PackState(
+        BeaconState state = new BeaconState(
                 List.of(new EffectSlotConfig(effectKey("speed"), 0, true, AuraMode.SELF)),
                 1000, false, 12000);
-        PackStats stats = PackResolver.resolve(TIER_4, List.of(), AUGMENTS);
+        BeaconStats stats = BeaconResolver.resolve(TIER_4, List.of(), AUGMENTS);
 
-        assertEquals(0.0, PackResolver.fuelPerSecond(state, stats,
+        assertEquals(0.0, BeaconResolver.fuelPerSecond(state, stats,
                 lookup(Map.of(effectKey("speed"), new BeaconEffectDef(null, 1.0, 1, 1, 2.5)))));
     }
 
-    private static <T> PackResolver.Lookup<T> lookup(Map<ResourceKey<T>, T> entries) {
+    private static <T> BeaconResolver.Lookup<T> lookup(Map<ResourceKey<T>, T> entries) {
         return key -> Optional.ofNullable(entries.get(key));
     }
 
