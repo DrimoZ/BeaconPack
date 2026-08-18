@@ -1,7 +1,7 @@
 {
   "itemGroup.portablebeacons": "Переносной маяк",
   "key.categories.portablebeacons": "Переносной маяк",
-  "key.portablebeacons.open_pack": "Открыть маяк",
+  "key.portablebeacons.open_beacon": "Открыть маяк",
   "item.portablebeacons.beacon_i": "Переносной маяк I",
   "item.portablebeacons.beacon_ii": "Переносной маяк II",
   "item.portablebeacons.beacon_iii": "Переносной маяк III",
@@ -50,7 +50,7 @@
   "portablebeacons.tip.hold_shift": "Удерживайте [Shift] для подробностей",
   "portablebeacons.tip.augment_rule": "По одному модулю каждого типа на ранец",
   "portablebeacons.tip.augment_line": "◈ %s",
-  "portablebeacons.tip.pack_tier": "Уровень %s · ячеек эффектов: %s · ячеек модулей: %s",
+  "portablebeacons.tip.beacon_tier": "Уровень %s · ячеек эффектов: %s · ячеек модулей: %s",
   "portablebeacons.tip.fuel_short": "Топливо: %s ед.",
   "portablebeacons.op.add_range": "Радиус +%s м",
   "portablebeacons.op.add_effect_slot": "+%s ячейка эффекта",

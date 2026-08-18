@@ -13,7 +13,7 @@ import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * The pack item tag, filled from {@link BPItems#packs()} so it cannot fall behind the registry.
+ * The beacon item tag, filled from {@link BPItems#beacons()} so it cannot fall behind the registry.
  *
  * <p>The block-tag lookup is empty on purpose: the vanilla provider takes one so it can copy block
  * tags into item tags, and this mod has no blocks to copy from.
@@ -29,7 +29,7 @@ public class BPItemTagProvider extends ItemTagsProvider {
 
     @Override
     protected void addTags(HolderLookup.Provider registries) {
-        var packs = tag(BPTags.PACKS);
-        BPItems.packs().forEach(pack -> packs.add(pack.get()));
+        var beacons = tag(BPTags.PACKS);
+        BPItems.beacons().forEach(beacon -> beacons.add(beacon.get()));
     }
 }

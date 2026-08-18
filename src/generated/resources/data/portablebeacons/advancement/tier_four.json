@@ -1,7 +1,7 @@
 {
   "parent": "portablebeacons:root",
   "criteria": {
-    "has_pack_iv": {
+    "has_beacon_iv": {
       "conditions": {
         "items": [
           {
@@ -27,7 +27,7 @@
   },
   "requirements": [
     [
-      "has_pack_iv"
+      "has_beacon_iv"
     ]
   ],
   "sends_telemetry_event": true

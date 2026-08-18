@@ -4,13 +4,13 @@ import dev.drimoz.portablebeacons.BPConfig;
 import dev.drimoz.portablebeacons.core.Durations;
 import dev.drimoz.portablebeacons.core.BeaconEffectDef;
 import dev.drimoz.portablebeacons.core.EffectSlotConfig;
-import dev.drimoz.portablebeacons.core.PackResolver;
-import dev.drimoz.portablebeacons.core.PackState;
-import dev.drimoz.portablebeacons.core.PackStats;
-import dev.drimoz.portablebeacons.core.PackTierDef;
+import dev.drimoz.portablebeacons.core.BeaconResolver;
+import dev.drimoz.portablebeacons.core.BeaconState;
+import dev.drimoz.portablebeacons.core.BeaconStats;
+import dev.drimoz.portablebeacons.core.BeaconTierDef;
 import dev.drimoz.portablebeacons.item.PortableBeaconItem;
 import dev.drimoz.portablebeacons.menu.PortableBeaconMenu;
-import dev.drimoz.portablebeacons.net.PackActionPayload;
+import dev.drimoz.portablebeacons.net.BeaconActionPayload;
 import dev.drimoz.portablebeacons.registry.BPLookups;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -36,7 +36,7 @@ import java.util.Locale;
 import java.util.Optional;
 
 /**
- * The pack's screen.
+ * The beacon's screen.
  *
  * <p>Everything is drawn by hand instead of using vanilla widgets. The effect selector is an
  * overlay, and vanilla widgets always render underneath {@code renderLabels}, so a mixed approach
@@ -64,7 +64,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
      *
      * <p>Augments and fuel moved out of the main frame entirely: they are configured once and then
      * left alone, so keeping them permanently on screen crowded the panel the player actually reads.
-     * Power stays a tab too - the one control that decides whether the pack runs should not compete
+     * Power stays a tab too - the one control that decides whether the beacon runs should not compete
      * with the settings it governs.
      */
     private static final int TAB_W = 30;
@@ -76,7 +76,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
      * Two columns, not one.
      *
      * <p>Four tabs stacked down one edge left the window visibly heavier on that side. Split, each
-     * side carries what belongs together: the two controls that govern the pack on the left, the
+     * side carries what belongs together: the two controls that govern the beacon on the left, the
      * two containers you load on the right.
      */
     private static final int LEFT_TAB_X = 1;
@@ -121,7 +121,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
     private static final int CASE_SIZE = 26;
     private static final int CASE_SPACING = 30;
     /**
-     * Five, now that the stats moved to a drawer and freed the whole row. The pack itself still
+     * Five, now that the stats moved to a drawer and freed the whole row. The beacon itself still
      * decides how many are unlocked; this is only how many the screen can lay out.
      */
     private static final int MAX_CASES = 5;
@@ -176,16 +176,16 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
     private List<ResourceKey<BeaconEffectDef>> rowsCache;
     private String rowsCacheKey;
     /** Cleared at the top of every frame; see {@link #stats()}. */
-    private PackStats frameStats;
+    private BeaconStats frameStats;
 
     /**
-     * The pack's resolved stats, computed at most once per frame.
+     * The beacon's resolved stats, computed at most once per frame.
      *
      * <p>Each call walks the augment slots through a capability lookup and re-applies every
      * operation. Rendering asked for it around six times a frame - the labels, the drawer, the
      * cases, and several tooltip branches - which is six times more often than it can change.
      */
-    private PackStats stats() {
+    private BeaconStats stats() {
         if (frameStats == null) {
             frameStats = menu.stats();
         }
@@ -209,7 +209,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
      * One drawer per side, not one in total.
      *
      * <p>They open away from each other, so nothing stops both being out at once - and comparing
-     * the pack's figures against the augments producing them is exactly when you want both.
+     * the beacon's figures against the augments producing them is exactly when you want both.
      */
     private Drawer leftDrawer = Drawer.NONE;
     private Drawer rightDrawer = Drawer.AUGMENTS;
@@ -253,8 +253,8 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         int localX = mouseX - leftPos;
         int localY = mouseY - topPos;
 
-        PackState state = menu.state();
-        PackStats stats = stats();
+        BeaconState state = menu.state();
+        BeaconStats stats = stats();
 
         graphics.drawString(font, Component.translatable("portablebeacons.gui.effects"),
                 CONTENT_LEFT, CASE_Y - 12, TEXT, false);
@@ -271,11 +271,11 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         }
     }
 
-    private void drawTabs(GuiGraphics graphics, PackState state, int mouseX, int mouseY) {
-        // Left column: the two controls that govern the pack.
+    private void drawTabs(GuiGraphics graphics, BeaconState state, int mouseX, int mouseY) {
+        // Left column: the two controls that govern the beacon.
         boolean powerHovered = hitTab(mouseX, mouseY, false, POWER_TAB_Y);
-        // Never expanded - power is a switch, not a drawer. Passing "is the pack on" as the
-        // expanded flag is what drew this tab a full panel wide whenever the pack was running.
+        // Never expanded - power is a switch, not a drawer. Passing "is the beacon on" as the
+        // expanded flag is what drew this tab a full panel wide whenever the beacon was running.
         drawTab(graphics, false, POWER_TAB_Y, TAB_H, 0.0F, powerHovered);
         int powerCx = glyphCentre(false);
         drawPowerGlyph(graphics, powerCx, POWER_TAB_Y + TAB_H / 2 - 2,
@@ -432,7 +432,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
      * <p>The slots inside it sit at fixed coordinates; a closed drawer hides them from rendering and
      * from hit-testing instead of moving them, because {@code Slot.x} is final.
      */
-    private void drawDrawer(GuiGraphics graphics, PackState state, PackStats stats,
+    private void drawDrawer(GuiGraphics graphics, BeaconState state, BeaconStats stats,
                             int mouseX, int mouseY) {
         // The two sides are independent, so each is drawn on its own terms. Contents appear only
         // once the panel holding them has finished growing, or they would be drawn outside it.
@@ -471,13 +471,13 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
     }
 
     /**
-     * The pack's figures, moved off the main panel.
+     * The beacon's figures, moved off the main panel.
      *
      * <p>They were three lines of small text wedged beside the effect cases, competing with them
      * for the same row. In a drawer they get labels, room to breathe, and the case row gets the
      * whole width back.
      */
-    private void drawStatsDrawer(GuiGraphics graphics, PackState state, PackStats stats) {
+    private void drawStatsDrawer(GuiGraphics graphics, BeaconState state, BeaconStats stats) {
         // Opens leftward, so its text is laid out from the panel's far edge inwards.
         int x = LEFT_TAB_X - PANEL_W + 8;
         // Stops short of the tab glyph, which sits at the panel's inner edge.
@@ -525,7 +525,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         graphics.fill(cx + 3, cy - 6, cx + 7, cy - 3, colour);
     }
 
-    private void drawCases(GuiGraphics graphics, PackState state, PackStats stats,
+    private void drawCases(GuiGraphics graphics, BeaconState state, BeaconStats stats,
                            int mouseX, int mouseY) {
         List<EffectSlotConfig> effects = state.effects();
         for (int i = 0; i < visibleCases(stats); i++) {
@@ -567,21 +567,21 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
     /**
      * Unlocked cases plus a single locked preview.
      *
-     * <p>Drawing the full five turned a tier-IV pack into two slots and three padlocks, which reads
+     * <p>Drawing the full five turned a tier-IV beacon into two slots and three padlocks, which reads
      * as a broken screen rather than as progression.
      */
-    private int visibleCases(PackStats stats) {
+    private int visibleCases(BeaconStats stats) {
         return Math.min(MAX_CASES, stats.effectSlots() + 1);
     }
 
     /**
-     * The pack-wide figures, right-aligned to the content column.
+     * The beacon-wide figures, right-aligned to the content column.
      *
      * <p>Right-aligned rather than placed at a fixed x: a longer translation used to run under the
      * frame. No fuel units either - they are an implementation detail of the datapack format, and a
      * rate in points per second is not something a player can act on. Time is.
      */
-    private List<Component> summaryTooltip(PackState state, PackStats stats) {
+    private List<Component> summaryTooltip(BeaconState state, BeaconStats stats) {
         List<Component> lines = new ArrayList<>(3);
         lines.add(Component.translatable("portablebeacons.gui.range",
                 String.format(Locale.ROOT, "%.0f", stats.range())));
@@ -595,7 +595,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         return lines;
     }
 
-    private void drawInfoPanel(GuiGraphics graphics, PackState state, PackStats stats,
+    private void drawInfoPanel(GuiGraphics graphics, BeaconState state, BeaconStats stats,
                                int mouseX, int mouseY) {
         List<EffectSlotConfig> effects = state.effects();
         if (focusedCase >= effects.size()) {
@@ -620,9 +620,9 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
                 INFO_X + 28, INFO_Y + 8, TEXT, false);
 
         // This effect's share of the total drain, rather than a raw rate: it answers "which of my
-        // effects is draining the pack" without asking the player to compare two decimals.
-        double cost = PackResolver.fuelPerSecond(slot, stats, effectLookup()) * stats.fuelMultiplier();
-        double total = PackResolver.fuelPerSecond(state, stats, effectLookup());
+        // effects is draining the beacon" without asking the player to compare two decimals.
+        double cost = BeaconResolver.fuelPerSecond(slot, stats, effectLookup()) * stats.fuelMultiplier();
+        double total = BeaconResolver.fuelPerSecond(state, stats, effectLookup());
         int share = total <= 0.0 ? 0 : (int) Math.round(cost / total * 100.0);
         // Labelled: the bare word "Self" next to a percentage read as if the two were related.
         String reach = slot.aura().isAura()
@@ -666,7 +666,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         return ROW_X + index * (BTN_W + BTN_GAP);
     }
 
-    private void drawFuel(GuiGraphics graphics, PackState state, PackStats stats) {
+    private void drawFuel(GuiGraphics graphics, BeaconState state, BeaconStats stats) {
         int capacity = Math.max(1, stats.fuelCapacity());
         int filled = (int) ((GAUGE_W - 4) * Math.min(1.0, state.fuel() / (double) capacity));
         graphics.fill(GAUGE_X + 2, GAUGE_Y + 2, GAUGE_X + 2 + filled, GAUGE_Y + GAUGE_H - 2,
@@ -990,8 +990,8 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         }
 
         List<Component> lines = new ArrayList<>(getTooltipFromContainerItem(stack));
-        PackStats stats = stats();
-        double perSecond = PackResolver.fuelPerSecond(menu.state(), stats, effectLookup());
+        BeaconStats stats = stats();
+        double perSecond = BeaconResolver.fuelPerSecond(menu.state(), stats, effectLookup());
         if (perSecond > 0.0) {
             lines.add(Component.translatable("portablebeacons.tip.fuel_worth",
                             Durations.format((int) (perItem / perSecond)),
@@ -999,7 +999,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
                     .withStyle(ChatFormatting.GRAY));
         }
         // A denser fuel than the buffer can hold is never consumed, and that would otherwise look
-        // like the pack ignoring it for no reason.
+        // like the beacon ignoring it for no reason.
         if (perItem > stats.fuelCapacity()) {
             lines.add(Component.translatable("portablebeacons.tip.fuel_too_dense")
                     .withStyle(ChatFormatting.RED));
@@ -1072,8 +1072,8 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         }
         if (BPConfig.fuelEnabled() && rightDrawer == Drawer.FUEL
                 && within(x, y, GAUGE_X, GAUGE_Y, GAUGE_W, GAUGE_H)) {
-            PackStats stats = stats();
-            double perSecond = PackResolver.fuelPerSecond(menu.state(), stats, effectLookup());
+            BeaconStats stats = stats();
+            double perSecond = BeaconResolver.fuelPerSecond(menu.state(), stats, effectLookup());
             return List.of(
                     Component.translatable("portablebeacons.gui.fuel"),
                     Component.translatable("portablebeacons.tip.fuel_stored",
@@ -1310,7 +1310,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
 
     private void send(int action, int slot, int value) {
         click();
-        PacketDistributor.sendToServer(new PackActionPayload(action, slot, value));
+        PacketDistributor.sendToServer(new BeaconActionPayload(action, slot, value));
     }
 
     /**
@@ -1324,7 +1324,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
                 .play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
     }
 
-    private PackResolver.Lookup<BeaconEffectDef> effectLookup() {
+    private BeaconResolver.Lookup<BeaconEffectDef> effectLookup() {
         return BPLookups.effects(Minecraft.getInstance().level.registryAccess());
     }
 
@@ -1343,9 +1343,9 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
     }
 
     /**
-     * The rows the picker shows: this pack's pool, narrowed by the search box.
+     * The rows the picker shows: this beacon's pool, narrowed by the search box.
      *
-     * <p>A themed pack listing the standard beacon effects it will never accept would be a list of
+     * <p>A themed beacon listing the standard beacon effects it will never accept would be a list of
      * dead ends, so the pool filters the picker rather than greying rows out. Locked entries are
      * kept, though - those are progress, not dead ends.
      *
@@ -1356,7 +1356,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         if (rowsCache != null && search.equals(rowsCacheKey)) {
             return rowsCache;
         }
-        PackTierDef tier = menu.tierDef();
+        BeaconTierDef tier = menu.tierDef();
         String needle = search.toLowerCase(Locale.ROOT);
         rowsCache = allKeys().stream()
                 .filter(key -> tier == null || tier.allows(key))
@@ -1370,14 +1370,14 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
     }
 
     private String totalRuntime() {
-        double perSecond = PackResolver.fuelPerSecond(menu.state(), stats(), effectLookup());
+        double perSecond = BeaconResolver.fuelPerSecond(menu.state(), stats(), effectLookup());
         return atCurrentDraw(menu.state().fuel() + reserveUnits(), perSecond);
     }
 
     /**
      * "Idle" rather than a dash when nothing is drawing.
      *
-     * <p>A lone "-" reads as missing data or a bug; naming the state says the pack is fine and
+     * <p>A lone "-" reads as missing data or a bug; naming the state says the beacon is fine and
      * simply has nothing running.
      */
     private static String atCurrentDraw(int units, double perSecond) {
@@ -1398,11 +1398,11 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
     }
 
     private int tierLevel() {
-        PackTierDef tier = menu.tierDef();
+        BeaconTierDef tier = menu.tierDef();
         return tier == null ? 1 : tier.level();
     }
 
-    private static boolean canAmplify(BeaconEffectDef def, PackStats stats) {
+    private static boolean canAmplify(BeaconEffectDef def, BeaconStats stats) {
         return Math.min(def.maxAmplifier(), stats.maxAmplifier()) > 0;
     }
 

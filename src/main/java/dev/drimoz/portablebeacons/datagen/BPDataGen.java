@@ -15,7 +15,7 @@ import java.util.concurrent.CompletableFuture;
  * Generates the repetitive resources.
  *
  * <p>Deliberately not everything. The datapack registry entries stay hand-written: they are the
- * mod's content rather than boilerplate, they read better as the JSON a pack author will copy, and
+ * mod's content rather than boilerplate, they read better as the JSON a beacon author will copy, and
  * a builtin-entries provider is a lot of machinery for twenty small files. Translations stay
  * hand-written too, since a generator only ever produces {@code en_us} and translators work on the
  * files directly.

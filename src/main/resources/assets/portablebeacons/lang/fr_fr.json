@@ -1,7 +1,7 @@
 {
   "itemGroup.portablebeacons": "Balise portative",
   "key.categories.portablebeacons": "Balise portative",
-  "key.portablebeacons.open_pack": "Ouvrir la balise",
+  "key.portablebeacons.open_beacon": "Ouvrir la balise",
   "item.portablebeacons.beacon_i": "Balise portative I",
   "item.portablebeacons.beacon_ii": "Balise portative II",
   "item.portablebeacons.beacon_iii": "Balise portative III",
@@ -50,7 +50,7 @@
   "portablebeacons.tip.hold_shift": "Maintenir [Maj] pour les détails",
   "portablebeacons.tip.augment_rule": "Un seul augment de chaque type par balise",
   "portablebeacons.tip.augment_line": "◈ %s",
-  "portablebeacons.tip.pack_tier": "Tier %s · %s cases d’effet · %s slots d’augment",
+  "portablebeacons.tip.beacon_tier": "Tier %s · %s cases d’effet · %s slots d’augment",
   "portablebeacons.tip.fuel_short": "Carburant : %s unités",
   "portablebeacons.op.add_range": "Portée +%s m",
   "portablebeacons.op.add_effect_slot": "+%s case d’effet",

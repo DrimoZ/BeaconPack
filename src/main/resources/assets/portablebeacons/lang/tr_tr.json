@@ -1,7 +1,7 @@
 {
   "itemGroup.portablebeacons": "Taşınabilir Fener",
   "key.categories.portablebeacons": "Taşınabilir Fener",
-  "key.portablebeacons.open_pack": "Feneri aç",
+  "key.portablebeacons.open_beacon": "Feneri aç",
   "item.portablebeacons.beacon_i": "Taşınabilir Fener I",
   "item.portablebeacons.beacon_ii": "Taşınabilir Fener II",
   "item.portablebeacons.beacon_iii": "Taşınabilir Fener III",
@@ -50,7 +50,7 @@
   "portablebeacons.tip.hold_shift": "Ayrıntılar için [Shift] tuşunu basılı tut",
   "portablebeacons.tip.augment_rule": "Çanta başına her türden bir modül",
   "portablebeacons.tip.augment_line": "◈ %s",
-  "portablebeacons.tip.pack_tier": "%s. seviye · %s etki yuvası · %s modül yuvası",
+  "portablebeacons.tip.beacon_tier": "%s. seviye · %s etki yuvası · %s modül yuvası",
   "portablebeacons.tip.fuel_short": "Yakıt: %s birim",
   "portablebeacons.op.add_range": "Menzil +%s m",
   "portablebeacons.op.add_effect_slot": "+%s etki yuvası",

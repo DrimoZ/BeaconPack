@@ -80,7 +80,7 @@ public class PortableBeaconsJeiPlugin implements IModPlugin {
     }
 
     /**
-     * Read from the datapack registry rather than hardcoded, so a pack's own fuels appear here on
+     * Read from the datapack registry rather than hardcoded, so a beacon's own fuels appear here on
      * their own - the same reason the creative tab enumerates augments instead of listing them.
      */
     private static List<FuelEntry> fuelEntries() {

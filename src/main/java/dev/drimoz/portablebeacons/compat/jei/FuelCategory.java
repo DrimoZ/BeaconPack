@@ -19,13 +19,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
 /**
- * What an item is worth as pack fuel.
+ * What an item is worth as beacon fuel.
  *
  * <p>This exists because it is the one number the mod never shows anywhere else: nothing in game
  * says an iron ingot is five minutes and a netherite ingot is eight hours, so the only way to find
  * out was to burn one and watch.
  *
- * <p>Rows come from the {@code portablebeacons:fuel} registry, so a pack that adds its own fuels gets
+ * <p>Rows come from the {@code portablebeacons:fuel} registry, so a beacon that adds its own fuels gets
  * them listed here with no further work.
  */
 public class FuelCategory implements IRecipeCategory<FuelEntry> {
@@ -40,7 +40,7 @@ public class FuelCategory implements IRecipeCategory<FuelEntry> {
     private final IDrawable slot;
 
     public FuelCategory(IGuiHelper helper) {
-        this.icon = helper.createDrawableItemStack(new ItemStack(BPItems.PACK_II.get()));
+        this.icon = helper.createDrawableItemStack(new ItemStack(BPItems.BEACON_II.get()));
         this.slot = helper.getSlotDrawable();
     }
 

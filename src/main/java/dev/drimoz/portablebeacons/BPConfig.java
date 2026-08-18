@@ -36,7 +36,7 @@ public final class BPConfig {
         builder.push("gameplay");
 
         requireFuel = builder
-                .comment("Whether packs consume fuel. Disable for a purely craft-gated mod.")
+                .comment("Whether beacons consume fuel. Disable for a purely craft-gated mod.")
                 .define("require_fuel", true);
 
         auraAffectsNonTeamPlayers = builder
@@ -49,9 +49,9 @@ public final class BPConfig {
                 .define("free_while_near_beacon", true);
 
         requireBeaconToConfigure = builder
-                .comment("Require a lit beacon within 16 blocks to change a pack's effects.",
+                .comment("Require a lit beacon within 16 blocks to change a beacon's effects.",
                         "Off by default: the beacon block is already on the crafting path of every",
-                        "tier. Turn it on for a pack that wants the stricter progression.")
+                        "tier. Turn it on for a beacon that wants the stricter progression.")
                 .define("require_beacon_to_configure", false);
 
         builder.pop();

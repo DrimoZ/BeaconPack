@@ -71,8 +71,8 @@ public final class GenerateTextures {
                     new File(ITEM_DIR + "/" + names[i] + ".png"));
         }
 
-        // Themed packs share the silhouette but take a saturated core and a marked casing, so they
-        // read as siblings of the numbered packs rather than as a separate family.
+        // Themed beacons share the silhouette but take a saturated core and a marked casing, so they
+        // read as siblings of the numbered beacons rather than as a separate family.
         ImageIO.write(themedPackIcon(0xFFE0603A, 0xFF4A2A26), "PNG",
                 new File(ITEM_DIR + "/cinder_beacon.png"));
         ImageIO.write(themedPackIcon(0xFFC48CE0, 0xFF2E2740), "PNG",
@@ -156,7 +156,7 @@ public final class GenerateTextures {
         return image;
     }
 
-    /** Same shape as a numbered pack, with a themed casing and no tier pips. */
+    /** Same shape as a numbered beacon, with a themed casing and no tier pips. */
     private static BufferedImage themedPackIcon(int accent, int body) {
         BufferedImage image = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
         int outline = 0xFF15161C;

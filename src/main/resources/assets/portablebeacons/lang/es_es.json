@@ -1,7 +1,7 @@
 {
   "itemGroup.portablebeacons": "Faro portátil",
   "key.categories.portablebeacons": "Faro portátil",
-  "key.portablebeacons.open_pack": "Abrir el faro",
+  "key.portablebeacons.open_beacon": "Abrir el faro",
   "item.portablebeacons.beacon_i": "Faro portátil I",
   "item.portablebeacons.beacon_ii": "Faro portátil II",
   "item.portablebeacons.beacon_iii": "Faro portátil III",
@@ -50,7 +50,7 @@
   "portablebeacons.tip.hold_shift": "Mantén [Mayús] para más detalles",
   "portablebeacons.tip.augment_rule": "Una mejora de cada tipo por mochila",
   "portablebeacons.tip.augment_line": "◈ %s",
-  "portablebeacons.tip.pack_tier": "Nivel %s · %s ranuras de efecto · %s ranuras de mejora",
+  "portablebeacons.tip.beacon_tier": "Nivel %s · %s ranuras de efecto · %s ranuras de mejora",
   "portablebeacons.tip.fuel_short": "Combustible: %s unidades",
   "portablebeacons.op.add_range": "Alcance +%s m",
   "portablebeacons.op.add_effect_slot": "+%s ranura de efecto",

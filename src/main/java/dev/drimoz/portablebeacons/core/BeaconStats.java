@@ -3,7 +3,7 @@ package dev.drimoz.portablebeacons.core;
 import java.util.Set;
 
 /**
- * A pack tier's stats after its augments have been applied. Produced by {@link PackResolver} and
+ * A beacon tier's stats after its augments have been applied. Produced by {@link BeaconResolver} and
  * consumed by the ticking logic, the GUI and the tooltip alike, so the number the player reads is
  * always the number the server charges.
  *
@@ -15,7 +15,7 @@ import java.util.Set;
  * @param fuelMultiplier   global factor on consumption (Efficiency lowers it)
  * @param allowedAuraModes aura modes the player may pick
  */
-public record PackStats(
+public record BeaconStats(
         int effectSlots,
         int augmentSlots,
         double range,

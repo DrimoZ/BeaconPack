@@ -5,10 +5,10 @@ import dev.drimoz.portablebeacons.core.AuraMode;
 import dev.drimoz.portablebeacons.core.BeaconEffectDef;
 import dev.drimoz.portablebeacons.core.EffectSlotConfig;
 import dev.drimoz.portablebeacons.core.FuelBudget;
-import dev.drimoz.portablebeacons.core.PackResolver;
-import dev.drimoz.portablebeacons.core.PackState;
-import dev.drimoz.portablebeacons.core.PackStats;
-import dev.drimoz.portablebeacons.core.PackTierDef;
+import dev.drimoz.portablebeacons.core.BeaconResolver;
+import dev.drimoz.portablebeacons.core.BeaconState;
+import dev.drimoz.portablebeacons.core.BeaconStats;
+import dev.drimoz.portablebeacons.core.BeaconTierDef;
 import dev.drimoz.portablebeacons.item.PortableBeaconItem;
 import dev.drimoz.portablebeacons.registry.BPLookups;
 import net.minecraft.ChatFormatting;
@@ -33,13 +33,13 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Applies pack effects and charges for them.
+ * Applies beacon effects and charges for them.
  *
  * <p>Runs every {@link #INTERVAL} ticks rather than every tick: a beacon that follows the player
  * does not need 20 Hz precision, and the aura scan is an AABB query per projecting effect.
  */
 @EventBusSubscriber(modid = PortableBeacons.MOD_ID)
-public final class PackTicker {
+public final class BeaconTicker {
 
     private static final int INTERVAL = 40;
     private static final double SECONDS_PER_INTERVAL = INTERVAL / 20.0;
@@ -57,29 +57,29 @@ public final class PackTicker {
     }
 
     /**
-     * One pass of the pack loop for one player.
+     * One pass of the beacon loop for one player.
      *
      * <p>Split out of the event handler so the game tests can drive a pass directly. Waiting for
      * {@code tickCount % INTERVAL} to line up made every test depend on server timing it does not
      * control, and a test that fails because the tick counter landed badly teaches nothing.
      */
     public static void tickPlayer(Player player) {
-        ItemStack pack = findActivePack(player);
-        if (pack.isEmpty()) {
+        ItemStack beacon = findActiveBeacon(player);
+        if (beacon.isEmpty()) {
             return;
         }
-        tickPack(player, pack);
+        tickBeacon(player, beacon);
     }
 
     /**
-     * Only the first active pack does anything. Letting several stack would make the tier ladder
-     * pointless — four tier-I packs would beat one tier-IV.
+     * Only the first active beacon does anything. Letting several stack would make the tier ladder
+     * pointless — four tier-I beacons would beat one tier-IV.
      */
-    private static ItemStack findActivePack(Player player) {
-        // Curios first: a pack the player has deliberately equipped should beat one that happens to
-        // be loose in the bag. The reverse order made a worn pack look broken - the inventory one
+    private static ItemStack findActiveBeacon(Player player) {
+        // Curios first: a beacon the player has deliberately equipped should beat one that happens to
+        // be loose in the bag. The reverse order made a worn beacon look broken - the inventory one
         // quietly won and there was nothing on screen to say why.
-        ItemStack worn = CuriosCompat.findActivePack(player);
+        ItemStack worn = CuriosCompat.findActiveBeacon(player);
         if (!worn.isEmpty()) {
             return worn;
         }
@@ -92,20 +92,20 @@ public final class PackTicker {
         return ItemStack.EMPTY;
     }
 
-    private static void tickPack(Player player, ItemStack pack) {
+    private static void tickBeacon(Player player, ItemStack beacon) {
         RegistryAccess access = player.level().registryAccess();
-        PortableBeaconItem item = (PortableBeaconItem) pack.getItem();
-        PackTierDef tier = BPLookups.tier(access, item);
+        PortableBeaconItem item = (PortableBeaconItem) beacon.getItem();
+        BeaconTierDef tier = BPLookups.tier(access, item);
         if (tier == null) {
             return;
         }
 
-        PackResolver.Lookup<BeaconEffectDef> effectLookup = BPLookups.effects(access);
-        PackStats stats = PackResolver.resolve(
-                tier, BPLookups.installedAugments(pack), BPLookups.augments(access));
+        BeaconResolver.Lookup<BeaconEffectDef> effectLookup = BPLookups.effects(access);
+        BeaconStats stats = BeaconResolver.resolve(
+                tier, BPLookups.installedAugments(beacon), BPLookups.augments(access));
 
-        PackState state = PackResolver.sanitize(
-                PortableBeaconItem.stateOf(pack), stats, effectLookup, tier);
+        BeaconState state = BeaconResolver.sanitize(
+                PortableBeaconItem.stateOf(beacon), stats, effectLookup, tier);
 
         List<EffectSlotConfig> toApply = new ArrayList<>(state.effects().size());
         double owed = 0.0;
@@ -116,38 +116,38 @@ public final class PackTicker {
             if (isCoveredByRealBeacon(player, slot, effectLookup)) {
                 // Skipped entirely, not just made free. Re-applying over the beacon's instance
                 // would replace an ambient effect with a non-ambient one, the coverage check would
-                // fail on the next tick, and the pack would start charging again - flipping between
+                // fail on the next tick, and the beacon would start charging again - flipping between
                 // free and paid every two seconds.
                 continue;
             }
-            owed += PackResolver.fuelPerSecond(slot, stats, effectLookup) * stats.fuelMultiplier();
+            owed += BeaconResolver.fuelPerSecond(slot, stats, effectLookup) * stats.fuelMultiplier();
             toApply.add(slot);
         }
 
         int cost = FuelBudget.costFor(owed, SECONDS_PER_INTERVAL);
         if (BPConfig.INSTANCE.requireFuel.get() && cost > 0) {
-            state = refuel(pack, state, stats, cost, player.level().registryAccess());
+            state = refuel(beacon, state, stats, cost, player.level().registryAccess());
             if (state.fuel() < cost) {
-                runDry(player, pack, state);
+                runDry(player, beacon, state);
                 return;
             }
             state = state.withFuel(state.fuel() - cost);
         }
 
-        PortableBeaconItem.setState(pack, state);
+        PortableBeaconItem.setState(beacon, state);
         for (EffectSlotConfig slot : toApply) {
             apply(player, slot, stats, effectLookup);
         }
     }
 
     /**
-     * Switches the pack off and says so.
+     * Switches the beacon off and says so.
      *
      * <p>Effects stopping with no explanation reads as a bug. This fires once by construction: an
-     * inactive pack is not ticked again until the player turns it back on.
+     * inactive beacon is not ticked again until the player turns it back on.
      */
-    private static void runDry(Player player, ItemStack pack, PackState state) {
-        PortableBeaconItem.setState(pack, state.withActive(false));
+    private static void runDry(Player player, ItemStack beacon, BeaconState state) {
+        PortableBeaconItem.setState(beacon, state.withActive(false));
         player.displayClientMessage(
                 Component.translatable("portablebeacons.msg.out_of_fuel").withStyle(ChatFormatting.RED),
                 true);
@@ -160,12 +160,12 @@ public final class PackTicker {
      * netherite ingot to cover a 3-unit shortfall would be an unpleasant surprise, so a single item
      * is consumed per tick at most.
      */
-    private static PackState refuel(ItemStack pack, PackState state, PackStats stats,
+    private static BeaconState refuel(ItemStack beacon, BeaconState state, BeaconStats stats,
                                     int cost, RegistryAccess access) {
         if (state.fuel() >= cost) {
             return state;
         }
-        IItemHandler handler = pack.getCapability(Capabilities.ItemHandler.ITEM);
+        IItemHandler handler = beacon.getCapability(Capabilities.ItemHandler.ITEM);
         if (handler == null || handler.getSlots() <= PortableBeaconItem.FUEL_SLOT) {
             return state;
         }
@@ -182,13 +182,13 @@ public final class PackTicker {
     }
 
     /**
-     * A real beacon already covering this effect makes the pack free for it.
+     * A real beacon already covering this effect makes the beacon free for it.
      *
-     * <p>Detection leans on the fact that beacons apply <em>ambient</em> instances while the pack
+     * <p>Detection leans on the fact that beacons apply <em>ambient</em> instances while the beacon
      * deliberately does not — see {@link #apply}.
      */
     private static boolean isCoveredByRealBeacon(Player player, EffectSlotConfig slot,
-                                                 PackResolver.Lookup<BeaconEffectDef> lookup) {
+                                                 BeaconResolver.Lookup<BeaconEffectDef> lookup) {
         if (!BPConfig.INSTANCE.freeWhileNearBeacon.get()) {
             return false;
         }
@@ -200,8 +200,8 @@ public final class PackTicker {
         return existing != null && existing.isAmbient() && existing.getAmplifier() >= slot.amplifier();
     }
 
-    private static void apply(Player carrier, EffectSlotConfig slot, PackStats stats,
-                              PackResolver.Lookup<BeaconEffectDef> lookup) {
+    private static void apply(Player carrier, EffectSlotConfig slot, BeaconStats stats,
+                              BeaconResolver.Lookup<BeaconEffectDef> lookup) {
         Optional<BeaconEffectDef> maybeDef = lookup.get(slot.effect());
         if (maybeDef.isEmpty()) {
             return;
@@ -246,5 +246,5 @@ public final class PackTicker {
         return BPConfig.INSTANCE.auraAffectsNonTeamPlayers.get() || other.isAlliedTo(carrier);
     }
 
-    private PackTicker() {}
+    private BeaconTicker() {}
 }

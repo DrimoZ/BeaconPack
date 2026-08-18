@@ -1,12 +1,12 @@
 package dev.drimoz.portablebeacons.gametest;
 
 import dev.drimoz.portablebeacons.PortableBeacons;
-import dev.drimoz.portablebeacons.PackTicker;
+import dev.drimoz.portablebeacons.BeaconTicker;
 import dev.drimoz.portablebeacons.core.AuraMode;
 import dev.drimoz.portablebeacons.core.BPRegistryKeys;
 import dev.drimoz.portablebeacons.core.BeaconEffectDef;
 import dev.drimoz.portablebeacons.core.EffectSlotConfig;
-import dev.drimoz.portablebeacons.core.PackState;
+import dev.drimoz.portablebeacons.core.BeaconState;
 import dev.drimoz.portablebeacons.item.PortableBeaconItem;
 import dev.drimoz.portablebeacons.menu.PortableBeaconMenu;
 import dev.drimoz.portablebeacons.registry.BPItems;
@@ -43,7 +43,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * could never be checked in single player - there, the carrier is the only player and every mode
  * looks identical.
  *
- * <p>These drive {@link PackTicker#tickPlayer} directly rather than waiting for the 40-tick
+ * <p>These drive {@link BeaconTicker#tickPlayer} directly rather than waiting for the 40-tick
  * interval to come round, which also keeps them independent of server timing they do not control.
  *
  * <p><b>What this does not cover:</b> the {@code PlayerTickEvent.Post} subscription that calls
@@ -77,10 +77,10 @@ public final class BPGameTests {
             ServerPlayer carrier = spawnPlayer(helper, cleanup);
             givePack(carrier, AuraMode.SELF);
 
-            PackTicker.tickPlayer(carrier);
+            BeaconTicker.tickPlayer(carrier);
 
             helper.assertTrue(carrier.getEffect(MobEffects.MOVEMENT_SPEED) != null,
-                    "the carrier did not receive the effect their own pack projects");
+                    "the carrier did not receive the effect their own beacon projects");
         });
     }
 
@@ -88,13 +88,13 @@ public final class BPGameTests {
     public static void anInactivePackAppliesNothing(GameTestHelper helper) {
         run(helper, cleanup -> {
             ServerPlayer carrier = spawnPlayer(helper, cleanup);
-            ItemStack pack = givePack(carrier, AuraMode.SELF);
-            PortableBeaconItem.setState(pack, PortableBeaconItem.stateOf(pack).withActive(false));
+            ItemStack beacon = givePack(carrier, AuraMode.SELF);
+            PortableBeaconItem.setState(beacon, PortableBeaconItem.stateOf(beacon).withActive(false));
 
-            PackTicker.tickPlayer(carrier);
+            BeaconTicker.tickPlayer(carrier);
 
             helper.assertTrue(carrier.getEffect(MobEffects.MOVEMENT_SPEED) == null,
-                    "a pack switched off still applied its effect");
+                    "a beacon switched off still applied its effect");
         });
     }
 
@@ -106,7 +106,7 @@ public final class BPGameTests {
             ServerPlayer bystander = spawnPlayer(helper, cleanup);
             givePack(carrier, AuraMode.ALLIES);
 
-            PackTicker.tickPlayer(carrier);
+            BeaconTicker.tickPlayer(carrier);
 
             helper.assertTrue(bystander.getEffect(MobEffects.MOVEMENT_SPEED) != null,
                     "a player standing next to the carrier was not reached by the aura");
@@ -120,12 +120,12 @@ public final class BPGameTests {
             ServerPlayer bystander = spawnPlayer(helper, cleanup);
             givePack(carrier, AuraMode.SELF);
 
-            PackTicker.tickPlayer(carrier);
+            BeaconTicker.tickPlayer(carrier);
 
             helper.assertTrue(carrier.getEffect(MobEffects.MOVEMENT_SPEED) != null,
                     "the carrier lost their own effect");
             helper.assertTrue(bystander.getEffect(MobEffects.MOVEMENT_SPEED) == null,
-                    "a pack set to self only leaked its effect to a bystander");
+                    "a beacon set to self only leaked its effect to a bystander");
         });
     }
 
@@ -145,7 +145,7 @@ public final class BPGameTests {
             scoreboard.addPlayerToTeam(carrier.getScoreboardName(), team);
 
             givePack(carrier, AuraMode.TEAM);
-            PackTicker.tickPlayer(carrier);
+            BeaconTicker.tickPlayer(carrier);
 
             helper.assertTrue(carrier.getEffect(MobEffects.MOVEMENT_SPEED) != null,
                     "the carrier lost their own effect in team mode");
@@ -164,7 +164,7 @@ public final class BPGameTests {
             pet.tame(carrier);
             Wolf stray = helper.spawnWithNoFreeWill(EntityType.WOLF, CENTRE);
 
-            PackTicker.tickPlayer(carrier);
+            BeaconTicker.tickPlayer(carrier);
 
             helper.assertTrue(pet.getEffect(MobEffects.MOVEMENT_SPEED) != null,
                     "a tamed pet was not reached by allies_and_pets");
@@ -184,14 +184,14 @@ public final class BPGameTests {
     public static void hostileActionIndicesAreRejected(GameTestHelper helper) {
         run(helper, cleanup -> {
             ServerPlayer carrier = spawnPlayer(helper, cleanup);
-            ItemStack pack = givePack(carrier, AuraMode.SELF);
+            ItemStack beacon = givePack(carrier, AuraMode.SELF);
 
-            // Built directly rather than through PackMenuOpener: openMenu writes a screen payload,
+            // Built directly rather than through BeaconMenuOpener: openMenu writes a screen payload,
             // and a mock player's connection refuses one outright ("Payload
             // neoforge:advanced_open_screen may not be sent to the client"). Nothing in the action
             // path needs a real connection - broadcastChanges is a no-op without a synchronizer.
             PortableBeaconMenu menu = new PortableBeaconMenu(1, carrier.getInventory(), 0);
-            PackState before = PortableBeaconItem.stateOf(pack);
+            BeaconState before = PortableBeaconItem.stateOf(beacon);
 
             int[] actions = {
                     PortableBeaconMenu.ACTION_SET_EFFECT,
@@ -212,8 +212,8 @@ public final class BPGameTests {
                         "Integer.MIN_VALUE was accepted by action " + action);
             }
 
-            helper.assertTrue(PortableBeaconItem.stateOf(pack).equals(before),
-                    "a rejected action still changed the pack");
+            helper.assertTrue(PortableBeaconItem.stateOf(beacon).equals(before),
+                    "a rejected action still changed the beacon");
         });
     }
 
@@ -257,14 +257,14 @@ public final class BPGameTests {
         return player;
     }
 
-    /** A tier IV pack, switched on, projecting Speed, with more fuel than a test can burn. */
+    /** A tier IV beacon, switched on, projecting Speed, with more fuel than a test can burn. */
     private static ItemStack givePack(ServerPlayer player, AuraMode aura) {
-        ItemStack pack = new ItemStack(BPItems.PACK_IV.get());
-        PortableBeaconItem.setState(pack, new PackState(
+        ItemStack beacon = new ItemStack(BPItems.BEACON_IV.get());
+        PortableBeaconItem.setState(beacon, new BeaconState(
                 List.of(new EffectSlotConfig(SPEED, 0, true, aura)),
                 Integer.MAX_VALUE / 2, true, 0));
-        player.getInventory().setItem(0, pack);
-        return pack;
+        player.getInventory().setItem(0, beacon);
+        return beacon;
     }
 
     private static void run(GameTestHelper helper, java.util.function.Consumer<Cleanup> body) {

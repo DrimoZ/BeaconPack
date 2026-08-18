@@ -5,8 +5,8 @@ import dev.drimoz.portablebeacons.core.AugmentInstance;
 import dev.drimoz.portablebeacons.core.BPRegistryKeys;
 import dev.drimoz.portablebeacons.core.BeaconEffectDef;
 import dev.drimoz.portablebeacons.core.FuelDef;
-import dev.drimoz.portablebeacons.core.PackResolver;
-import dev.drimoz.portablebeacons.core.PackTierDef;
+import dev.drimoz.portablebeacons.core.BeaconResolver;
+import dev.drimoz.portablebeacons.core.BeaconTierDef;
 import dev.drimoz.portablebeacons.item.AugmentItem;
 import dev.drimoz.portablebeacons.item.PortableBeaconItem;
 import net.minecraft.core.Registry;
@@ -30,18 +30,18 @@ import java.util.List;
  */
 public final class BPLookups {
 
-    public static PackResolver.Lookup<AugmentDef> augments(RegistryAccess access) {
+    public static BeaconResolver.Lookup<AugmentDef> augments(RegistryAccess access) {
         Registry<AugmentDef> registry = access.registryOrThrow(BPRegistryKeys.AUGMENT);
         return registry::getOptional;
     }
 
-    public static PackResolver.Lookup<BeaconEffectDef> effects(RegistryAccess access) {
+    public static BeaconResolver.Lookup<BeaconEffectDef> effects(RegistryAccess access) {
         Registry<BeaconEffectDef> registry = access.registryOrThrow(BPRegistryKeys.EFFECT);
         return registry::getOptional;
     }
 
     @Nullable
-    public static PackTierDef tier(RegistryAccess access, PortableBeaconItem item) {
+    public static BeaconTierDef tier(RegistryAccess access, PortableBeaconItem item) {
         return access.registryOrThrow(BPRegistryKeys.TIER).get(item.tier());
     }
 
@@ -60,7 +60,7 @@ public final class BPLookups {
 
     /** Fuel units the given item is worth, or 0 if it is not fuel. */
     public static int fuelValue(RegistryAccess access, Item item) {
-        // An item named directly wins over one matched through a tag, so a pack can price a single
+        // An item named directly wins over one matched through a tag, so a beacon can price a single
         // metal without having to exclude it from whatever convention tag it belongs to.
         int viaTag = 0;
         for (FuelDef def : access.registryOrThrow(BPRegistryKeys.FUEL)) {
@@ -75,9 +75,9 @@ public final class BPLookups {
         return viaTag;
     }
 
-    /** The augments currently installed in a pack, read straight from its container component. */
-    public static List<AugmentInstance> installedAugments(ItemStack packStack) {
-        IItemHandler handler = packStack.getCapability(Capabilities.ItemHandler.ITEM);
+    /** The augments currently installed in a beacon, read straight from its container component. */
+    public static List<AugmentInstance> installedAugments(ItemStack beaconStack) {
+        IItemHandler handler = beaconStack.getCapability(Capabilities.ItemHandler.ITEM);
         if (handler == null) {
             return List.of();
         }

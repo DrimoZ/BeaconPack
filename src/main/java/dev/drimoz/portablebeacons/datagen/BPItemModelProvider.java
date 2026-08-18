@@ -29,7 +29,7 @@ public class BPItemModelProvider extends ItemModelProvider {
 
     @Override
     protected void registerModels() {
-        BPItems.packs().forEach(pack -> generated(name(pack.getId())));
+        BPItems.beacons().forEach(beacon -> generated(name(beacon.getId())));
 
         ItemModelBuilder augment = generated("augment");
         for (int i = 0; i < AUGMENTS.length; i++) {

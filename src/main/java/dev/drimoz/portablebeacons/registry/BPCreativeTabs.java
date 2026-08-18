@@ -22,9 +22,9 @@ public final class BPCreativeTabs {
     public static final DeferredHolder<CreativeModeTab, CreativeModeTab> MAIN = TABS.register(
             "main", () -> CreativeModeTab.builder()
                     .title(Component.translatable("itemGroup.portablebeacons"))
-                    .icon(() -> new ItemStack(BPItems.PACK_IV.get()))
+                    .icon(() -> new ItemStack(BPItems.BEACON_IV.get()))
                     .displayItems((parameters, output) -> {
-                        BPItems.packs().forEach(pack -> output.accept(pack.get()));
+                        BPItems.beacons().forEach(beacon -> output.accept(beacon.get()));
 
                         // Augments are enumerated from the registry, so datapack-added ones show up
                         // here on their own - the whole point of them not being separate items.

@@ -6,7 +6,7 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.fml.ModList;
 
 /**
- * Optional Curios support: a pack worn in a curio slot works exactly like one carried in the
+ * Optional Curios support: a beacon worn in a curio slot works exactly like one carried in the
  * inventory.
  *
  * <p>Curios is compiled against but never required. Every call into its API sits behind
@@ -14,10 +14,10 @@ import net.neoforged.fml.ModList;
  * is actually present - referencing them from this class directly would fail to link without it.
  *
  * <p>Packs bind to Curios' {@code charm} slot through a shipped tag rather than being left for the
- * pack author to wire up. Declaring nothing was the tidier position, but it meant a player who
+ * beacon author to wire up. Declaring nothing was the tidier position, but it meant a player who
  * installed both mods found the integration simply did not work, with no way to tell that a
  * config file was missing. The binding is additive - {@code replace: false} on both files - so a
- * datapack can still move packs to another slot.
+ * datapack can still move beacons to another slot.
  */
 public final class CuriosCompat {
 
@@ -27,19 +27,19 @@ public final class CuriosCompat {
         return LOADED;
     }
 
-    /** The first active pack worn as a curio, or empty. */
-    public static ItemStack findActivePack(Player player) {
+    /** The first active beacon worn as a curio, or empty. */
+    public static ItemStack findActiveBeacon(Player player) {
         return LOADED ? Inner.find(player, true) : ItemStack.EMPTY;
     }
 
     /**
-     * The first pack worn as a curio whether it is switched on or not, or empty.
+     * The first beacon worn as a curio whether it is switched on or not, or empty.
      *
-     * <p>Separate from {@link #findActivePack} because the two answer different questions: the
-     * ticker wants a pack that is running, while opening the screen must find the pack precisely
+     * <p>Separate from {@link #findActiveBeacon} because the two answer different questions: the
+     * ticker wants a beacon that is running, while opening the screen must find the beacon precisely
      * when it is switched off - that is usually why the player is opening it.
      */
-    public static ItemStack findPack(Player player) {
+    public static ItemStack findBeacon(Player player) {
         return LOADED ? Inner.find(player, false) : ItemStack.EMPTY;
     }
 

@@ -2,7 +2,7 @@ package dev.drimoz.portablebeacons.registry;
 
 import dev.drimoz.portablebeacons.PortableBeacons;
 import dev.drimoz.portablebeacons.core.AugmentInstance;
-import dev.drimoz.portablebeacons.core.PackState;
+import dev.drimoz.portablebeacons.core.BeaconState;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -18,11 +18,11 @@ public final class BPComponents {
     public static final DeferredRegister.DataComponents REGISTRAR =
             DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, PortableBeacons.MOD_ID);
 
-    /** Everything a pack remembers: effect slots, fuel buffer, master switch. */
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<PackState>> PACK =
-            REGISTRAR.registerComponentType("pack", builder -> builder
-                    .persistent(PackState.CODEC)
-                    .networkSynchronized(PackState.STREAM_CODEC));
+    /** Everything a beacon remembers: effect slots, fuel buffer, master switch. */
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<BeaconState>> PACK =
+            REGISTRAR.registerComponentType("beacon", builder -> builder
+                    .persistent(BeaconState.CODEC)
+                    .networkSynchronized(BeaconState.STREAM_CODEC));
 
     /** What turns the single generic augment item into a specific augment. */
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<AugmentInstance>>

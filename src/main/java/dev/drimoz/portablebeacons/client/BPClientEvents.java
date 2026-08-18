@@ -6,7 +6,7 @@ import dev.drimoz.portablebeacons.core.AugmentDef;
 import dev.drimoz.portablebeacons.core.AugmentInstance;
 import dev.drimoz.portablebeacons.core.BPRegistryKeys;
 import dev.drimoz.portablebeacons.item.AugmentItem;
-import dev.drimoz.portablebeacons.net.OpenPackPayload;
+import dev.drimoz.portablebeacons.net.OpenBeaconPayload;
 import dev.drimoz.portablebeacons.registry.BPItems;
 import dev.drimoz.portablebeacons.registry.BPMenus;
 import net.minecraft.client.KeyMapping;
@@ -27,13 +27,13 @@ import org.lwjgl.glfw.GLFW;
 public final class BPClientEvents {
 
     /**
-     * Opens the active pack without having to hold it.
+     * Opens the active beacon without having to hold it.
      *
      * <p>Its own category rather than the vanilla "Inventory" one: filed there it sat among twenty
      * vanilla binds and was effectively impossible to find, which reads as the bind not existing.
      */
     public static final KeyMapping OPEN_PACK = new KeyMapping(
-            "key.portablebeacons.open_pack",
+            "key.portablebeacons.open_beacon",
             KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM,
             GLFW.GLFW_KEY_B,
@@ -45,7 +45,7 @@ public final class BPClientEvents {
 
         @SubscribeEvent
         public static void registerScreens(RegisterMenuScreensEvent event) {
-            event.register(BPMenus.BEACON_PACK.get(), PortableBeaconScreen::new);
+            event.register(BPMenus.BEACON.get(), PortableBeaconScreen::new);
         }
 
         @SubscribeEvent
@@ -102,9 +102,9 @@ public final class BPClientEvents {
         @SubscribeEvent
         public static void onClientTick(ClientTickEvent.Post event) {
             while (OPEN_PACK.consumeClick()) {
-                // No slot index: the server finds the pack itself, so a crafted packet cannot
+                // No slot index: the server finds the beacon itself, so a crafted packet cannot
                 // point the menu at an arbitrary stack.
-                PacketDistributor.sendToServer(new OpenPackPayload(OpenPackPayload.FIND_ANY));
+                PacketDistributor.sendToServer(new OpenBeaconPayload(OpenBeaconPayload.FIND_ANY));
             }
         }
 

@@ -7,7 +7,7 @@ import net.minecraft.resources.ResourceKey;
 import java.util.List;
 
 /**
- * One entry of the {@code portablebeacons:tier} datapack registry: the base stats of a pack item,
+ * One entry of the {@code portablebeacons:tier} datapack registry: the base stats of a beacon item,
  * before augments.
  *
  * <p>Ranges are deliberately far below the vanilla beacon's 20/30/40/50: a beacon that follows you
@@ -20,7 +20,7 @@ import java.util.List;
  * @param fuelCapacity internal buffer in fuel units
  * @param maxAmplifier highest amplifier reachable without an Amplification augment
  */
-public record PackTierDef(
+public record BeaconTierDef(
         int level,
         int effectSlots,
         int augmentSlots,
@@ -29,27 +29,27 @@ public record PackTierDef(
         int maxAmplifier,
         List<ResourceKey<BeaconEffectDef>> effectPool
 ) {
-    public static final Codec<PackTierDef> CODEC = RecordCodecBuilder.create(i -> i.group(
-            Codec.intRange(1, 4).fieldOf("level").forGetter(PackTierDef::level),
-            Codec.intRange(0, 9).fieldOf("effect_slots").forGetter(PackTierDef::effectSlots),
-            Codec.intRange(0, 3).fieldOf("augment_slots").forGetter(PackTierDef::augmentSlots),
-            Codec.DOUBLE.fieldOf("base_range").forGetter(PackTierDef::baseRange),
-            Codec.INT.fieldOf("fuel_capacity").forGetter(PackTierDef::fuelCapacity),
+    public static final Codec<BeaconTierDef> CODEC = RecordCodecBuilder.create(i -> i.group(
+            Codec.intRange(1, 4).fieldOf("level").forGetter(BeaconTierDef::level),
+            Codec.intRange(0, 9).fieldOf("effect_slots").forGetter(BeaconTierDef::effectSlots),
+            Codec.intRange(0, 3).fieldOf("augment_slots").forGetter(BeaconTierDef::augmentSlots),
+            Codec.DOUBLE.fieldOf("base_range").forGetter(BeaconTierDef::baseRange),
+            Codec.INT.fieldOf("fuel_capacity").forGetter(BeaconTierDef::fuelCapacity),
             Codec.intRange(0, 3).optionalFieldOf("max_amplifier", 0)
-                    .forGetter(PackTierDef::maxAmplifier),
+                    .forGetter(BeaconTierDef::maxAmplifier),
             ResourceKey.codec(BPRegistryKeys.EFFECT).listOf()
-                    .optionalFieldOf("effect_pool", List.of()).forGetter(PackTierDef::effectPool)
-    ).apply(i, PackTierDef::new));
+                    .optionalFieldOf("effect_pool", List.of()).forGetter(BeaconTierDef::effectPool)
+    ).apply(i, BeaconTierDef::new));
 
-    public PackTierDef {
+    public BeaconTierDef {
         effectPool = List.copyOf(effectPool);
     }
 
     /**
-     * Whether this pack may project the given effect.
+     * Whether this beacon may project the given effect.
      *
      * <p>An empty pool means "anything the effect registry allows", which is what a datapack gets
-     * for free; the shipped tiers all declare one explicitly so that a themed pack cannot quietly
+     * for free; the shipped tiers all declare one explicitly so that a themed beacon cannot quietly
      * inherit the standard list.
      */
     public boolean allows(ResourceKey<BeaconEffectDef> effect) {

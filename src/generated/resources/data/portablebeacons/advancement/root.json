@@ -1,10 +1,10 @@
 {
   "criteria": {
-    "has_pack": {
+    "has_beacon": {
       "conditions": {
         "items": [
           {
-            "items": "#portablebeacons:packs"
+            "items": "#portablebeacons:beacons"
           }
         ]
       },
@@ -26,7 +26,7 @@
   },
   "requirements": [
     [
-      "has_pack"
+      "has_beacon"
     ]
   ],
   "sends_telemetry_event": true

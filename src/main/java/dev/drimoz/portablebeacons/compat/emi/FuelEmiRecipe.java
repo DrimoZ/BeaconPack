@@ -13,7 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.List;
 
 /**
- * One row of EMI's fuel category: what burns, and how long it runs a pack for.
+ * One row of EMI's fuel category: what burns, and how long it runs a beacon for.
  *
  * <p>Deliberately the same layout and the same wording as the JEI category. A player who switches
  * viewers should not have to relearn the figure, and both read it from the same registry.

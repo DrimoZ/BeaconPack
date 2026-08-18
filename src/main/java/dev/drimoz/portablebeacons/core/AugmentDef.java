@@ -27,7 +27,7 @@ import java.util.List;
  * @param color      tint applied to the augment texture; alpha is forced opaque at render time
  * @param modelData  selects a model override, so each augment can have its own glyph. 0 falls back
  *                   to the generic gem, which is what a datapack-added augment gets for free
- * @param operations modifiers applied to the pack's resolved stats
+ * @param operations modifiers applied to the beacon's resolved stats
  */
 public record AugmentDef(int maxTier, int color, int modelData, List<Operation> operations) {
 
@@ -65,7 +65,7 @@ public record AugmentDef(int maxTier, int color, int modelData, List<Operation> 
         ADD_AMPLIFIER("add_amplifier"),
         MUL_FUEL("mul_fuel"),
         MUL_CAPACITY("mul_capacity"),
-        /** Unlocks aura modes whose {@code minTier} the pack alone would not satisfy. */
+        /** Unlocks aura modes whose {@code minTier} the beacon alone would not satisfy. */
         UNLOCK_AURA("unlock_aura"),
         /**
          * Hides the swirl at 1, and the status icon as well at 2.

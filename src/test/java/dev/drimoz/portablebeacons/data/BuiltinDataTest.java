@@ -7,7 +7,7 @@ import com.mojang.serialization.JsonOps;
 import dev.drimoz.portablebeacons.core.AugmentDef;
 import dev.drimoz.portablebeacons.core.BeaconEffectDef;
 import dev.drimoz.portablebeacons.core.FuelDef;
-import dev.drimoz.portablebeacons.core.PackTierDef;
+import dev.drimoz.portablebeacons.core.BeaconTierDef;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -56,7 +56,7 @@ class BuiltinDataTest {
 
     @Test
     void tiersParse() throws IOException {
-        assertAllParse("tier", PackTierDef.CODEC);
+        assertAllParse("tier", BeaconTierDef.CODEC);
     }
 
     @Test

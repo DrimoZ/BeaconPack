@@ -4,10 +4,10 @@ import com.mojang.serialization.Codec;
 import net.minecraft.util.StringRepresentable;
 
 /**
- * Who a given effect is projected to. Chosen per effect, not per pack: sharing Regeneration with
+ * Who a given effect is projected to. Chosen per effect, not per beacon: sharing Regeneration with
  * the group while keeping Haste to yourself is the intended kind of decision.
  *
- * @param minTier lowest pack tier that may select this mode
+ * @param minTier lowest beacon tier that may select this mode
  * @param costMultiplier fuel cost relative to {@link #SELF}
  */
 public enum AuraMode implements StringRepresentable {

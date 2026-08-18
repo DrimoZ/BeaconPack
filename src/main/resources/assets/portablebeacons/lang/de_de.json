@@ -1,7 +1,7 @@
 {
   "itemGroup.portablebeacons": "Tragbares Leuchtfeuer",
   "key.categories.portablebeacons": "Tragbares Leuchtfeuer",
-  "key.portablebeacons.open_pack": "Leuchtfeuer öffnen",
+  "key.portablebeacons.open_beacon": "Leuchtfeuer öffnen",
   "item.portablebeacons.beacon_i": "Tragbares Leuchtfeuer I",
   "item.portablebeacons.beacon_ii": "Tragbares Leuchtfeuer II",
   "item.portablebeacons.beacon_iii": "Tragbares Leuchtfeuer III",
@@ -50,7 +50,7 @@
   "portablebeacons.tip.hold_shift": "[Umschalt] halten für Details",
   "portablebeacons.tip.augment_rule": "Ein Modul jeder Art pro Pack",
   "portablebeacons.tip.augment_line": "◈ %s",
-  "portablebeacons.tip.pack_tier": "Stufe %s · %s Effektplätze · %s Modulplätze",
+  "portablebeacons.tip.beacon_tier": "Stufe %s · %s Effektplätze · %s Modulplätze",
   "portablebeacons.tip.fuel_short": "Brennstoff: %s Einheiten",
   "portablebeacons.op.add_range": "Reichweite +%s m",
   "portablebeacons.op.add_effect_slot": "+%s Effektplatz",

@@ -3,13 +3,13 @@ package dev.drimoz.portablebeacons.item;
 import dev.drimoz.portablebeacons.BPConfig;
 import dev.drimoz.portablebeacons.core.AugmentInstance;
 import dev.drimoz.portablebeacons.core.BPRegistryKeys;
-import dev.drimoz.portablebeacons.core.PackResolver;
-import dev.drimoz.portablebeacons.core.PackStats;
+import dev.drimoz.portablebeacons.core.BeaconResolver;
+import dev.drimoz.portablebeacons.core.BeaconStats;
 import dev.drimoz.portablebeacons.core.EffectSlotConfig;
 import dev.drimoz.portablebeacons.core.Durations;
-import dev.drimoz.portablebeacons.core.PackState;
-import dev.drimoz.portablebeacons.core.PackTierDef;
-import dev.drimoz.portablebeacons.menu.PackMenuOpener;
+import dev.drimoz.portablebeacons.core.BeaconState;
+import dev.drimoz.portablebeacons.core.BeaconTierDef;
+import dev.drimoz.portablebeacons.menu.BeaconMenuOpener;
 import dev.drimoz.portablebeacons.registry.BPComponents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
@@ -42,22 +42,22 @@ public class PortableBeaconItem extends Item {
     public static final int FUEL_SLOT = AUGMENT_SLOTS;
     public static final int CONTAINER_SIZE = AUGMENT_SLOTS + 1;
 
-    private final ResourceKey<PackTierDef> tier;
+    private final ResourceKey<BeaconTierDef> tier;
 
-    public PortableBeaconItem(Properties properties, ResourceKey<PackTierDef> tier) {
+    public PortableBeaconItem(Properties properties, ResourceKey<BeaconTierDef> tier) {
         super(properties);
         this.tier = tier;
     }
 
-    public ResourceKey<PackTierDef> tier() {
+    public ResourceKey<BeaconTierDef> tier() {
         return tier;
     }
 
-    public static PackState stateOf(ItemStack stack) {
-        return stack.getOrDefault(BPComponents.PACK.get(), PackState.EMPTY);
+    public static BeaconState stateOf(ItemStack stack) {
+        return stack.getOrDefault(BPComponents.PACK.get(), BeaconState.EMPTY);
     }
 
-    public static void setState(ItemStack stack, PackState state) {
+    public static void setState(ItemStack stack, BeaconState state) {
         stack.set(BPComponents.PACK.get(), state);
     }
 
@@ -65,7 +65,7 @@ public class PortableBeaconItem extends Item {
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack held = player.getItemInHand(hand);
         if (player instanceof ServerPlayer serverPlayer && hand == InteractionHand.MAIN_HAND) {
-            PackMenuOpener.open(serverPlayer, player.getInventory().selected);
+            BeaconMenuOpener.open(serverPlayer, player.getInventory().selected);
         }
         // The offhand has no drawn slot to freeze, so it opens nothing rather than opening a menu
         // whose source stack the player could still move. It keeps working while carried.
@@ -75,7 +75,7 @@ public class PortableBeaconItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context,
                                 List<Component> tooltip, TooltipFlag flag) {
-        PackState state = stateOf(stack);
+        BeaconState state = stateOf(stack);
         tooltip.add(Component.translatable(state.active()
                         ? "portablebeacons.gui.active" : "portablebeacons.gui.inactive")
                 .withStyle(state.active() ? ChatFormatting.GREEN : ChatFormatting.GRAY));
@@ -89,13 +89,13 @@ public class PortableBeaconItem extends Item {
         }
         context.registries().lookup(BPRegistryKeys.TIER)
                 .flatMap(lookup -> lookup.get(tier))
-                .ifPresent(holder -> tooltip.add(Component.translatable("portablebeacons.tip.pack_tier",
+                .ifPresent(holder -> tooltip.add(Component.translatable("portablebeacons.tip.beacon_tier",
                                 holder.value().level(),
                                 holder.value().effectSlots(),
                                 holder.value().augmentSlots())
                         .withStyle(ChatFormatting.DARK_GRAY)));
 
-        // The configured effects, so a pack in a chest can be identified without opening it.
+        // The configured effects, so a beacon in a chest can be identified without opening it.
         context.registries().lookup(BPRegistryKeys.EFFECT).ifPresent(lookup -> {
             for (EffectSlotConfig slot : state.effects()) {
                 lookup.get(slot.effect()).ifPresent(holder -> tooltip.add(Component.empty()
@@ -109,7 +109,7 @@ public class PortableBeaconItem extends Item {
                                 : ChatFormatting.DARK_GRAY)));
             }
         });
-        // Installed augments, which were missing entirely: two packs of the same tier can behave
+        // Installed augments, which were missing entirely: two beacons of the same tier can behave
         // completely differently and looked identical in a chest.
         List<AugmentInstance> augments = augmentsOf(stack);
         for (AugmentInstance augment : augments) {
@@ -126,19 +126,19 @@ public class PortableBeaconItem extends Item {
      * Remaining runtime rather than a fuel count: the stored number is an implementation detail of
      * the datapack format, and only the time it buys is actionable.
      */
-    private void appendRuntime(ItemStack stack, TooltipContext context, PackState state,
+    private void appendRuntime(ItemStack stack, TooltipContext context, BeaconState state,
                                List<Component> tooltip) {
         HolderLookup.Provider registries = context.registries();
         if (registries == null || state.fuel() <= 0 || !BPConfig.fuelEnabled()) {
             return;
         }
-        PackTierDef tierDef = lookup(registries, BPRegistryKeys.TIER, tier);
+        BeaconTierDef tierDef = lookup(registries, BPRegistryKeys.TIER, tier);
         if (tierDef == null) {
             return;
         }
-        PackStats stats = PackResolver.resolve(tierDef, augmentsOf(stack),
+        BeaconStats stats = BeaconResolver.resolve(tierDef, augmentsOf(stack),
                 key -> Optional.ofNullable(lookup(registries, BPRegistryKeys.AUGMENT, key)));
-        double perSecond = PackResolver.fuelPerSecond(state, stats,
+        double perSecond = BeaconResolver.fuelPerSecond(state, stats,
                 key -> Optional.ofNullable(lookup(registries, BPRegistryKeys.EFFECT, key)));
         if (perSecond <= 0.0) {
             return;
@@ -173,7 +173,7 @@ public class PortableBeaconItem extends Item {
     }
 
 
-    /** A running pack glints. Cheapest possible "this is on" signal, visible from the hotbar. */
+    /** A running beacon glints. Cheapest possible "this is on" signal, visible from the hotbar. */
     @Override
     public boolean isFoil(ItemStack stack) {
         return stateOf(stack).active();
@@ -189,7 +189,7 @@ public class PortableBeaconItem extends Item {
         return (int) Math.round(stateOf(stack).fillRatio() * 13.0);
     }
 
-    /** Green to red as it empties, so a nearly dry pack is obvious without reading the tooltip. */
+    /** Green to red as it empties, so a nearly dry beacon is obvious without reading the tooltip. */
     @Override
     public int getBarColor(ItemStack stack) {
         float ratio = (float) stateOf(stack).fillRatio();
