@@ -30,6 +30,12 @@ last thing standing between the beta and a release.
   so rather than leaving players to guess.
 
 ### Fixed
+- The rename left every id in the Java sources pointing at the old namespace, so 44 translation
+  keys and the GUI background resolved to nothing: the screen, every tooltip, the creative tab, the
+  keybind category and the out-of-fuel message all rendered as raw ids over a missing texture.
+  Caught before the 1.0.0 file went up, by a new test that checks every key named in the code is one
+  the language files actually define — the existing test only compared the locales to each other,
+  and all fifteen were consistently wrong together.
 - EMI showed an on-screen error for every fuel row: rows built from a registry rather than from a
   JSON recipe need EMI's synthetic-id form.
 
