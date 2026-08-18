@@ -6,21 +6,35 @@ Versions follow `{mod version}+{minecraft version}`.
 ## Unreleased
 
 ### Added
-- **Five trade-off augments.** The seven original ones are each a single pure operation, so every one
-  is strictly good and the only decision is which you lack room for. These spend one stat to buy
-  another, and so compete for a slot instead of queueing behind it.
+- **Seven augments, and four new levers to build them from.**
+
+  The mod had seven operations and seven augments — one each — so the vocabulary was saturated and
+  anything new was a recombination. These four operations are the first additions to it:
+
+  | | |
+  |---|---|
+  | `mul_aura_cost` | scales the sharing surcharge **alone** |
+  | `free_effect_slot` | runs the dearest N effects for nothing |
+  | `mul_cost_moving` | while the carrier is travelling |
+  | `mul_cost_still` | while holding a position |
+
+  Four augments spend them, and three combine several gains across different axes for one cost — so
+  what they buy back is a **slot**, which is the scarcest thing a beacon has:
 
   | | Gains | Pays |
   |---|---|---|
-  | **Overdrive** | +1 / +2 level ceiling | fuel ×1.6 / ×2.4 |
-  | **Projector** | +10 / +18 blocks | buffer ×0.5 / ×0.35 |
-  | **Miser** | fuel ×0.55 / ×0.4 | buffer ×0.5 / ×0.35 |
-  | **Reservoir** | buffer ×5 / ×8 | fuel ×1.2 / ×1.35 |
-  | **Herald** | +2 / +3 aura ranks | fuel ×1.8 / ×2.2 |
+  | **Communion** | sharing surcharge ×0.5 / ×0.3 | all fuel ×1.35 / ×1.5 |
+  | **Wellspring** | one effect free | everything else ×1.6 |
+  | **Wayfarer** | ×0.5 / ×0.35 while moving | ×1.6 / ×1.9 standing still |
+  | **Sentinel** | ×0.5 / ×0.35 standing still | ×1.6 / ×1.9 while moving |
+  | **Vanguard** | +12 range, +1 aura rank | fuel ×1.9 |
+  | **Prism** | +1 effect slot, +1 level ceiling | fuel ×2.2 |
+  | **Recluse** | fuel ×0.35, buffer ×3, no particles | −2 aura ranks |
 
-  None of them needed new code: an augment entry already took several operations, and the resolver
-  already clamped every stat, so penalties were always expressible. Any datapack can do the same.
-- **A fourth augment slot on Beacon IV.**
+  `mul_aura_cost` is the one that opens the most ground: sharing became the central mechanic in this
+  release and nothing modulated its price.
+
+- **Beacon IV: three effect slots and four augment slots.**
 
 ### Changed
 - **Fuel moved to container slot 0**, with augments after it. It used to sit *after* the augments, so
@@ -32,6 +46,20 @@ Versions follow `{mod version}+{minecraft version}`.
   To be clear, since it is easy to confuse the two: a **datapack** moving `augment_slots` was never
   dangerous and still is not. That field says how many slots are *usable*; the container's size is
   fixed by the mod. Lowering it locks augments in place rather than losing them.
+- The sharing surcharge is computed separately from an effect's own cost, so an augment can discount
+  one without the other. Every existing price is unchanged, and a test pins them there — a refactor
+  of that shape moves the whole balance without failing anything.
+
+### Fixed
+- `effect_slots` accepted up to 9 while the screen laid out 5, and nothing connected them. A sixth
+  effect would have been resolved, charged and kept — paid for and invisible. One ceiling now, in
+  the place the number is decided.
+- The effect cases were drawn from the background texture, which held exactly three, so a beacon
+  with more slots showed its fourth and fifth floating with no frame.
+- An effect covered by Wellspring reported "Drain 375%": its share compared a gross cost against a
+  total it had been excluded from. It says *free* now.
+- The advancement tab drew as missing texture. `ClientAsset.ResourceTexture` builds its own path, so
+  passing a full one asked for `textures/textures/….png.png`.
 
 ## 1.0.1+26.1.2 — the port
 
