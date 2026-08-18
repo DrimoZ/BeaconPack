@@ -1,6 +1,6 @@
 {
   "level": 3, "effect_slots": 2, "augment_slots": 2, "base_range": 10.0,
-  "fuel_capacity": 10800, "max_amplifier": 1,
+  "fuel_capacity": 10800, "max_amplifier": 1, "aura_rank": 1,
   "effect_pool": [
     "portablebeacons:fire_resistance", "portablebeacons:strength", "portablebeacons:haste", "portablebeacons:resistance"
   ]

@@ -9,7 +9,13 @@ import dev.drimoz.portablebeacons.core.EffectSlotConfig;
 import dev.drimoz.portablebeacons.core.BeaconState;
 import dev.drimoz.portablebeacons.item.PortableBeaconItem;
 import dev.drimoz.portablebeacons.menu.PortableBeaconMenu;
+import dev.drimoz.portablebeacons.core.AugmentInstance;
+import dev.drimoz.portablebeacons.registry.BPComponents;
 import dev.drimoz.portablebeacons.registry.BPItems;
+import dev.drimoz.portablebeacons.registry.BPLookups;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import com.mojang.authlib.GameProfile;
 import io.netty.channel.embedded.EmbeddedChannel;
 import net.minecraft.core.BlockPos;
@@ -68,10 +74,16 @@ public final class BPGameTests {
     /** Distinct names per player - see {@link #spawnPlayer(GameTestHelper, Cleanup, String)}. */
     private static final AtomicInteger NEXT_PLAYER = new AtomicInteger();
 
+    private static final ResourceKey<dev.drimoz.portablebeacons.core.AugmentDef> ATTUNEMENT =
+            ResourceKey.create(BPRegistryKeys.AUGMENT, BPRegistryKeys.id("attunement"));
+
+    /** Mirrors tier_4.json. A test that silently disagreed with the data would prove nothing. */
+    private static final int TIER_IV_AURA_RANK = 1;
+
     public static void beaconAppliesItsEffectToTheCarrier(GameTestHelper helper) {
         run(helper, cleanup -> {
             ServerPlayer carrier = spawnPlayer(helper, cleanup);
-            givePack(carrier, AuraMode.SELF);
+            giveBeacon(carrier, AuraMode.SELF);
 
             BeaconTicker.tickPlayer(carrier);
 
@@ -83,7 +95,7 @@ public final class BPGameTests {
     public static void anInactiveBeaconAppliesNothing(GameTestHelper helper) {
         run(helper, cleanup -> {
             ServerPlayer carrier = spawnPlayer(helper, cleanup);
-            ItemStack beacon = givePack(carrier, AuraMode.SELF);
+            ItemStack beacon = giveBeacon(carrier, AuraMode.SELF);
             PortableBeaconItem.setState(beacon, PortableBeaconItem.stateOf(beacon).withActive(false));
 
             BeaconTicker.tickPlayer(carrier);
@@ -98,7 +110,7 @@ public final class BPGameTests {
         run(helper, cleanup -> {
             ServerPlayer carrier = spawnPlayer(helper, cleanup);
             ServerPlayer bystander = spawnPlayer(helper, cleanup);
-            givePack(carrier, AuraMode.ALLIES);
+            giveBeacon(carrier, AuraMode.ALLIES);
 
             BeaconTicker.tickPlayer(carrier);
 
@@ -111,7 +123,7 @@ public final class BPGameTests {
         run(helper, cleanup -> {
             ServerPlayer carrier = spawnPlayer(helper, cleanup);
             ServerPlayer bystander = spawnPlayer(helper, cleanup);
-            givePack(carrier, AuraMode.SELF);
+            giveBeacon(carrier, AuraMode.SELF);
 
             BeaconTicker.tickPlayer(carrier);
 
@@ -136,7 +148,7 @@ public final class BPGameTests {
             cleanup.add(() -> scoreboard.removePlayerTeam(team));
             scoreboard.addPlayerToTeam(carrier.getScoreboardName(), team);
 
-            givePack(carrier, AuraMode.TEAM);
+            giveBeacon(carrier, AuraMode.TEAM);
             BeaconTicker.tickPlayer(carrier);
 
             helper.assertTrue(carrier.getEffect(MobEffects.SPEED) != null,
@@ -149,7 +161,7 @@ public final class BPGameTests {
     public static void auraReachesATamedPetButNotAStrayOne(GameTestHelper helper) {
         run(helper, cleanup -> {
             ServerPlayer carrier = spawnPlayer(helper, cleanup);
-            givePack(carrier, AuraMode.ALLIES_AND_PETS);
+            giveBeacon(carrier, AuraMode.ALLIES_AND_PETS);
 
             Wolf pet = helper.spawnWithNoFreeWill(EntityType.WOLF, CENTRE);
             pet.tame(carrier);
@@ -174,7 +186,7 @@ public final class BPGameTests {
     public static void hostileActionIndicesAreRejected(GameTestHelper helper) {
         run(helper, cleanup -> {
             ServerPlayer carrier = spawnPlayer(helper, cleanup);
-            ItemStack beacon = givePack(carrier, AuraMode.SELF);
+            ItemStack beacon = giveBeacon(carrier, AuraMode.SELF);
 
             // Built directly rather than through BeaconMenuOpener: openMenu writes a screen payload,
             // and a mock player's connection refuses one outright ("Payload
@@ -248,11 +260,34 @@ public final class BPGameTests {
     }
 
     /** A tier IV beacon, switched on, projecting Speed, with more fuel than a test can burn. */
-    private static ItemStack givePack(ServerPlayer player, AuraMode aura) {
+    /**
+     * A tier IV beacon set to one sharing mode, with whatever Attunement that mode requires.
+     *
+     * <p>A tier grants sharing only up to its own {@code aura_rank}, and anything beyond it is
+     * fitted, not given. Without the augment the resolver quietly falls the mode back to
+     * {@link AuraMode#SELF} — which is correct, and would make an aura test fail for a reason that
+     * has nothing to do with auras.
+     */
+    private static ItemStack giveBeacon(ServerPlayer player, AuraMode aura) {
         ItemStack beacon = new ItemStack(BPItems.BEACON_IV.get());
-        PortableBeaconItem.setState(beacon, new BeaconState(
+        BeaconState state = new BeaconState(
                 List.of(new EffectSlotConfig(SPEED, 0, true, aura)),
-                Integer.MAX_VALUE / 2, true, 0));
+                Integer.MAX_VALUE / 2, true, 0);
+        PortableBeaconItem.setState(beacon, state);
+
+        int needed = aura.rank() - TIER_IV_AURA_RANK;
+        if (needed > 0) {
+            ResourceHandler<ItemResource> slots = BPLookups.handlerOf(beacon);
+            ItemStack augment = new ItemStack(BPItems.AUGMENT.get());
+            augment.set(BPComponents.AUGMENT.get(), new AugmentInstance(ATTUNEMENT, needed));
+            try (Transaction transaction = Transaction.openRoot()) {
+                slots.insert(0, ItemResource.of(augment), 1, transaction);
+                transaction.commit();
+            }
+            // Re-set: the handler wrote the container component onto the same stack, and the state
+            // above was captured before it existed.
+            PortableBeaconItem.setState(beacon, state);
+        }
         player.getInventory().setItem(0, beacon);
         return beacon;
     }

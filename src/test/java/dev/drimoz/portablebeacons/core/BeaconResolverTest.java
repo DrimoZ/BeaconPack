@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 class BeaconResolverTest {
 
-    private static final BeaconTierDef TIER_4 = new BeaconTierDef(4, 2, 3, 16.0, 12000, 1, List.of());
+    private static final BeaconTierDef TIER_4 = new BeaconTierDef(4, 2, 3, 16.0, 12000, 1, 1, List.of());
 
     private static final ResourceKey<AugmentDef> RANGE = augmentKey("range");
     private static final ResourceKey<AugmentDef> FOCUS = augmentKey("focus");
@@ -28,9 +28,14 @@ class BeaconResolverTest {
     private static final AugmentDef FOCUS_DEF = new AugmentDef(1, 0, List.of(
             new AugmentDef.Operation(AugmentDef.Type.ADD_EFFECT_SLOT, List.of(1.0))));
 
+    private static final ResourceKey<AugmentDef> ATTUNEMENT = augmentKey("attunement");
+    private static final AugmentDef ATTUNEMENT_DEF = new AugmentDef(2, 0, List.of(
+            new AugmentDef.Operation(AugmentDef.Type.UNLOCK_AURA, List.of(1.0, 2.0))));
+
     private static final BeaconResolver.Lookup<AugmentDef> AUGMENTS = lookup(Map.of(
             RANGE, RANGE_DEF,
-            FOCUS, FOCUS_DEF));
+            FOCUS, FOCUS_DEF,
+            ATTUNEMENT, ATTUNEMENT_DEF));
 
     @Test
     void augmentsStackAcrossTypes() {
@@ -63,10 +68,30 @@ class BeaconResolverTest {
     @Test
     void tierOneCannotProject() {
         BeaconStats stats = BeaconResolver.resolve(
-                new BeaconTierDef(1, 1, 0, 0.0, 600, 0, List.of()), List.of(), AUGMENTS);
+                new BeaconTierDef(1, 1, 0, 0.0, 600, 0, 0, List.of()), List.of(), AUGMENTS);
 
         assertTrue(stats.allows(AuraMode.SELF));
         assertFalse(stats.allows(AuraMode.ALLIES));
+    }
+
+    /**
+     * The augment shipped doing nothing for two releases: every tier already cleared the threshold
+     * it raised, so there was never a mode left for it to unlock. Nothing tested that it did.
+     */
+    @Test
+    void attunementUnlocksModesTheTierDoesNotGrant() {
+        BeaconStats unaided = BeaconResolver.resolve(TIER_4, List.of(), AUGMENTS);
+        assertTrue(unaided.allows(AuraMode.TEAM), "tier 4 shares with a team on its own");
+        assertFalse(unaided.allows(AuraMode.ALLIES), "and needs help to go wider");
+
+        BeaconStats attuned = BeaconResolver.resolve(TIER_4,
+                List.of(new AugmentInstance(ATTUNEMENT, 1)), AUGMENTS);
+        assertTrue(attuned.allows(AuraMode.ALLIES), "Attunement I reaches allies");
+        assertFalse(attuned.allows(AuraMode.ALLIES_AND_PETS), "but not their pets yet");
+
+        BeaconStats fully = BeaconResolver.resolve(TIER_4,
+                List.of(new AugmentInstance(ATTUNEMENT, 2)), AUGMENTS);
+        assertTrue(fully.allows(AuraMode.ALLIES_AND_PETS), "Attunement II reaches pets too");
     }
 
     @Test

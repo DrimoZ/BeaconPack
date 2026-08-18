@@ -63,10 +63,10 @@ public final class BeaconResolver {
             }
         }
 
-        int effectiveTier = tier.level() + auraTierBonus;
+        int auraRank = tier.auraRank() + auraTierBonus;
         EnumSet<AuraMode> auraModes = EnumSet.noneOf(AuraMode.class);
         for (AuraMode mode : AuraMode.values()) {
-            if (mode.minTier() <= effectiveTier) {
+            if (mode.rank() <= auraRank) {
                 auraModes.add(mode);
             }
         }

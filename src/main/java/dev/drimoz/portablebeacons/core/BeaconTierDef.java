@@ -19,6 +19,9 @@ import java.util.List;
  * @param baseRange    aura radius in blocks; ignored by effects set to {@link AuraMode#SELF}
  * @param fuelCapacity internal buffer in fuel units
  * @param maxAmplifier highest amplifier reachable without an Amplification augment
+ * @param auraRank     highest {@link AuraMode} rank this beacon offers unaided; an Attunement
+ *                     augment adds to it. 0 is self only, which is what a tier gets by default —
+ *                     sharing is meant to be earned, either by tier or by augment
  */
 public record BeaconTierDef(
         int level,
@@ -27,6 +30,7 @@ public record BeaconTierDef(
         double baseRange,
         int fuelCapacity,
         int maxAmplifier,
+        int auraRank,
         List<ResourceKey<BeaconEffectDef>> effectPool
 ) {
     public static final Codec<BeaconTierDef> CODEC = RecordCodecBuilder.create(i -> i.group(
@@ -37,6 +41,8 @@ public record BeaconTierDef(
             Codec.INT.fieldOf("fuel_capacity").forGetter(BeaconTierDef::fuelCapacity),
             Codec.intRange(0, 3).optionalFieldOf("max_amplifier", 0)
                     .forGetter(BeaconTierDef::maxAmplifier),
+            Codec.intRange(0, 3).optionalFieldOf("aura_rank", 0)
+                    .forGetter(BeaconTierDef::auraRank),
             ResourceKey.codec(BPRegistryKeys.EFFECT).listOf()
                     .optionalFieldOf("effect_pool", List.of()).forGetter(BeaconTierDef::effectPool)
     ).apply(i, BeaconTierDef::new));
