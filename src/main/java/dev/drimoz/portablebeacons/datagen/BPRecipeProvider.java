@@ -26,16 +26,16 @@ import java.util.concurrent.CompletableFuture;
  */
 public class BPRecipeProvider extends RecipeProvider {
 
-    private final CompletableFuture<HolderLookup.Provider> registries;
-
-    public BPRecipeProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
-        super(output, registries);
-        this.registries = registries;
+    public BPRecipeProvider(HolderLookup.Provider registries, RecipeOutput output) {
+        super(registries, output);
     }
 
     @Override
-    protected void buildRecipes(RecipeOutput output) {
-        HolderLookup.Provider lookup = registries.join();
+    protected void buildRecipes() {
+        // Both were parameters before; the base class now holds them, and the registries arrive
+        // already resolved rather than as a future to join.
+        RecipeOutput output = this.output;
+        HolderLookup.Provider lookup = this.registries;
 
         // Every tier consumes a Beacon block, which is what keeps the vanilla beacon on the
         // progression path instead of being replaced by its own portable version.
@@ -120,6 +120,30 @@ public class BPRecipeProvider extends RecipeProvider {
             String id = tier == 1 ? "augment_" + name : "augment_" + name + "_" + tier;
             ComponentShapedRecipe.save(output, lookup, BPRegistryKeys.id(id), result, material,
                     key, pattern);
+        }
+    }
+
+    /**
+     * The DataProvider half.
+     *
+     * <p>A recipe provider is no longer a provider itself: it is built per run with the resolved
+     * registries and a RecipeOutput, and this is what the generator actually registers.
+     */
+    public static class Runner extends RecipeProvider.Runner {
+
+        public Runner(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
+            super(output, registries);
+        }
+
+        @Override
+        protected RecipeProvider createRecipeProvider(HolderLookup.Provider registries,
+                                                     RecipeOutput output) {
+            return new BPRecipeProvider(registries, output);
+        }
+
+        @Override
+        public String getName() {
+            return "Portable Beacons Recipes";
         }
     }
 

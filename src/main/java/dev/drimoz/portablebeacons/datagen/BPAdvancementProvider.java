@@ -6,15 +6,17 @@ import dev.drimoz.portablebeacons.registry.BPTags;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementType;
-import net.minecraft.advancements.critereon.InventoryChangeTrigger;
-import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.advancements.criterion.InventoryChangeTrigger;
+import net.minecraft.advancements.criterion.ItemPredicate;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.world.level.ItemLike;
-import net.neoforged.neoforge.common.data.AdvancementProvider;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.advancements.AdvancementSubProvider;
+import net.minecraft.world.item.Item;
 
 import java.util.function.Consumer;
 
@@ -29,11 +31,10 @@ import java.util.function.Consumer;
  * but a modpack may hand them out, and an advancement that only fires on crafting would silently
  * never trigger there.
  */
-public class BPAdvancementProvider implements AdvancementProvider.AdvancementGenerator {
+public class BPAdvancementProvider implements AdvancementSubProvider {
 
     @Override
-    public void generate(HolderLookup.Provider registries, Consumer<AdvancementHolder> saver,
-                         ExistingFileHelper helper) {
+    public void generate(HolderLookup.Provider registries, Consumer<AdvancementHolder> saver) {
 
         AdvancementHolder root = Advancement.Builder.advancement()
                 .display(
@@ -45,22 +46,22 @@ public class BPAdvancementProvider implements AdvancementProvider.AdvancementGen
                         Identifier.withDefaultNamespace("textures/block/deepslate_bricks.png"),
                         AdvancementType.TASK,
                         true, true, false)
-                .addCriterion("has_pack", hasTaggedPack())
-                .save(saver, id("root"), helper);
+                .addCriterion("has_pack", hasTaggedPack(registries.lookupOrThrow(Registries.ITEM)))
+                .save(saver, id("root"));
 
         Advancement.Builder.advancement()
                 .parent(root)
                 .display(BPItems.AUGMENT.get(), title("augmented"), description("augmented"),
                         null, AdvancementType.TASK, true, true, false)
                 .addCriterion("has_augment", has(BPItems.AUGMENT.get()))
-                .save(saver, id("augmented"), helper);
+                .save(saver, id("augmented"));
 
         Advancement.Builder.advancement()
                 .parent(root)
                 .display(BPItems.PACK_IV.get(), title("tier_four"), description("tier_four"),
                         null, AdvancementType.CHALLENGE, true, true, false)
                 .addCriterion("has_pack_iv", has(BPItems.PACK_IV.get()))
-                .save(saver, id("tier_four"), helper);
+                .save(saver, id("tier_four"));
 
         // Any one of the three, because they are alternatives rather than a set to collect.
         Advancement.Builder.advancement()
@@ -71,12 +72,16 @@ public class BPAdvancementProvider implements AdvancementProvider.AdvancementGen
                 .addCriterion("has_void", has(BPItems.PACK_END.get()))
                 .addCriterion("has_tidal", has(BPItems.PACK_TIDAL.get()))
                 .requirements(net.minecraft.advancements.AdvancementRequirements.Strategy.OR)
-                .save(saver, id("themed"), helper);
+                .save(saver, id("themed"));
     }
 
-    private static Criterion<InventoryChangeTrigger.TriggerInstance> hasTaggedPack() {
+    /**
+     * The tag predicate needs a registry lookup now, where it used to resolve the tag on its own.
+     */
+    private static Criterion<InventoryChangeTrigger.TriggerInstance> hasTaggedPack(
+            HolderGetter<Item> items) {
         return InventoryChangeTrigger.TriggerInstance.hasItems(
-                ItemPredicate.Builder.item().of(BPTags.PACKS));
+                ItemPredicate.Builder.item().of(items, BPTags.PACKS));
     }
 
     private static Criterion<InventoryChangeTrigger.TriggerInstance> has(ItemLike item) {
@@ -91,7 +96,7 @@ public class BPAdvancementProvider implements AdvancementProvider.AdvancementGen
         return Component.translatable("advancement." + PortableBeacons.MOD_ID + "." + name + ".description");
     }
 
-    private static Identifier id(String name) {
-        return Identifier.fromNamespaceAndPath(PortableBeacons.MOD_ID, name);
+    private static String id(String name) {
+        return Identifier.fromNamespaceAndPath(PortableBeacons.MOD_ID, name).toString();
     }
 }
