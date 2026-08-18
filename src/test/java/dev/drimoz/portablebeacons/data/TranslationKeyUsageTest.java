@@ -1,6 +1,7 @@
 package dev.drimoz.portablebeacons.data;
 
 import com.google.gson.JsonObject;
+import dev.drimoz.portablebeacons.core.AugmentDef;
 import com.google.gson.JsonParser;
 import org.junit.jupiter.api.Test;
 
@@ -71,6 +72,29 @@ class TranslationKeyUsageTest {
             }
         }
         assertEquals(List.of(), List.copyOf(missing), "translation keys used but never defined");
+    }
+
+    /**
+     * Every augment operation must have a line for its tooltip.
+     *
+     * <p>The keys above cannot cover these: the code builds them by concatenation
+     * ({@code "portablebeacons.op." + type}), so the literal ends at a dot and the scan skips it —
+     * which is exactly how four new operations shipped with no description at all. Walking the enum
+     * is the only way to check a key that is never written down whole.
+     */
+    @Test
+    void everyAugmentOperationIsDescribed() throws IOException {
+        JsonObject english = read(ProjectFiles.resources()
+                .resolve(Path.of("assets", "portablebeacons", "lang", "en_us.json")));
+
+        List<String> missing = new java.util.ArrayList<>();
+        for (AugmentDef.Type type : AugmentDef.Type.values()) {
+            String key = "portablebeacons.op." + type.getSerializedName();
+            if (!english.has(key)) {
+                missing.add(key);
+            }
+        }
+        assertEquals(List.of(), missing, "augment operations with no tooltip line");
     }
 
     private static JsonObject read(Path file) throws IOException {

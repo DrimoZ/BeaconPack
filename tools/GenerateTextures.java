@@ -44,10 +44,8 @@ public final class GenerateTextures {
 
         panel(image, 0, 0, WIDTH, HEIGHT);
 
-        // Effect cases: 24x24 so the level indicator has room in the corner.
-        for (int i = 0; i < 3; i++) {
-            recess(image, 16 + i * 30, 44, 26, 26);
-        }
+        // No effect cases here: the screen draws them, because how many there are depends on the
+        // beacon and its augments and a baked texture can only ever hold one answer.
         // Info panel.
         recess(image, 16, 78, 162, 68);
         // Player inventory + hotbar.

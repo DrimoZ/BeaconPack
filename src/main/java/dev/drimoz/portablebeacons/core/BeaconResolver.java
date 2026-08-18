@@ -168,6 +168,33 @@ public final class BeaconResolver {
         return total * stats.fuelMultiplier() * context;
     }
 
+    /**
+     * Which of these effects the free slots cover, in the order given.
+     *
+     * <p>The screen needs the same answer the bill uses. Working it out twice, once here and once
+     * there, is how a display comes to claim an effect is 375% of a total it was excluded from.
+     */
+    public static boolean[] freeMask(List<EffectSlotConfig> slots,
+                                     BeaconStats stats,
+                                     Lookup<BeaconEffectDef> effectLookup) {
+        boolean[] free = new boolean[slots.size()];
+        if (stats.freeEffectSlots() <= 0) {
+            return free;
+        }
+        // The dearest first, ties broken by position so the answer is stable frame to frame.
+        Integer[] byCost = new Integer[slots.size()];
+        for (int i = 0; i < slots.size(); i++) {
+            byCost[i] = i;
+        }
+        java.util.Arrays.sort(byCost, Comparator.comparingDouble(
+                (Integer i) -> fuelPerSecond(slots.get(i), stats, effectLookup)).reversed());
+
+        for (int n = 0; n < Math.min(stats.freeEffectSlots(), byCost.length); n++) {
+            free[byCost[n]] = true;
+        }
+        return free;
+    }
+
     /** Per-effect cost, excluding the beacon-wide {@link BeaconStats#fuelMultiplier()}. */
     public static double fuelPerSecond(EffectSlotConfig slot,
                                        BeaconStats stats,

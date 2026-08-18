@@ -519,6 +519,15 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         graphics.fill(x + w - 1, y, x + w, y + h, 0xFF555555);
     }
 
+    /** A sunken effect case, matching the recesses the background texture draws elsewhere. */
+    private static void caseRecess(GuiGraphicsExtractor graphics, int x, int y) {
+        graphics.fill(x, y, x + CASE_SIZE, y + CASE_SIZE, 0xFF8B8B8B);
+        graphics.fill(x, y, x + CASE_SIZE, y + 1, 0xFF373737);
+        graphics.fill(x, y, x + 1, y + CASE_SIZE, 0xFF373737);
+        graphics.fill(x, y + CASE_SIZE - 1, x + CASE_SIZE, y + CASE_SIZE, 0xFFFFFFFF);
+        graphics.fill(x + CASE_SIZE - 1, y, x + CASE_SIZE, y + CASE_SIZE, 0xFFFFFFFF);
+    }
+
     private static void slotFrame(GuiGraphicsExtractor graphics, int x, int y) {
         graphics.fill(x, y, x + SLOT_SIZE, y + SLOT_SIZE, 0xFF8B8B8B);
         graphics.fill(x, y, x + SLOT_SIZE, y + 1, 0xFF373737);
@@ -542,6 +551,11 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         List<EffectSlotConfig> effects = state.effects();
         for (int i = 0; i < visibleCases(stats); i++) {
             int x = CASE_X + i * CASE_SPACING;
+
+            // The recess is drawn here rather than baked into the background texture. The texture
+            // carried exactly three, so a beacon with more effect slots showed its fourth and fifth
+            // cases floating with no frame at all — and the count is not the texture's to know.
+            caseRecess(graphics, x, CASE_Y);
 
             if (i >= stats.effectSlots()) {
                 // Locked cases stay visible rather than hidden: the player should see what a higher
@@ -633,6 +647,11 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
 
         // This effect's share of the total drain, rather than a raw rate: it answers "which of my
         // effects is draining the beacon" without asking the player to compare two decimals.
+        // A free slot covers this one: say so rather than printing a share of a total it is not in.
+        boolean[] free = BeaconResolver.freeMask(state.effects(), stats, effectLookup());
+        int index = state.effects().indexOf(slot);
+        boolean covered = index >= 0 && index < free.length && free[index];
+
         double cost = BeaconResolver.fuelPerSecond(slot, stats, effectLookup()) * stats.fuelMultiplier();
         double total = BeaconResolver.fuelPerSecond(state, stats, effectLookup());
         int share = total <= 0.0 ? 0 : (int) Math.round(cost / total * 100.0);
@@ -644,7 +663,9 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
         // against the right edge, and the share truncated if the two would meet. Concatenating them
         // with spaces meant the pair ran past the panel as soon as either string grew - which is
         // every language whose words are longer than English's.
-        String shareText = Component.translatable("portablebeacons.gui.share", share).getString();
+        String shareText = covered
+                ? Component.translatable("portablebeacons.gui.share_free").getString()
+                : Component.translatable("portablebeacons.gui.share", share).getString();
         String reachText = Component.translatable("portablebeacons.gui.reach", reach).getString();
         int reachX = INFO_X + INFO_W - 6 - font.width(reachText);
         int shareX = INFO_X + 28;
