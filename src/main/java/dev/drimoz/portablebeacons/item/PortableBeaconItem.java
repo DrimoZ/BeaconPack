@@ -35,10 +35,25 @@ import java.util.Optional;
 /** The portable beacon itself. One class, four registered instances, one per tier. */
 public class PortableBeaconItem extends Item {
 
-    /** Slots 0..2 hold augments, slot 3 holds fuel. Slots above the tier's count stay locked. */
-    public static final int AUGMENT_SLOTS = 3;
-    public static final int FUEL_SLOT = AUGMENT_SLOTS;
+    /**
+     * Slot 0 holds fuel; augments follow it. Slots above the tier's count stay locked.
+     *
+     * <p>Fuel comes first so that raising {@link #AUGMENT_SLOTS} only ever appends. It used to sit
+     * after the augments, which meant adding a slot shifted its index and turned the fuel in every
+     * saved beacon into an augment. The layout a saved item is written against has to be stable
+     * under exactly the change this mod is most likely to make again.
+     *
+     * <p>The tier's {@code augment_slots} is a separate thing entirely — it says how many of these
+     * are <em>usable</em>, and a datapack may move it freely without touching anyone's contents.
+     */
+    public static final int FUEL_SLOT = 0;
+    public static final int AUGMENT_SLOTS = 4;
     public static final int CONTAINER_SIZE = AUGMENT_SLOTS + 1;
+
+    /** Container index of the nth augment slot, counting from zero. */
+    public static int augmentSlot(int n) {
+        return n + 1;
+    }
 
     private final ResourceKey<BeaconTierDef> tier;
 

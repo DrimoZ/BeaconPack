@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": "minecraft:amethyst_shard",
+    "B": "minecraft:amethyst_block",
+    "M": "minecraft:emerald"
+  },
+  "pattern": [
+    "BAB",
+    "AMA",
+    "BAB"
+  ],
+  "result": {
+    "components": {
+      "portablebeacons:augment": {
+        "type": "portablebeacons:miser",
+        "tier": 2
+      }
+    },
+    "id": "portablebeacons:augment"
+  }
+}

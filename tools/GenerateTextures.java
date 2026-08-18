@@ -85,7 +85,7 @@ public final class GenerateTextures {
         // One glyph per built-in augment, selected by a model override. A datapack-added augment
         // declares no model_data and falls back to the plain gem above.
         String[] glyphs = {"range", "focus", "amplification", "efficiency", "capacity", "attunement",
-                "discretion"};
+                "discretion", "overdrive", "projector", "miser", "reservoir", "herald"};
         for (String glyph : glyphs) {
             ImageIO.write(augmentIcon(glyph), "PNG",
                     new File(ITEM_DIR + "/augment_" + glyph + ".png"));
@@ -250,6 +250,47 @@ public final class GenerateTextures {
                 fill(image, 7, 5, 2, 1, ink);
                 fill(image, 4, 5, 2, 1, ink);
                 fill(image, 10, 5, 2, 1, ink);
+            }
+            // Double chevron up: Amplification's one, doubled - it goes further and costs more.
+            case "overdrive" -> {
+                fill(image, 7, 3, 2, 2, ink);
+                fill(image, 5, 5, 2, 2, ink);
+                fill(image, 9, 5, 2, 2, ink);
+                fill(image, 7, 7, 2, 2, ink);
+                fill(image, 5, 9, 2, 2, ink);
+                fill(image, 9, 9, 2, 2, ink);
+            }
+            // A widening beam: reach bought at the cost of everything behind it.
+            case "projector" -> {
+                fill(image, 4, 7, 2, 2, ink);
+                fill(image, 7, 6, 1, 4, ink);
+                fill(image, 9, 5, 1, 6, ink);
+                fill(image, 11, 4, 1, 8, ink);
+            }
+            // A closed purse: it spends little and holds little.
+            case "miser" -> {
+                fill(image, 5, 6, 6, 1, ink);
+                fill(image, 5, 7, 1, 4, ink);
+                fill(image, 10, 7, 1, 4, ink);
+                fill(image, 6, 11, 4, 1, ink);
+                fill(image, 7, 4, 2, 2, ink);
+            }
+            // A tall tank with the level near the top.
+            case "reservoir" -> {
+                fill(image, 5, 3, 6, 1, ink);
+                fill(image, 5, 4, 1, 8, ink);
+                fill(image, 10, 4, 1, 8, ink);
+                fill(image, 6, 11, 4, 1, ink);
+                fill(image, 6, 6, 4, 4, ink);
+            }
+            // A horn, sounding outward: the aura carried further than the beacon can manage alone.
+            case "herald" -> {
+                fill(image, 4, 6, 2, 4, ink);
+                fill(image, 6, 5, 1, 6, ink);
+                fill(image, 7, 4, 1, 8, ink);
+                fill(image, 10, 6, 1, 1, ink);
+                fill(image, 11, 8, 1, 1, ink);
+                fill(image, 10, 10, 1, 1, ink);
             }
             default -> { }
         }

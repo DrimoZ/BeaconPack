@@ -1,0 +1,8 @@
+{
+  "max_tier": 2,
+  "color": 6711039,
+  "operations": [
+    { "type": "mul_capacity", "values": [5.0, 8.0] },
+    { "type": "mul_fuel", "values": [1.2, 1.35] }
+  ]
+}

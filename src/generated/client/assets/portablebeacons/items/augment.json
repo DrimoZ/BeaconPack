@@ -85,6 +85,66 @@
           ]
         },
         "when": "portablebeacons:discretion"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "portablebeacons:item/augment_overdrive",
+          "tints": [
+            {
+              "type": "portablebeacons:augment_colour"
+            }
+          ]
+        },
+        "when": "portablebeacons:overdrive"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "portablebeacons:item/augment_projector",
+          "tints": [
+            {
+              "type": "portablebeacons:augment_colour"
+            }
+          ]
+        },
+        "when": "portablebeacons:projector"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "portablebeacons:item/augment_miser",
+          "tints": [
+            {
+              "type": "portablebeacons:augment_colour"
+            }
+          ]
+        },
+        "when": "portablebeacons:miser"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "portablebeacons:item/augment_reservoir",
+          "tints": [
+            {
+              "type": "portablebeacons:augment_colour"
+            }
+          ]
+        },
+        "when": "portablebeacons:reservoir"
+      },
+      {
+        "model": {
+          "type": "minecraft:model",
+          "model": "portablebeacons:item/augment_herald",
+          "tints": [
+            {
+              "type": "portablebeacons:augment_colour"
+            }
+          ]
+        },
+        "when": "portablebeacons:herald"
       }
     ],
     "fallback": {

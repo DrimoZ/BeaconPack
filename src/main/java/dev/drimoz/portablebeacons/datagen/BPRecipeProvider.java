@@ -73,6 +73,14 @@ public class BPRecipeProvider extends RecipeProvider {
         augment(output, lookup, "capacity", Items.GOLD_BLOCK, 3);
         augment(output, lookup, "attunement", Items.ECHO_SHARD, 2);
         augment(output, lookup, "discretion", Items.PHANTOM_MEMBRANE, 2);
+
+        // The trade-off augments. Each buys one stat by spending another, so they compete with the
+        // plain ones for a slot rather than replacing them.
+        augment(output, lookup, "overdrive", Items.BLAZE_POWDER, 2);
+        augment(output, lookup, "projector", Items.END_ROD, 2);
+        augment(output, lookup, "miser", Items.EMERALD, 2);
+        augment(output, lookup, "reservoir", Items.COPPER_BLOCK, 2);
+        augment(output, lookup, "herald", Items.GOAT_HORN, 2);
     }
 
     private void beacon(RecipeOutput output, HolderLookup.Provider lookup, ItemLike result,

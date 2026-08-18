@@ -469,7 +469,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
                     graphics.fill(x + 1, AUGMENT_SLOT_Y + 1, x + SLOT_SIZE - 1,
                             AUGMENT_SLOT_Y + SLOT_SIZE - 1, 0x80000000);
                     drawPadlock(graphics, x + SLOT_SIZE / 2, AUGMENT_SLOT_Y + 8, 0xFF8A8A8A);
-                } else if (slotStack(i).isEmpty()) {
+                } else if (slotStack(PortableBeaconItem.augmentSlot(i)).isEmpty()) {
                     graphics.centeredText(font, "+", x + SLOT_SIZE / 2, AUGMENT_SLOT_Y + 5,
                             0xFFA0A0A0);
                 }

@@ -281,7 +281,7 @@ public final class BPGameTests {
             ItemStack augment = new ItemStack(BPItems.AUGMENT.get());
             augment.set(BPComponents.AUGMENT.get(), new AugmentInstance(ATTUNEMENT, needed));
             try (Transaction transaction = Transaction.openRoot()) {
-                slots.insert(0, ItemResource.of(augment), 1, transaction);
+                slots.insert(PortableBeaconItem.augmentSlot(0), ItemResource.of(augment), 1, transaction);
                 transaction.commit();
             }
             // Re-set: the handler wrote the container component onto the same stack, and the state

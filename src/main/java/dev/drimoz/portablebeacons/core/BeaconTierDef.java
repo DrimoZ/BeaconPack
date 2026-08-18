@@ -36,7 +36,7 @@ public record BeaconTierDef(
     public static final Codec<BeaconTierDef> CODEC = RecordCodecBuilder.create(i -> i.group(
             Codec.intRange(1, 4).fieldOf("level").forGetter(BeaconTierDef::level),
             Codec.intRange(0, 9).fieldOf("effect_slots").forGetter(BeaconTierDef::effectSlots),
-            Codec.intRange(0, 3).fieldOf("augment_slots").forGetter(BeaconTierDef::augmentSlots),
+            Codec.intRange(0, 4).fieldOf("augment_slots").forGetter(BeaconTierDef::augmentSlots),
             Codec.DOUBLE.fieldOf("base_range").forGetter(BeaconTierDef::baseRange),
             Codec.INT.fieldOf("fuel_capacity").forGetter(BeaconTierDef::fuelCapacity),
             Codec.intRange(0, 3).optionalFieldOf("max_amplifier", 0)
