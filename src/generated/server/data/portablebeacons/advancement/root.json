@@ -1,0 +1,32 @@
+{
+  "criteria": {
+    "has_pack": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#portablebeacons:packs"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "background": "minecraft:textures/block/deepslate_bricks.png",
+    "description": {
+      "translate": "advancement.portablebeacons.root.description"
+    },
+    "icon": {
+      "id": "portablebeacons:beacon_i"
+    },
+    "title": {
+      "translate": "advancement.portablebeacons.root.title"
+    }
+  },
+  "requirements": [
+    [
+      "has_pack"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

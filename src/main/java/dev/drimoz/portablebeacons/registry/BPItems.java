@@ -22,13 +22,13 @@ public final class BPItems {
      * stay trivial, and a player can tell two packs apart in a chest at a glance.
      */
     public static final DeferredItem<PortableBeaconItem> PACK_I =
-            pack("beacon_pack_i", "tier_1", Rarity.COMMON);
+            pack("beacon_i", "tier_1", Rarity.COMMON);
     public static final DeferredItem<PortableBeaconItem> PACK_II =
-            pack("beacon_pack_ii", "tier_2", Rarity.UNCOMMON);
+            pack("beacon_ii", "tier_2", Rarity.UNCOMMON);
     public static final DeferredItem<PortableBeaconItem> PACK_III =
-            pack("beacon_pack_iii", "tier_3", Rarity.RARE);
+            pack("beacon_iii", "tier_3", Rarity.RARE);
     public static final DeferredItem<PortableBeaconItem> PACK_IV =
-            pack("beacon_pack_iv", "tier_4", Rarity.EPIC);
+            pack("beacon_iv", "tier_4", Rarity.EPIC);
 
     /**
      * Themed packs: same machinery, different effect pool.
@@ -39,11 +39,11 @@ public final class BPItems {
      * one instead of a tier IV a real choice rather than a downgrade.
      */
     public static final DeferredItem<PortableBeaconItem> PACK_NETHER =
-            pack("nether_pack", "nether", Rarity.RARE);
+            pack("cinder_beacon", "nether", Rarity.RARE);
     public static final DeferredItem<PortableBeaconItem> PACK_END =
-            pack("end_pack", "end", Rarity.RARE);
+            pack("void_beacon", "end", Rarity.RARE);
     public static final DeferredItem<PortableBeaconItem> PACK_TIDAL =
-            pack("tidal_pack", "tidal", Rarity.RARE);
+            pack("tidal_beacon", "tidal", Rarity.RARE);
 
     /**
      * One registered augment item for every augment there will ever be — its identity comes from a

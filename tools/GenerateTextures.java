@@ -60,12 +60,12 @@ public final class GenerateTextures {
             recess(image, 16 + col * 18, 230, 18, 18);
         }
 
-        ImageIO.write(image, "PNG", new File(GUI_DIR + "/beacon_pack.png"));
+        ImageIO.write(image, "PNG", new File(GUI_DIR + "/beacon.png"));
     }
 
     private static void writeItems() throws IOException {
         int[] tierColours = {0xFF9AA7B0, 0xFF62C2E0, 0xFF6BE07F, 0xFFE0C24A};
-        String[] names = {"beacon_pack_i", "beacon_pack_ii", "beacon_pack_iii", "beacon_pack_iv"};
+        String[] names = {"beacon_i", "beacon_ii", "beacon_iii", "beacon_iv"};
         for (int i = 0; i < names.length; i++) {
             ImageIO.write(packIcon(tierColours[i], i + 1), "PNG",
                     new File(ITEM_DIR + "/" + names[i] + ".png"));
@@ -74,11 +74,11 @@ public final class GenerateTextures {
         // Themed packs share the silhouette but take a saturated core and a marked casing, so they
         // read as siblings of the numbered packs rather than as a separate family.
         ImageIO.write(themedPackIcon(0xFFE0603A, 0xFF4A2A26), "PNG",
-                new File(ITEM_DIR + "/nether_pack.png"));
+                new File(ITEM_DIR + "/cinder_beacon.png"));
         ImageIO.write(themedPackIcon(0xFFC48CE0, 0xFF2E2740), "PNG",
-                new File(ITEM_DIR + "/end_pack.png"));
+                new File(ITEM_DIR + "/void_beacon.png"));
         ImageIO.write(themedPackIcon(0xFF3FB6D8, 0xFF20404C), "PNG",
-                new File(ITEM_DIR + "/tidal_pack.png"));
+                new File(ITEM_DIR + "/tidal_beacon.png"));
         // Greyscale on purpose: the augment item is tinted at render time from its registry entry.
         ImageIO.write(augmentIcon(null), "PNG", new File(ITEM_DIR + "/augment.png"));
 

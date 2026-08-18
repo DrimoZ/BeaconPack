@@ -65,18 +65,29 @@ neoForge {
         // Datagen is split in two from 1.21.4 on: the client run owns anything that needs assets
         // (item models), the server run owns recipes, advancements and tags. The single data() run
         // 1.21.1 used no longer exists.
+        /**
+         * Datagen is two runs since 1.21.4, and they must not share an output folder.
+         *
+         * <p>The generator purges anything under its output that the providers it just ran did not
+         * write, deciding from the .cache index. Pointed at one folder, whichever run went second
+         * deleted the other half - which is how the mod ended up with models and no recipes, then
+         * recipes and no models. Separate folders, separate caches, both on the resource path.
+         *
+         * <p>Own game directory too: run/mods holds whatever was last copied there, and datagen
+         * needs no mods at all.
+         */
         clientData {
             clientData()
-            gameDirectory = project.file('run')
-            programArguments.addAll '--mod', mod_id, '--all',
-                    '--output', file('src/generated/resources/').absolutePath,
+            gameDirectory = project.file('run-data')
+            programArguments.addAll '--mod', mod_id,
+                    '--output', file('src/generated/client/').absolutePath,
                     '--existing', file('src/main/resources/').absolutePath
         }
         serverData {
             serverData()
-            gameDirectory = project.file('run')
-            programArguments.addAll '--mod', mod_id, '--all',
-                    '--output', file('src/generated/resources/').absolutePath,
+            gameDirectory = project.file('run-data')
+            programArguments.addAll '--mod', mod_id,
+                    '--output', file('src/generated/server/').absolutePath,
                     '--existing', file('src/main/resources/').absolutePath
         }
         configureEach {
@@ -218,7 +229,8 @@ var generateModMetadata = tasks.register('generateModMetadata', ProcessResources
 
 sourceSets.main.resources.srcDir generateModMetadata
 // Generated resources are committed, so a clone builds without running datagen first.
-sourceSets.main.resources.srcDir 'src/generated/resources'
+sourceSets.main.resources.srcDir 'src/generated/client'
+sourceSets.main.resources.srcDir 'src/generated/server'
 neoForge.ideSyncTask generateModMetadata
 
 // Both licences travel with the jar. A distributed artifact that does not carry its own terms

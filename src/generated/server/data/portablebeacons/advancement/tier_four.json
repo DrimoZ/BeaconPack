@@ -1,0 +1,33 @@
+{
+  "parent": "portablebeacons:root",
+  "criteria": {
+    "has_pack_iv": {
+      "conditions": {
+        "items": [
+          {
+            "items": "portablebeacons:beacon_iv"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancement.portablebeacons.tier_four.description"
+    },
+    "frame": "challenge",
+    "icon": {
+      "id": "portablebeacons:beacon_iv"
+    },
+    "title": {
+      "translate": "advancement.portablebeacons.tier_four.title"
+    }
+  },
+  "requirements": [
+    [
+      "has_pack_iv"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

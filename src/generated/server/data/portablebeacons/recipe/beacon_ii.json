@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": "minecraft:beacon",
+    "G": "minecraft:gold_ingot",
+    "P": "portablebeacons:beacon_i"
+  },
+  "pattern": [
+    " G ",
+    "GPG",
+    " B "
+  ],
+  "result": {
+    "id": "portablebeacons:beacon_ii"
+  }
+}

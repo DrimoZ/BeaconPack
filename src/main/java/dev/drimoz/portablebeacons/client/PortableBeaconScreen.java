@@ -53,7 +53,7 @@ import java.util.Optional;
 public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeaconMenu> {
 
     private static final Identifier TEXTURE =
-            Identifier.fromNamespaceAndPath("portablebeacons", "textures/gui/beacon_pack.png");
+            Identifier.fromNamespaceAndPath("portablebeacons", "textures/gui/beacon.png");
     private static final int TEXTURE_SIZE = 512;
 
     static final int IMAGE_W = 194;
