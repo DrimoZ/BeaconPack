@@ -5,17 +5,20 @@
     "B": {
       "item": "minecraft:beacon"
     },
-    "I": {
-      "item": "minecraft:iron_ingot"
+    "G": {
+      "item": "minecraft:gold_ingot"
+    },
+    "P": {
+      "item": "portablebeacons:beacon_i"
     }
   },
   "pattern": [
-    " I ",
-    "IBI",
-    " I "
+    " G ",
+    "GPG",
+    " B "
   ],
   "result": {
     "count": 1,
-    "id": "portablebeacons:beacon_pack_i"
+    "id": "portablebeacons:beacon_ii"
   }
 }

@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "portablebeacons:item/tidal_pack"
+    "layer0": "portablebeacons:item/void_beacon"
   }
 }

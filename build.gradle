@@ -59,7 +59,11 @@ neoForge {
             gameDirectory = project.file('run-gametest')
         }
         data {
-            gameDirectory = project.file('run')
+            // Its own directory, for the reason the game test run needed one: run/mods holds
+            // whatever was last copied there, and datagen needs no mods at all to produce its
+            // files. Sharing run/ meant a JEI built for another Minecraft version stopped the
+            // generator before it wrote anything.
+            gameDirectory = project.file('run-data')
             // 1.21.1 has a single datagen run; clientData()/serverData() only exist from 1.21.4 on.
             data()
             programArguments.addAll '--mod', mod_id, '--all',

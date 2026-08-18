@@ -5,7 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": "portablebeacons:nether_pack"
+            "items": "portablebeacons:cinder_beacon"
           }
         ]
       },
@@ -15,7 +15,7 @@
       "conditions": {
         "items": [
           {
-            "items": "portablebeacons:tidal_pack"
+            "items": "portablebeacons:tidal_beacon"
           }
         ]
       },
@@ -25,7 +25,7 @@
       "conditions": {
         "items": [
           {
-            "items": "portablebeacons:end_pack"
+            "items": "portablebeacons:void_beacon"
           }
         ]
       },
@@ -39,7 +39,7 @@
     "frame": "goal",
     "icon": {
       "count": 1,
-      "id": "portablebeacons:tidal_pack"
+      "id": "portablebeacons:tidal_beacon"
     },
     "title": {
       "translate": "advancement.portablebeacons.themed.title"

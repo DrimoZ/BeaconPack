@@ -3,6 +3,32 @@
 All notable changes to this project are documented here, newest first.
 Versions follow `{mod version}+{minecraft version}`.
 
+## 1.0.1
+
+Finishes the rename. 1.0.0 changed the mod id and left the item ids alone, so the beacons were still
+`portablebeacons:beacon_pack_i` and the themed ones were still named after dimensions rather than
+after themselves.
+
+| was | is |
+|---|---|
+| `beacon_pack_i` … `beacon_pack_iv` | `beacon_i` … `beacon_iv` |
+| `nether_pack` | `cinder_beacon` |
+| `end_pack` | `void_beacon` |
+| `tidal_pack` | `tidal_beacon` |
+
+The themed three were the worst of it: their ids said Nether, End and Tidal while the game showed
+Cinder Beacon, Void Beacon and Tidal Beacon. Anyone reading a crash report, writing a datapack or
+typing `/give` met a name the mod never uses out loud.
+
+**This breaks beacons saved with 1.0.0 or the 0.9.0 beta** — they become unknown items, and a
+datapack written against the old ids needs updating. Same reasoning as the rename itself: the ids
+are wrong now and will only get more expensive to fix, so it happens at 1.0.1 or never.
+
+### Changed
+- The GUI texture and the item textures are named after their items again.
+- Datagen runs in its own game folder, so a mod left in `run/mods` for a different Minecraft version
+  can no longer stop the generator before it writes anything.
+
 ## 1.0.0
 
 Renamed from **BeaconPack** to **Portable Beacons**, and renamed all the way down: the mod id, the

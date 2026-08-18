@@ -5,7 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": "portablebeacons:beacon_pack_iv"
+            "items": "portablebeacons:beacon_iv"
           }
         ]
       },
@@ -19,7 +19,7 @@
     "frame": "challenge",
     "icon": {
       "count": 1,
-      "id": "portablebeacons:beacon_pack_iv"
+      "id": "portablebeacons:beacon_iv"
     },
     "title": {
       "translate": "advancement.portablebeacons.tier_four.title"

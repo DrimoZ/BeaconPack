@@ -15,7 +15,7 @@ public final class BPMenus {
 
     /** Extra data is just the pack's inventory slot index; the client reads the stack from there. */
     public static final DeferredHolder<MenuType<?>, MenuType<PortableBeaconMenu>> BEACON_PACK =
-            MENUS.register("beacon_pack",
+            MENUS.register("beacon",
                     () -> IMenuTypeExtension.create(PortableBeaconMenu::new));
 
     private BPMenus() {}

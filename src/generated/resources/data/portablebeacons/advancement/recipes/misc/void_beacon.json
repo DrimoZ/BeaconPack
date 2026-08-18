@@ -4,7 +4,7 @@
       "conditions": {
         "items": [
           {
-            "items": "minecraft:beacon"
+            "items": "minecraft:dragon_breath"
           }
         ]
       },
@@ -12,7 +12,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "portablebeacons:beacon_pack_iii"
+        "recipe": "portablebeacons:void_beacon"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -25,7 +25,7 @@
   ],
   "rewards": {
     "recipes": [
-      "portablebeacons:beacon_pack_iii"
+      "portablebeacons:void_beacon"
     ]
   }
 }

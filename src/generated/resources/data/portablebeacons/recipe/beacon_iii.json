@@ -5,11 +5,11 @@
     "B": {
       "item": "minecraft:beacon"
     },
-    "N": {
-      "item": "minecraft:netherite_ingot"
+    "D": {
+      "item": "minecraft:diamond"
     },
     "P": {
-      "item": "portablebeacons:beacon_pack_iii"
+      "item": "portablebeacons:beacon_ii"
     },
     "S": {
       "item": "minecraft:nether_star"
@@ -17,11 +17,11 @@
   },
   "pattern": [
     " S ",
-    "NPN",
+    "DPD",
     " B "
   ],
   "result": {
     "count": 1,
-    "id": "portablebeacons:beacon_pack_iv"
+    "id": "portablebeacons:beacon_iii"
   }
 }

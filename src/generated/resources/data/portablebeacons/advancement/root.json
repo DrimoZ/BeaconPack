@@ -18,7 +18,7 @@
     },
     "icon": {
       "count": 1,
-      "id": "portablebeacons:beacon_pack_i"
+      "id": "portablebeacons:beacon_i"
     },
     "title": {
       "translate": "advancement.portablebeacons.root.title"

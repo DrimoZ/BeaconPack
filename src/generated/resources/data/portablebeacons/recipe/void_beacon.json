@@ -6,13 +6,13 @@
       "item": "minecraft:beacon"
     },
     "C": {
-      "item": "minecraft:heart_of_the_sea"
+      "item": "minecraft:dragon_breath"
     },
     "M": {
-      "item": "minecraft:prismarine_crystals"
+      "item": "minecraft:ender_eye"
     },
     "P": {
-      "item": "portablebeacons:beacon_pack_ii"
+      "item": "portablebeacons:beacon_ii"
     }
   },
   "pattern": [
@@ -22,6 +22,6 @@
   ],
   "result": {
     "count": 1,
-    "id": "portablebeacons:tidal_pack"
+    "id": "portablebeacons:void_beacon"
   }
 }
