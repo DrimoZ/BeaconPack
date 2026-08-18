@@ -1,7 +1,7 @@
 {
   "itemGroup.portablebeacons": "Przenośny sygnalizator",
   "key.categories.portablebeacons": "Przenośny sygnalizator",
-  "key.portablebeacons.open_pack": "Otwórz sygnalizator",
+  "key.portablebeacons.open_beacon": "Otwórz sygnalizator",
   "item.portablebeacons.beacon_i": "Przenośny sygnalizator I",
   "item.portablebeacons.beacon_ii": "Przenośny sygnalizator II",
   "item.portablebeacons.beacon_iii": "Przenośny sygnalizator III",
@@ -50,7 +50,7 @@
   "portablebeacons.tip.hold_shift": "Przytrzymaj [Shift], aby zobaczyć szczegóły",
   "portablebeacons.tip.augment_rule": "Jeden moduł każdego rodzaju na plecak",
   "portablebeacons.tip.augment_line": "◈ %s",
-  "portablebeacons.tip.pack_tier": "Poziom %s · miejsca na efekty: %s · miejsca na moduły: %s",
+  "portablebeacons.tip.beacon_tier": "Poziom %s · miejsca na efekty: %s · miejsca na moduły: %s",
   "portablebeacons.tip.fuel_short": "Paliwo: %s jednostek",
   "portablebeacons.op.add_range": "Zasięg +%s m",
   "portablebeacons.op.add_effect_slot": "+%s miejsce na efekt",

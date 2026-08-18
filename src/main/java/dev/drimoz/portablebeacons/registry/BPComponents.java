@@ -19,7 +19,7 @@ public final class BPComponents {
             DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, PortableBeacons.MOD_ID);
 
     /** Everything a beacon remembers: effect slots, fuel buffer, master switch. */
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<BeaconState>> PACK =
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<BeaconState>> BEACON =
             REGISTRAR.registerComponentType("beacon", builder -> builder
                     .persistent(BeaconState.CODEC)
                     .networkSynchronized(BeaconState.STREAM_CODEC));

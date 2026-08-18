@@ -1,7 +1,7 @@
 {
   "itemGroup.portablebeacons": "Faro portatile",
   "key.categories.portablebeacons": "Faro portatile",
-  "key.portablebeacons.open_pack": "Apri il faro",
+  "key.portablebeacons.open_beacon": "Apri il faro",
   "item.portablebeacons.beacon_i": "Faro portatile I",
   "item.portablebeacons.beacon_ii": "Faro portatile II",
   "item.portablebeacons.beacon_iii": "Faro portatile III",
@@ -50,7 +50,7 @@
   "portablebeacons.tip.hold_shift": "Tieni premuto [Shift] per i dettagli",
   "portablebeacons.tip.augment_rule": "Un modulo di ciascun tipo per zaino",
   "portablebeacons.tip.augment_line": "◈ %s",
-  "portablebeacons.tip.pack_tier": "Livello %s · %s spazi effetto · %s spazi modulo",
+  "portablebeacons.tip.beacon_tier": "Livello %s · %s spazi effetto · %s spazi modulo",
   "portablebeacons.tip.fuel_short": "Carburante: %s unità",
   "portablebeacons.op.add_range": "Portata +%s m",
   "portablebeacons.op.add_effect_slot": "+%s spazio effetto",

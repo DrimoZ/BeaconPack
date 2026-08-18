@@ -52,11 +52,11 @@ public class PortableBeaconItem extends Item {
     }
 
     public static BeaconState stateOf(ItemStack stack) {
-        return stack.getOrDefault(BPComponents.PACK.get(), BeaconState.EMPTY);
+        return stack.getOrDefault(BPComponents.BEACON.get(), BeaconState.EMPTY);
     }
 
     public static void setState(ItemStack stack, BeaconState state) {
-        stack.set(BPComponents.PACK.get(), state);
+        stack.set(BPComponents.BEACON.get(), state);
     }
 
     @Override
@@ -85,7 +85,7 @@ public class PortableBeaconItem extends Item {
         }
         context.registries().lookup(BPRegistryKeys.TIER)
                 .flatMap(lookup -> lookup.get(tier))
-                .ifPresent(holder -> tooltip.accept(Component.translatable("portablebeacons.tip.pack_tier",
+                .ifPresent(holder -> tooltip.accept(Component.translatable("portablebeacons.tip.beacon_tier",
                                 holder.value().level(),
                                 holder.value().effectSlots(),
                                 holder.value().augmentSlots())

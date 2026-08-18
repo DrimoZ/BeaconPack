@@ -1,7 +1,7 @@
 {
   "itemGroup.portablebeacons": "便攜烽火台",
   "key.categories.portablebeacons": "便攜烽火台",
-  "key.portablebeacons.open_pack": "開啟烽火台",
+  "key.portablebeacons.open_beacon": "開啟烽火台",
   "item.portablebeacons.beacon_i": "便攜烽火台 I",
   "item.portablebeacons.beacon_ii": "便攜烽火台 II",
   "item.portablebeacons.beacon_iii": "便攜烽火台 III",
@@ -50,7 +50,7 @@
   "portablebeacons.tip.hold_shift": "按住 [Shift] 檢視詳情",
   "portablebeacons.tip.augment_rule": "每個背包每種模組限一個",
   "portablebeacons.tip.augment_line": "◈ %s",
-  "portablebeacons.tip.pack_tier": "%s 級 · %s 個效果欄 · %s 個模組欄",
+  "portablebeacons.tip.beacon_tier": "%s 級 · %s 個效果欄 · %s 個模組欄",
   "portablebeacons.tip.fuel_short": "燃料：%s 單位",
   "portablebeacons.op.add_range": "範圍 +%s 公尺",
   "portablebeacons.op.add_effect_slot": "效果欄 +%s",

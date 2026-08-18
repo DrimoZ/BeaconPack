@@ -1,7 +1,7 @@
 {
   "itemGroup.portablebeacons": "Draagbaar vuurbaken",
   "key.categories.portablebeacons": "Draagbaar vuurbaken",
-  "key.portablebeacons.open_pack": "Vuurbaken openen",
+  "key.portablebeacons.open_beacon": "Vuurbaken openen",
   "item.portablebeacons.beacon_i": "Draagbaar vuurbaken I",
   "item.portablebeacons.beacon_ii": "Draagbaar vuurbaken II",
   "item.portablebeacons.beacon_iii": "Draagbaar vuurbaken III",
@@ -50,7 +50,7 @@
   "portablebeacons.tip.hold_shift": "Houd [Shift] ingedrukt voor details",
   "portablebeacons.tip.augment_rule": "Eén module van elk type per rugzak",
   "portablebeacons.tip.augment_line": "◈ %s",
-  "portablebeacons.tip.pack_tier": "Niveau %s · %s effectvakken · %s modulevakken",
+  "portablebeacons.tip.beacon_tier": "Niveau %s · %s effectvakken · %s modulevakken",
   "portablebeacons.tip.fuel_short": "Brandstof: %s eenheden",
   "portablebeacons.op.add_range": "Bereik +%s m",
   "portablebeacons.op.add_effect_slot": "+%s effectvak",

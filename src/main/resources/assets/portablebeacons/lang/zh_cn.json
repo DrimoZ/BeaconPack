@@ -1,7 +1,7 @@
 {
   "itemGroup.portablebeacons": "便携信标",
   "key.categories.portablebeacons": "便携信标",
-  "key.portablebeacons.open_pack": "打开信标",
+  "key.portablebeacons.open_beacon": "打开信标",
   "item.portablebeacons.beacon_i": "便携信标 I",
   "item.portablebeacons.beacon_ii": "便携信标 II",
   "item.portablebeacons.beacon_iii": "便携信标 III",
@@ -50,7 +50,7 @@
   "portablebeacons.tip.hold_shift": "按住 [Shift] 查看详情",
   "portablebeacons.tip.augment_rule": "每个背包每种模块限一个",
   "portablebeacons.tip.augment_line": "◈ %s",
-  "portablebeacons.tip.pack_tier": "%s 级 · %s 个效果槽 · %s 个模块槽",
+  "portablebeacons.tip.beacon_tier": "%s 级 · %s 个效果槽 · %s 个模块槽",
   "portablebeacons.tip.fuel_short": "燃料：%s 单位",
   "portablebeacons.op.add_range": "范围 +%s 米",
   "portablebeacons.op.add_effect_slot": "效果槽 +%s",

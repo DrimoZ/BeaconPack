@@ -23,7 +23,7 @@ public record OpenBeaconPayload(int slot) implements CustomPacketPayload {
 
     public static final int FIND_ANY = -1;
 
-    public static final Type<OpenBeaconPayload> TYPE = new Type<>(BPRegistryKeys.id("open_pack"));
+    public static final Type<OpenBeaconPayload> TYPE = new Type<>(BPRegistryKeys.id("open_beacon"));
 
     public static final StreamCodec<io.netty.buffer.ByteBuf, OpenBeaconPayload> STREAM_CODEC =
             StreamCodec.composite(ByteBufCodecs.VAR_INT, OpenBeaconPayload::slot, OpenBeaconPayload::new);

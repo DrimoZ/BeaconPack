@@ -1,7 +1,7 @@
 {
   "itemGroup.portablebeacons": "携帯ビーコン",
   "key.categories.portablebeacons": "携帯ビーコン",
-  "key.portablebeacons.open_pack": "ビーコンを開く",
+  "key.portablebeacons.open_beacon": "ビーコンを開く",
   "item.portablebeacons.beacon_i": "携帯ビーコン I",
   "item.portablebeacons.beacon_ii": "携帯ビーコン II",
   "item.portablebeacons.beacon_iii": "携帯ビーコン III",
@@ -50,7 +50,7 @@
   "portablebeacons.tip.hold_shift": "[Shift] で詳細を表示",
   "portablebeacons.tip.augment_rule": "同じ種類のモジュールはパックに 1 つまで",
   "portablebeacons.tip.augment_line": "◈ %s",
-  "portablebeacons.tip.pack_tier": "ティア %s · 効果スロット %s · モジュールスロット %s",
+  "portablebeacons.tip.beacon_tier": "ティア %s · 効果スロット %s · モジュールスロット %s",
   "portablebeacons.tip.fuel_short": "燃料: %s ユニット",
   "portablebeacons.op.add_range": "範囲 +%s m",
   "portablebeacons.op.add_effect_slot": "効果スロット +%s",

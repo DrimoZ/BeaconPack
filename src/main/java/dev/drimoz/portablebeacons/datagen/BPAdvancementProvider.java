@@ -46,7 +46,7 @@ public class BPAdvancementProvider implements AdvancementSubProvider {
                         Identifier.withDefaultNamespace("textures/block/deepslate_bricks.png"),
                         AdvancementType.TASK,
                         true, true, false)
-                .addCriterion("has_pack", hasTaggedPack(registries.lookupOrThrow(Registries.ITEM)))
+                .addCriterion("has_beacon", hasTaggedPack(registries.lookupOrThrow(Registries.ITEM)))
                 .save(saver, id("root"));
 
         Advancement.Builder.advancement()
@@ -60,7 +60,7 @@ public class BPAdvancementProvider implements AdvancementSubProvider {
                 .parent(root)
                 .display(BPItems.BEACON_IV.get(), title("tier_four"), description("tier_four"),
                         null, AdvancementType.CHALLENGE, true, true, false)
-                .addCriterion("has_pack_iv", has(BPItems.BEACON_IV.get()))
+                .addCriterion("has_beacon_iv", has(BPItems.BEACON_IV.get()))
                 .save(saver, id("tier_four"));
 
         // Any one of the three, because they are alternatives rather than a set to collect.
@@ -81,7 +81,7 @@ public class BPAdvancementProvider implements AdvancementSubProvider {
     private static Criterion<InventoryChangeTrigger.TriggerInstance> hasTaggedPack(
             HolderGetter<Item> items) {
         return InventoryChangeTrigger.TriggerInstance.hasItems(
-                ItemPredicate.Builder.item().of(items, BPTags.PACKS));
+                ItemPredicate.Builder.item().of(items, BPTags.BEACONS));
     }
 
     private static Criterion<InventoryChangeTrigger.TriggerInstance> has(ItemLike item) {

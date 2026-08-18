@@ -21,7 +21,7 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
  */
 public record BeaconActionPayload(int action, int slot, int value) implements CustomPacketPayload {
 
-    public static final Type<BeaconActionPayload> TYPE = new Type<>(BPRegistryKeys.id("pack_action"));
+    public static final Type<BeaconActionPayload> TYPE = new Type<>(BPRegistryKeys.id("beacon_action"));
 
     public static final StreamCodec<io.netty.buffer.ByteBuf, BeaconActionPayload> STREAM_CODEC =
             StreamCodec.composite(

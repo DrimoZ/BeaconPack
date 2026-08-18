@@ -34,7 +34,7 @@ public final class BPClientEvents {
             new KeyMapping.Category(BPRegistryKeys.id("main"));
 
     public static final KeyMapping OPEN_PACK = new KeyMapping(
-            "key.portablebeacons.open_pack",
+            "key.portablebeacons.open_beacon",
             KeyConflictContext.IN_GAME,
             InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_B),
             CATEGORY);

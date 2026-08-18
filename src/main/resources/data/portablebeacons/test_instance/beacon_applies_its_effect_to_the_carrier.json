@@ -1,6 +1,6 @@
 {
   "type": "minecraft:function",
-  "function": "portablebeacons:pack_applies_its_effect_to_the_carrier",
+  "function": "portablebeacons:beacon_applies_its_effect_to_the_carrier",
   "environment": "minecraft:default",
   "structure": "portablebeacons:platform",
   "max_ticks": 200

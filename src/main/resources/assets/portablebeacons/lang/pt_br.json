@@ -1,7 +1,7 @@
 {
   "itemGroup.portablebeacons": "Sinalizador portátil",
   "key.categories.portablebeacons": "Sinalizador portátil",
-  "key.portablebeacons.open_pack": "Abrir o sinalizador",
+  "key.portablebeacons.open_beacon": "Abrir o sinalizador",
   "item.portablebeacons.beacon_i": "Sinalizador portátil I",
   "item.portablebeacons.beacon_ii": "Sinalizador portátil II",
   "item.portablebeacons.beacon_iii": "Sinalizador portátil III",
@@ -50,7 +50,7 @@
   "portablebeacons.tip.hold_shift": "Segure [Shift] para detalhes",
   "portablebeacons.tip.augment_rule": "Um módulo de cada tipo por mochila",
   "portablebeacons.tip.augment_line": "◈ %s",
-  "portablebeacons.tip.pack_tier": "Nível %s · %s espaços de efeito · %s espaços de módulo",
+  "portablebeacons.tip.beacon_tier": "Nível %s · %s espaços de efeito · %s espaços de módulo",
   "portablebeacons.tip.fuel_short": "Combustível: %s unidades",
   "portablebeacons.op.add_range": "Alcance +%s m",
   "portablebeacons.op.add_effect_slot": "+%s espaço de efeito",

@@ -1,6 +1,6 @@
 {
   "criteria": {
-    "has_pack": {
+    "has_beacon": {
       "conditions": {
         "items": [
           {
@@ -25,7 +25,7 @@
   },
   "requirements": [
     [
-      "has_pack"
+      "has_beacon"
     ]
   ],
   "sends_telemetry_event": true

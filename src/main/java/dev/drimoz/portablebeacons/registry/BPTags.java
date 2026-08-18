@@ -13,7 +13,7 @@ public final class BPTags {
      * <p>Exists so the Curios binding and anything downstream can name "a beacon" once rather than
      * listing seven items and going stale the moment an eighth appears.
      */
-    public static final TagKey<Item> PACKS =
+    public static final TagKey<Item> BEACONS =
             TagKey.create(Registries.ITEM, BPRegistryKeys.id("beacons"));
 
     private BPTags() {}

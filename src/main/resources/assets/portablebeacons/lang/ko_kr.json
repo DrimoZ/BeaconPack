@@ -1,7 +1,7 @@
 {
   "itemGroup.portablebeacons": "휴대용 신호기",
   "key.categories.portablebeacons": "휴대용 신호기",
-  "key.portablebeacons.open_pack": "신호기 열기",
+  "key.portablebeacons.open_beacon": "신호기 열기",
   "item.portablebeacons.beacon_i": "휴대용 신호기 I",
   "item.portablebeacons.beacon_ii": "휴대용 신호기 II",
   "item.portablebeacons.beacon_iii": "휴대용 신호기 III",
@@ -50,7 +50,7 @@
   "portablebeacons.tip.hold_shift": "[Shift]를 누르면 자세히",
   "portablebeacons.tip.augment_rule": "팩당 같은 종류의 모듈은 하나까지",
   "portablebeacons.tip.augment_line": "◈ %s",
-  "portablebeacons.tip.pack_tier": "%s 등급 · 효과 칸 %s개 · 모듈 칸 %s개",
+  "portablebeacons.tip.beacon_tier": "%s 등급 · 효과 칸 %s개 · 모듈 칸 %s개",
   "portablebeacons.tip.fuel_short": "연료: %s 단위",
   "portablebeacons.op.add_range": "범위 +%s m",
   "portablebeacons.op.add_effect_slot": "효과 칸 +%s",

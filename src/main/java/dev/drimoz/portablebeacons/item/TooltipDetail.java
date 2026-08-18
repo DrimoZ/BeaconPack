@@ -7,7 +7,7 @@ import net.neoforged.fml.loading.FMLEnvironment;
 /**
  * Shift-to-expand tooltips.
  *
- * <p>Packs and augments both carry more detail than fits on a hover, and dumping all of it on every
+ * <p>Beacons and augments both carry more detail than fits on a hover, and dumping all of it on every
  * item makes chests unreadable. Shift is the convention players already know from the wider modded
  * ecosystem, so it needs no explanation beyond the hint line.
  */

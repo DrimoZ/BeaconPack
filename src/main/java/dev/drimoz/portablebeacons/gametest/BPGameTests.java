@@ -68,7 +68,7 @@ public final class BPGameTests {
     /** Distinct names per player - see {@link #spawnPlayer(GameTestHelper, Cleanup, String)}. */
     private static final AtomicInteger NEXT_PLAYER = new AtomicInteger();
 
-    public static void packAppliesItsEffectToTheCarrier(GameTestHelper helper) {
+    public static void beaconAppliesItsEffectToTheCarrier(GameTestHelper helper) {
         run(helper, cleanup -> {
             ServerPlayer carrier = spawnPlayer(helper, cleanup);
             givePack(carrier, AuraMode.SELF);
@@ -80,7 +80,7 @@ public final class BPGameTests {
         });
     }
 
-    public static void anInactivePackAppliesNothing(GameTestHelper helper) {
+    public static void anInactiveBeaconAppliesNothing(GameTestHelper helper) {
         run(helper, cleanup -> {
             ServerPlayer carrier = spawnPlayer(helper, cleanup);
             ItemStack beacon = givePack(carrier, AuraMode.SELF);

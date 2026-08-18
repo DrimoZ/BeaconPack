@@ -29,10 +29,10 @@ public final class BPTestFunctions {
     @SubscribeEvent
     public static void register(RegisterEvent event) {
         event.register(Registries.TEST_FUNCTION, helper -> {
-            helper.register(id("pack_applies_its_effect_to_the_carrier"),
-                    (Consumer<GameTestHelper>) BPGameTests::packAppliesItsEffectToTheCarrier);
-            helper.register(id("an_inactive_pack_applies_nothing"),
-                    (Consumer<GameTestHelper>) BPGameTests::anInactivePackAppliesNothing);
+            helper.register(id("beacon_applies_its_effect_to_the_carrier"),
+                    (Consumer<GameTestHelper>) BPGameTests::beaconAppliesItsEffectToTheCarrier);
+            helper.register(id("an_inactive_beacon_applies_nothing"),
+                    (Consumer<GameTestHelper>) BPGameTests::anInactiveBeaconAppliesNothing);
             helper.register(id("aura_reaches_a_second_player"),
                     (Consumer<GameTestHelper>) BPGameTests::auraReachesASecondPlayer);
             helper.register(id("self_mode_reaches_nobody_else"),
