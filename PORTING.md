@@ -117,7 +117,7 @@ them that way. That bet gets tested here. Expect real work but confined to two o
 `Validatable` interface — `validate(ValidationContext)` — replacing ad-hoc validation. `FuelDef`
 currently validates through `Codec#validate` for its exactly-one-of-item-or-tag rule; that becomes
 the new interface. Moderate, and the JSON format the datapacks use should be unaffected — **the
-registries stay compatible for pack authors**, which is worth saying on the store page.
+registries stay compatible for datapack authors**, which is worth saying on the store page.
 
 ### The parts that should be nearly free
 
@@ -182,7 +182,128 @@ bug found on 1.21.1 is much cheaper to fix on one branch than on three. That is 
 keeping `1.21.1` genuinely maintained, not an argument against starting — the 1.21.1 ecosystem is
 where it will stay, and every month there is a month of players who cannot install the mod at all.
 
-## 8. Branches
+## 8. What the compiler actually said
+
+The build config landed and `createMinecraftArtifacts` succeeded — 26.1.2.95 downloads, decompiles
+and patches cleanly. `compileJava` then produced **169 errors across 20 files**. Every replacement
+below was read out of `minecraft-patched-26.1.2.95-sources.jar` and the NeoForge 26.1.2.95 sources,
+not inferred from the primers.
+
+| file | errors |
+|---|---|
+| `client/PortableBeaconScreen` | 44 |
+| `gametest/BPGameTests` | 24 |
+| `datagen/BPAdvancementProvider` | 16 |
+| `datagen/BPItemModelProvider` | 13 |
+| `datagen/ComponentShapedRecipe` | 9 |
+| `compat/jei/PortableBeaconsJeiPlugin` | 8 |
+| `item/PortableBeaconItem` | 8 |
+| `datagen/BPDataGen` | 8 |
+| `registry/BPLookups` | 7 |
+| `client/BPClientEvents` | 7 |
+| the other 10 | 1–6 each |
+
+**`core/` came through almost untouched** — 3 errors in `BPRegistryKeys`, all of them the same
+rename, and nothing at all in `PackState`, the codecs or the arithmetic. That was the bet the layer
+was written to win, and it won.
+
+### The mechanical majority
+
+131 of the 169 are `cannot find symbol`, and most are one rename cascading:
+
+| 1.21.1 | 26.1 |
+|---|---|
+| `net.minecraft.resources.ResourceLocation` | **`net.minecraft.resources.Identifier`** — same factory methods (`fromNamespaceAndPath`, `parse`) |
+| `ResourceKey#location()` | `ResourceKey#identifier()` |
+| `HolderLookup.Provider#registryOrThrow(key)` | `#lookupOrThrow(key)` |
+| `ItemStack#getDescriptionId()` | `#getHoverName()`, which already returns a `Component` |
+| `Player#displayClientMessage(Component, boolean)` | gone; `sendSystemMessage(Component)` for chat, and the action bar goes through `ClientboundSetActionBarTextPacket` |
+| `mouseClicked(double, double, int)` | `mouseClicked(MouseButtonEvent, boolean doubleClick)` |
+| `keyPressed(int, int, int)` | `keyPressed(KeyEvent)` |
+| `imageWidth` / `imageHeight` | now final — set through the constructor |
+
+Input became event objects rather than loose primitives. Incidentally the new `mouseClicked` carries
+its own `doubleClick` flag, so whatever the screen does to detect double clicks can be deleted
+rather than migrated.
+
+### The one real decision: `IItemHandler`
+
+NeoForge replaced the item capability with a resource-based one. `Capabilities.ItemHandler.ITEM`
+is now `Capabilities.Item.ITEM`, typed `ResourceHandler<ItemResource>` instead of `IItemHandler`.
+
+`IItemHandler` still exists — but marked `@Deprecated(since = "1.21.9", forRemoval = true)`, with an
+explicit migration bridge, `IItemHandler.of(ResourceHandler<ItemResource>)`.
+
+So there are two ways through, and they differ in more than effort:
+
+- **Bridge.** Wrap at the capability boundary, leave the rest of the item code alone. Cheap now.
+  Deprecated *for removal*, so it is a debt with a due date somewhere in 26.2 or 26.3 — the exact
+  versions this plan already commits to porting to. It also carries a real constraint: the adapter's
+  javadoc warns that `insertItem` / `extractItem` open new root transactions and cannot be called
+  from inside a transactional context, and fuel is consumed every tick.
+- **Migrate.** Rewrite the item handling against `ResourceHandler<ItemResource>`. More work now,
+  and it is the shape the API is actually going to keep.
+
+Given that the plan is three ports rather than one, paying this once looks right — but it is a
+genuine fork and not mine to take silently.
+
+`ComponentItemHandler`, `SlotItemHandler` and `ItemContainerContents` all still exist, so the way the
+beacon stores its contents does not have to change; this is about the capability boundary only.
+
+### The parts that are rewrites, not renames
+
+- **The screen**, as predicted — 44 errors, and the count understates it. Renames aside, 26.1's
+  extract-then-render split is not something the compiler can point at.
+- **Datagen**, more than expected. `net.minecraft.advancements.critereon` no longer exists,
+  `net.neoforged.neoforge.client.model.generators` is gone with the old item model system,
+  `RecipeProvider` now has an abstract no-arg `buildRecipes()`, and recipes want `Recipe.CommonInfo`.
+  All four providers plus `BPDataGen` are affected.
+- **Gametests**, 24 errors, the area §4 flagged as unknown. Now measured, still unexamined.
+
+## 9. What actually happened
+
+The port is done: 169 errors to zero, 33 unit tests, 8 gametests. Kept as written above rather than
+tidied, because the estimate is only useful next time if its mistakes are still visible.
+
+### Where the estimate was wrong
+
+**The screen was not a rewrite.** §4 called it "the whole cost of this port" and said to assume it
+was rewritten, because 26.1 "split drawing into two phases". The split is real, but
+`GuiGraphicsExtractor` kept the same verbs — `fill`, `blit`, text — so all 97 draw calls migrated by
+renaming. The drawer animation, which §4 named as "exactly the shape the new model removes", needed
+no change at all: extraction runs every frame, so reading a clock and interpolating a width works
+as it always did. I read more into one line of a primer summary than the line said.
+
+**Datagen was worse.** §4 listed two providers; all four broke, plus the entry point, plus a trap
+the analysis never suspected — see below.
+
+**Gametests were a rearchitecture, not a migration.** §4 marked them "unknown", which was honest,
+and unknown turned out to mean the `@GameTest` annotation no longer exists.
+
+### What the analysis could not have predicted
+
+Three of the hardest bugs were invisible to a compiler and to every test:
+
+- **The two datagen runs deleted each other's output.** The generator purges anything under its
+  output folder that the providers it just ran did not write. Pointed at one folder, whichever run
+  went second wiped the other half — the mod had models and no recipes, then recipes and no models.
+  Separate output folders, separate caches.
+- **Every label on the screen was invisible.** Text colours are strict ARGB now, and the two text
+  constants had no alpha channel — `0x404040` is alpha 0. The accent colours all carried `0xFF`
+  already, so the tab glyphs and buttons looked right and hid how wide the problem was.
+- **Vanilla unpacked the beacon's slots into its tooltip**, unprompted, because
+  `ItemContainerContents` is a tooltip provider now.
+
+None of these fail a build. All three needed the game running and someone looking at it.
+
+### What held
+
+`core/` came through with three errors, all one rename. The two files that differ from the 1.21.1
+branch differ by six lines and two — the same arithmetic, character for character, across ten
+primers. That is the whole argument for the layer, and it is the one prediction in this document
+that was not just right but underclaimed.
+
+## 10. Branches
 
 One branch per game version, since each one keeps getting files rather than being replaced.
 

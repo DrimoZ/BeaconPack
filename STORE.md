@@ -28,57 +28,62 @@ people read the page, not the repo.
 
 ### Portable Beacons
 
-A Portable Beacon in your inventory projects beacon effects on you, and — from tier II up — on the
-people around you. Which effects, how far, how strong, and what it costs are all configured in the
-pack's own screen.
+A Portable Beacon in your inventory projects beacon effects on you, and — once it can share — on the
+people around you. Which effects, how far, how strong, how widely and what it costs are all
+configured in the beacon's own screen.
 
-It is deliberately **not** a beacon replacement. Every pack tier consumes a Beacon block in its
-recipe, the aura tops out at 16 blocks against the block's 20–50, and an effect your own beacon
-already provides costs the pack nothing. The block stays the better choice for a base; the pack is
-what you take with you.
+It is deliberately **not** a beacon replacement. Every tier consumes a Beacon block in its recipe,
+the aura tops out at 16 blocks against the block's 20–50, and an effect your own beacon already
+provides costs nothing. The block stays the better choice for a base; this is what you take with you.
 
 ### Four tiers, and three that specialise
 
-| Pack | Effects | Aura | Augments |
-|---|---|---|---|
-| Portable Beacon I | 1 | self only | — |
-| Portable Beacon II | 1 | 8 blocks | 1 |
-| Portable Beacon III | 2 | 12 blocks | 2 |
-| Portable Beacon IV | 2, one at level II | 16 blocks | 3 |
+| Beacon | Effects | Level | Shares with | Aura | Augments |
+|---|---|---|---|---|---|
+| Portable Beacon I | 1 | I | you | — | — |
+| Portable Beacon II | 1 | I | you | 8 blocks | 1 |
+| Portable Beacon III | 2 | I | your team | 12 blocks | 2 |
+| Portable Beacon IV | 2 | II | your team | 16 blocks | 3 |
 
-**Cinder**, **Void** and **Tidal** packs branch off tier II with narrow pools drawn from effects the
-vanilla beacon never offered — Fire Resistance, Slow Falling, Water Breathing, Conduit Power,
-Dolphin's Grace. Carrying one instead of a tier IV is a trade, not a downgrade.
+**Cinder**, **Void** and **Tidal** beacons branch off tier II with narrow pools drawn from effects
+the vanilla beacon never offered — Fire Resistance, Slow Falling, Water Breathing, Conduit Power,
+Dolphin's Grace. Carrying one instead of a Beacon IV is a trade, not a downgrade.
+
+Both ceilings above can be raised by augments, and both are datapack fields.
 
 ### Seven augments
 
 Range, Focus, Amplification, Efficiency, Capacity, Attunement and Discretion — one of each type per
-pack, most with three tiers. More reach, more effects at once, cheaper fuel, a bigger buffer, wider
-sharing, or no particles at all.
+beacon, most with three tiers. More reach, more effects at once, higher levels, cheaper fuel, a
+bigger buffer, wider sharing, or no particles at all.
+
+**Sharing is earned, not given.** Reaching beyond your own team costs an Attunement augment, and
+therefore an augment slot — which is the decision, since the slot could have held more range or
+cheaper fuel instead.
 
 ### Fuel you can read
 
 Copper through netherite, priced by a datapack — per item, or by a convention tag, so a modded
-metal is accepted without a file of its own. The screen shows **remaining runtime**, not
-a unit count: "4 h" answers the question you actually have. Each effect chooses its own audience —
-just you, your team, everyone nearby, or your pets — and sharing costs more. That is the main
-decision the mod asks of you.
+metal is accepted without a file of its own. The screen shows **remaining runtime**, not a unit
+count: "4 h" answers the question you actually have. Each effect chooses its own level and its own
+audience, and both cost more, so a beacon is a set of small trades rather than one switch.
 
 Fuel can be switched off entirely in the config, and when it is, every trace of it disappears from
 the screen rather than sitting there inert.
 
 ### Data-driven, properly
 
-Four datapack registries: which effects a pack may project and what they cost, what augments do,
+Four datapack registries: which effects a beacon may project and what they cost, what augments do,
 what each tier is worth, and what burns as fuel. The mod's own content ships through exactly that
-mechanism — there is no private path. Adding another mod's effect, or a whole themed pack, is a JSON
-file. See the [datapack guide](https://github.com/DrimoZ/PortableBeacons/wiki/Datapack-Guide).
+mechanism — there is no private path. Adding another mod's effect, or a whole themed beacon, is a
+JSON file. See the [datapack guide](https://github.com/DrimoZ/PortableBeacons/wiki/Datapack-Guide).
 
 ### Compatibility
 
-- **Curios** (optional): wear a pack in the charm slot. Ships configured; nothing to set up.
-- **JEI and EMI** (optional): all fifteen augments listed separately instead of collapsing into one,
-  plus a fuel category showing what each item is worth as runtime.
+- **Curios** (optional): wear a beacon in the charm slot, and it works exactly like a carried one.
+  Ships configured; nothing to set up.
+- **JEI** (optional): all fifteen augments listed separately instead of collapsing into one, plus a
+  fuel category showing what each item is worth as runtime. **EMI** the same, on 1.21.1.
 - Server-side config, synced to clients. Required on both sides.
 
 ---
@@ -104,8 +109,10 @@ freely, but do not lift them into another project.
 
 - [x] CurseForge project created and renamed to Portable Beacons.
 - [ ] Release type: **Release**. The aura is confirmed on a dedicated server with two players.
-- [ ] Game version 1.21.1, loader NeoForge.
-- [ ] Mark Curios, JEI and EMI as **optional** dependencies, not required.
+- [ ] Game version: **1.21.1** for the 1.0.1 file; **26.1.2** for the 26.1 build when it ships.
+      Loader NeoForge.
+- [ ] Mark Curios and JEI as **optional** dependencies, not required. EMI too on the 1.21.1 file;
+      the 26.1 build has no EMI plugin, because no 26.x NeoForge build of EMI exists yet.
 - [ ] Changelog: paste the newest section from `CHANGELOG.md`.
 - [ ] Gallery: screenshots are still missing, and this is the one thing that decides whether anyone
       clicks. At minimum: the beacon screen with a drawer open, the effect picker, and the JEI fuel
