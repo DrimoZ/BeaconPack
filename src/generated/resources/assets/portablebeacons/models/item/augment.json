@@ -1,49 +1,5 @@
 {
   "parent": "minecraft:item/generated",
-  "overrides": [
-    {
-      "model": "portablebeacons:item/augment_range",
-      "predicate": {
-        "portablebeacons:augment_type": 1.0
-      }
-    },
-    {
-      "model": "portablebeacons:item/augment_focus",
-      "predicate": {
-        "portablebeacons:augment_type": 2.0
-      }
-    },
-    {
-      "model": "portablebeacons:item/augment_amplification",
-      "predicate": {
-        "portablebeacons:augment_type": 3.0
-      }
-    },
-    {
-      "model": "portablebeacons:item/augment_efficiency",
-      "predicate": {
-        "portablebeacons:augment_type": 4.0
-      }
-    },
-    {
-      "model": "portablebeacons:item/augment_capacity",
-      "predicate": {
-        "portablebeacons:augment_type": 5.0
-      }
-    },
-    {
-      "model": "portablebeacons:item/augment_attunement",
-      "predicate": {
-        "portablebeacons:augment_type": 6.0
-      }
-    },
-    {
-      "model": "portablebeacons:item/augment_discretion",
-      "predicate": {
-        "portablebeacons:augment_type": 7.0
-      }
-    }
-  ],
   "textures": {
     "layer0": "portablebeacons:item/augment"
   }
