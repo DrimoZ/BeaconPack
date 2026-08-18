@@ -12,7 +12,7 @@
     }
   },
   "display": {
-    "background": "minecraft:textures/block/deepslate_bricks.png",
+    "background": "minecraft:block/deepslate_bricks",
     "description": {
       "translate": "advancement.portablebeacons.root.description"
     },

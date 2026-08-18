@@ -43,7 +43,11 @@ public class BPAdvancementProvider implements AdvancementSubProvider {
                         description("root"),
                         // Reuses a vanilla background rather than shipping one: a bespoke tab
                         // texture for four advancements is not worth the kilobytes.
-                        Identifier.withDefaultNamespace("textures/block/deepslate_bricks.png"),
+                        //
+                        // The bare asset id, not a file path: ClientAsset.ResourceTexture adds the
+                        // "textures/" prefix and the ".png" itself, so a full path became
+                        // textures/textures/....png.png and drew the missing-texture checks.
+                        Identifier.withDefaultNamespace("block/deepslate_bricks"),
                         AdvancementType.TASK,
                         true, true, false)
                 .addCriterion("has_beacon", hasTaggedPack(registries.lookupOrThrow(Registries.ITEM)))

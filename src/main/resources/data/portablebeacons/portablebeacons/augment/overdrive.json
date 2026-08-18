@@ -1,8 +1,8 @@
 {
-  "max_tier": 2,
+  "max_tier": 1,
   "color": 13378082,
   "operations": [
-    { "type": "add_amplifier", "values": [1.0, 2.0] },
-    { "type": "mul_fuel", "values": [1.6, 2.4] }
+    { "type": "add_amplifier", "values": [2.0] },
+    { "type": "mul_fuel", "values": [1.7] }
   ]
 }
