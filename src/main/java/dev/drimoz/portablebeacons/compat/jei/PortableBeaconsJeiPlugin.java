@@ -56,15 +56,6 @@ public class PortableBeaconsJeiPlugin implements IModPlugin {
                         // going through a string at all.
                         return AugmentItem.instanceOf(stack);
                     }
-
-                    @Override
-                    @SuppressWarnings("deprecation") // Abstract on the interface; not optional.
-                    public String getLegacyStringSubtypeInfo(ItemStack stack, UidContext context) {
-                        AugmentInstance instance = AugmentItem.instanceOf(stack);
-                        return instance == null
-                                ? ""
-                                : instance.type().identifier() + "@" + instance.tier();
-                    }
                 });
     }
 
@@ -116,11 +107,11 @@ public class PortableBeaconsJeiPlugin implements IModPlugin {
      */
     private static List<ItemStack> itemsIn(FuelDef def) {
         return def.tag()
-                .map(tag -> net.minecraft.core.registries.BuiltInRegistries.ITEM.getTag(tag)
-                        .map(holders -> holders.stream()
-                                .map(holder -> new ItemStack(holder.value()))
-                                .toList())
-                        .orElse(List.<ItemStack>of()))
+                .map(tag -> java.util.stream.StreamSupport.stream(
+                                net.minecraft.core.registries.BuiltInRegistries.ITEM
+                                        .getTagOrEmpty(tag).spliterator(), false)
+                        .map(holder -> new ItemStack(holder.value()))
+                        .toList())
                 .orElse(List.of());
     }
 }

@@ -49,11 +49,10 @@ class TranslationKeyUsageTest {
 
     @Test
     void everyKeyUsedInJavaIsTranslated() throws IOException {
-        Path root = projectRoot();
-        Path sources = root.resolve(Path.of("src", "main", "java"));
+        Path sources = ProjectFiles.root().resolve(Path.of("src", "main", "java"));
 
-        JsonObject english = read(root.resolve(Path.of("src", "main", "resources", "assets",
-                "portablebeacons", "lang", "en_us.json")));
+        JsonObject english = read(ProjectFiles.resources()
+                .resolve(Path.of("assets", "portablebeacons", "lang", "en_us.json")));
 
         Set<String> missing = new TreeSet<>();
         List<Path> files;
@@ -72,27 +71,6 @@ class TranslationKeyUsageTest {
             }
         }
         assertEquals(List.of(), List.copyOf(missing), "translation keys used but never defined");
-    }
-
-    /**
-     * The project root, found by walking up from wherever the tests were started.
-     *
-     * <p>Not the working directory: ModDevGradle runs the unit tests from
-     * {@code build/minecraft-junit} so they see a Minecraft-shaped game folder, and this test reads
-     * the sources rather than the classpath - it is looking for keys the build may never have
-     * compiled a reference to.
-     */
-    private static Path projectRoot() {
-        Path dir = Path.of("").toAbsolutePath();
-        while (dir != null) {
-            if (Files.isDirectory(dir.resolve(Path.of("src", "main", "java")))
-                    && Files.isRegularFile(dir.resolve("gradle.properties"))) {
-                return dir;
-            }
-            dir = dir.getParent();
-        }
-        throw new IllegalStateException(
-                "no project root above " + Path.of("").toAbsolutePath());
     }
 
     private static JsonObject read(Path file) throws IOException {

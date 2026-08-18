@@ -10,11 +10,11 @@ import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
-import mezz.jei.api.recipe.RecipeType;
+import mezz.jei.api.recipe.types.IRecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
@@ -30,8 +30,8 @@ import net.minecraft.world.item.ItemStack;
  */
 public class FuelCategory implements IRecipeCategory<FuelEntry> {
 
-    public static final RecipeType<FuelEntry> TYPE =
-            RecipeType.create(BPRegistryKeys.id("fuel").getNamespace(), "fuel", FuelEntry.class);
+    public static final IRecipeType<FuelEntry> TYPE =
+            IRecipeType.create(BPRegistryKeys.id("fuel"), FuelEntry.class);
 
     private static final int WIDTH = 150;
     private static final int HEIGHT = 26;
@@ -45,7 +45,7 @@ public class FuelCategory implements IRecipeCategory<FuelEntry> {
     }
 
     @Override
-    public RecipeType<FuelEntry> getRecipeType() {
+    public IRecipeType<FuelEntry> getRecipeType() {
         return TYPE;
     }
 
@@ -76,18 +76,18 @@ public class FuelCategory implements IRecipeCategory<FuelEntry> {
     }
 
     @Override
-    public void draw(FuelEntry entry, IRecipeSlotsView slots, GuiGraphics graphics,
+    public void draw(FuelEntry entry, IRecipeSlotsView slots, GuiGraphicsExtractor graphics,
                      double mouseX, double mouseY) {
         slot.draw(graphics, 0, 4);
 
         var font = Minecraft.getInstance().font;
         // Time first and in white: it is the answer to the question people are asking. The unit
         // count is the same fact in the mod's own currency, so it is there but subdued.
-        graphics.drawString(font,
+        graphics.text(font,
                 Component.translatable("portablebeacons.viewer.fuel_runtime",
                         Durations.format(entry.seconds())),
                 24, 4, 0xFFFFFF, false);
-        graphics.drawString(font,
+        graphics.text(font,
                 Component.translatable("portablebeacons.viewer.fuel_units", entry.units())
                         .withStyle(ChatFormatting.GRAY),
                 24, 15, 0xA0A0A0, false);

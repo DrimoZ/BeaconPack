@@ -135,6 +135,8 @@ dependencies {
     // Pure-logic classes under core/ are plain Java and unit-testable.
     testImplementation platform('org.junit:junit-bom:5.10.2')
     testImplementation 'org.junit.jupiter:junit-jupiter'
+    // Gradle 9 stopped putting the launcher on the test runtime classpath itself.
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 test {

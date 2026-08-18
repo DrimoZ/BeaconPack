@@ -13,7 +13,7 @@ import dev.drimoz.portablebeacons.registry.BPItems;
 import com.mojang.authlib.GameProfile;
 import io.netty.channel.embedded.EmbeddedChannel;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.TestFunctionLoader;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.PacketFlow;
@@ -23,12 +23,10 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.world.entity.animal.wolf.Wolf;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
-import net.neoforged.neoforge.gametest.GameTestHolder;
-import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,12 +54,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <p>Run headlessly with {@code ./gradlew runGameTestServer}, or {@code /test run portablebeacons} in a
  * client.
  */
-@GameTestHolder(PortableBeacons.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class BPGameTests {
 
-    private static final String PLATFORM = "platform";
-    private static final int TIMEOUT = 200;
+    /** Matches the structure named by every test_instance entry. */
+    public static final String PLATFORM = "platform";
+    public static final int TIMEOUT = 200;
 
     private static final BlockPos CENTRE = new BlockPos(4, 1, 4);
 
@@ -71,7 +68,6 @@ public final class BPGameTests {
     /** Distinct names per player - see {@link #spawnPlayer(GameTestHelper, Cleanup, String)}. */
     private static final AtomicInteger NEXT_PLAYER = new AtomicInteger();
 
-    @GameTest(template = PLATFORM, timeoutTicks = TIMEOUT)
     public static void packAppliesItsEffectToTheCarrier(GameTestHelper helper) {
         run(helper, cleanup -> {
             ServerPlayer carrier = spawnPlayer(helper, cleanup);
@@ -79,12 +75,11 @@ public final class BPGameTests {
 
             PackTicker.tickPlayer(carrier);
 
-            helper.assertTrue(carrier.getEffect(MobEffects.MOVEMENT_SPEED) != null,
+            helper.assertTrue(carrier.getEffect(MobEffects.SPEED) != null,
                     "the carrier did not receive the effect their own pack projects");
         });
     }
 
-    @GameTest(template = PLATFORM, timeoutTicks = TIMEOUT)
     public static void anInactivePackAppliesNothing(GameTestHelper helper) {
         run(helper, cleanup -> {
             ServerPlayer carrier = spawnPlayer(helper, cleanup);
@@ -93,13 +88,12 @@ public final class BPGameTests {
 
             PackTicker.tickPlayer(carrier);
 
-            helper.assertTrue(carrier.getEffect(MobEffects.MOVEMENT_SPEED) == null,
+            helper.assertTrue(carrier.getEffect(MobEffects.SPEED) == null,
                     "a pack switched off still applied its effect");
         });
     }
 
     /** The half of the aura that would otherwise need a second client to test by hand. */
-    @GameTest(template = PLATFORM, timeoutTicks = TIMEOUT)
     public static void auraReachesASecondPlayer(GameTestHelper helper) {
         run(helper, cleanup -> {
             ServerPlayer carrier = spawnPlayer(helper, cleanup);
@@ -108,12 +102,11 @@ public final class BPGameTests {
 
             PackTicker.tickPlayer(carrier);
 
-            helper.assertTrue(bystander.getEffect(MobEffects.MOVEMENT_SPEED) != null,
+            helper.assertTrue(bystander.getEffect(MobEffects.SPEED) != null,
                     "a player standing next to the carrier was not reached by the aura");
         });
     }
 
-    @GameTest(template = PLATFORM, timeoutTicks = TIMEOUT)
     public static void selfModeReachesNobodyElse(GameTestHelper helper) {
         run(helper, cleanup -> {
             ServerPlayer carrier = spawnPlayer(helper, cleanup);
@@ -122,9 +115,9 @@ public final class BPGameTests {
 
             PackTicker.tickPlayer(carrier);
 
-            helper.assertTrue(carrier.getEffect(MobEffects.MOVEMENT_SPEED) != null,
+            helper.assertTrue(carrier.getEffect(MobEffects.SPEED) != null,
                     "the carrier lost their own effect");
-            helper.assertTrue(bystander.getEffect(MobEffects.MOVEMENT_SPEED) == null,
+            helper.assertTrue(bystander.getEffect(MobEffects.SPEED) == null,
                     "a pack set to self only leaked its effect to a bystander");
         });
     }
@@ -133,7 +126,6 @@ public final class BPGameTests {
      * Team mode is the one that excludes, and the exclusion is what cannot be seen in single
      * player: there, the carrier is trivially allied with everyone who exists.
      */
-    @GameTest(template = PLATFORM, timeoutTicks = TIMEOUT)
     public static void teamModeExcludesPlayersOffTheTeam(GameTestHelper helper) {
         run(helper, cleanup -> {
             ServerPlayer carrier = spawnPlayer(helper, cleanup);
@@ -147,14 +139,13 @@ public final class BPGameTests {
             givePack(carrier, AuraMode.TEAM);
             PackTicker.tickPlayer(carrier);
 
-            helper.assertTrue(carrier.getEffect(MobEffects.MOVEMENT_SPEED) != null,
+            helper.assertTrue(carrier.getEffect(MobEffects.SPEED) != null,
                     "the carrier lost their own effect in team mode");
-            helper.assertTrue(outsider.getEffect(MobEffects.MOVEMENT_SPEED) == null,
+            helper.assertTrue(outsider.getEffect(MobEffects.SPEED) == null,
                     "team mode reached a player who is not on the team");
         });
     }
 
-    @GameTest(template = PLATFORM, timeoutTicks = TIMEOUT)
     public static void auraReachesATamedPetButNotAStrayOne(GameTestHelper helper) {
         run(helper, cleanup -> {
             ServerPlayer carrier = spawnPlayer(helper, cleanup);
@@ -166,9 +157,9 @@ public final class BPGameTests {
 
             PackTicker.tickPlayer(carrier);
 
-            helper.assertTrue(pet.getEffect(MobEffects.MOVEMENT_SPEED) != null,
+            helper.assertTrue(pet.getEffect(MobEffects.SPEED) != null,
                     "a tamed pet was not reached by allies_and_pets");
-            helper.assertTrue(stray.getEffect(MobEffects.MOVEMENT_SPEED) == null,
+            helper.assertTrue(stray.getEffect(MobEffects.SPEED) == null,
                     "an untamed animal was reached by allies_and_pets");
         });
     }
@@ -180,7 +171,6 @@ public final class BPGameTests {
      * applyAction was an upper bound, so a negative index used to reach List.set / List.remove and
      * throw on the server thread.
      */
-    @GameTest(template = PLATFORM, timeoutTicks = TIMEOUT)
     public static void hostileActionIndicesAreRejected(GameTestHelper helper) {
         run(helper, cleanup -> {
             ServerPlayer carrier = spawnPlayer(helper, cleanup);

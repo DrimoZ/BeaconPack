@@ -30,7 +30,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.SlotItemHandler;
+import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
@@ -756,7 +756,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
 
     private ItemStack slotStack(int handlerIndex) {
         for (var slot : menu.slots) {
-            if (slot instanceof SlotItemHandler handler
+            if (slot instanceof ResourceHandlerSlot handler
                     && handler.getSlotIndex() == handlerIndex) {
                 return slot.getItem();
             }
@@ -985,7 +985,7 @@ public class PortableBeaconScreen extends AbstractContainerScreen<PortableBeacon
     // ------------------------------------------------------------------ tooltips
 
     private boolean renderFuelSlotTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-        if (!(hoveredSlot instanceof SlotItemHandler handler)
+        if (!(hoveredSlot instanceof ResourceHandlerSlot handler)
                 || handler.getSlotIndex() != PortableBeaconItem.FUEL_SLOT
                 || !hoveredSlot.hasItem()) {
             return false;

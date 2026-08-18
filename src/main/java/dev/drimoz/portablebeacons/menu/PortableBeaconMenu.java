@@ -418,12 +418,12 @@ public class PortableBeaconMenu extends AbstractContainerMenu {
      * out whatever is there, then put in what was asked for", both inside one transaction: an
      * insert that gets refused rolls the extract back rather than leaving the slot emptied.
      *
-     * <p>Nested under any transaction already running rather than always opening a root one, which
-     * would throw if this is ever reached from inside a transfer.
+     * <p>A root transaction, because there is genuinely no context to nest under: vanilla drives
+     * slot writes from menu code, not from inside a transfer.
      */
     private static void setSlot(ResourceHandler<ItemResource> handler, int index,
                                 ItemResource resource, int amount) {
-        try (Transaction transaction = Transaction.open(Transaction.getCurrentOpenedTransaction())) {
+        try (Transaction transaction = Transaction.openRoot()) {
             int held = handler.getAmountAsInt(index);
             if (held > 0) {
                 handler.extract(index, handler.getResource(index), held, transaction);
