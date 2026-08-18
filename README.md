@@ -3,7 +3,7 @@
 Beacon effects in an inventory item. Four tiers, augments you slot in, and a fuel cost — all
 defined in datapacks rather than in code.
 
-**NeoForge 1.21.1** · Java 21 · MIT
+**NeoForge 26.1.2** · Java 25 · MIT
 
 **[Download on CurseForge](https://www.curseforge.com/minecraft/mc-mods/portables-beacons)**
 
@@ -17,12 +17,12 @@ config, datapack docs and FAQ. This README is the short version.
 A Portable Beacon sitting in your inventory projects beacon effects. Which effects, how far, how
 strong, and what it costs are all configured through its own screen.
 
-| Tier | Effects | Amplitude | Aura range | Augment slots |
-|---|---|---|---|---|
-| I | 1 | I | self only | 0 |
-| II | 1 | I | 8 blocks | 1 |
-| III | 2 | I | 12 blocks | 2 |
-| IV | 2 | one at II | 16 blocks | 3 |
+| Tier | Effects | Level | Shares with | Aura range | Augment slots |
+|---|---|---|---|---|---|
+| I | 1 | I | you | — | 0 |
+| II | 1 | I | you | 8 blocks | 1 |
+| III | 2 | I | your team | 12 blocks | 2 |
+| IV | 2 | II | your team | 16 blocks | 3 |
 
 Ranges are far below the vanilla beacon's 20–50 blocks on purpose: a beacon that follows you is
 worth much more than a fixed one at equal reach.
@@ -36,11 +36,15 @@ comes from a datapack registry entry, so a datapack can add new ones without any
 |---|---|
 | Range | +4 / +8 / +12 blocks |
 | Focus | +1 effect slot |
-| Amplification | +1 effect level |
+| Amplification | +1 to the effect level you may *reach* — you still choose it, and still pay for it |
 | Efficiency | −25 / −40 / −55 % fuel |
 | Capacity | fuel buffer ×2 / ×3 / ×4 |
-| Attunement | unlocks wider sharing modes |
+| Attunement | +1 / +2 sharing ranks, which is how most beacons share at all |
 | Discretion | hides effect particles, and the status icon at tier II |
+
+Sharing is earned rather than given: Beacons I and II keep everything to the carrier, III and IV
+reach your team, and anything wider needs Attunement. Each tier's starting point is a datapack
+field, so a datapack can hand it all out from the start or lock it all behind the augment.
 
 ### Themed beacons
 
@@ -139,8 +143,9 @@ item.
 ## Compatibility
 
 **Curios** is optional. With it installed, a beacon worn in the `charm` slot works exactly like one
-carried in the inventory — the binding ships with the mod, so nothing needs configuring. One in the inventory still wins if you somehow carry two. Without Curios, none of that code is ever
-touched.
+carried in the inventory — the binding ships with the mod, so nothing needs configuring. A worn
+beacon wins if you somehow carry two: one you deliberately equipped should beat one that merely
+happens to be in your bag. Without Curios, none of that code is ever touched.
 
 ---
 
@@ -165,7 +170,7 @@ freely, but do not lift them into another project. See [LICENSE-ASSETS](LICENSE-
 
 ## Building
 
-Requires JDK 21.
+Requires JDK 25.
 
 ```bash
 ./gradlew build

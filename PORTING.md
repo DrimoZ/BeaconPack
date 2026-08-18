@@ -117,7 +117,7 @@ them that way. That bet gets tested here. Expect real work but confined to two o
 `Validatable` interface — `validate(ValidationContext)` — replacing ad-hoc validation. `FuelDef`
 currently validates through `Codec#validate` for its exactly-one-of-item-or-tag rule; that becomes
 the new interface. Moderate, and the JSON format the datapacks use should be unaffected — **the
-registries stay compatible for pack authors**, which is worth saying on the store page.
+registries stay compatible for datapack authors**, which is worth saying on the store page.
 
 ### The parts that should be nearly free
 
@@ -260,7 +260,50 @@ beacon stores its contents does not have to change; this is about the capability
   All four providers plus `BPDataGen` are affected.
 - **Gametests**, 24 errors, the area §4 flagged as unknown. Now measured, still unexamined.
 
-## 9. Branches
+## 9. What actually happened
+
+The port is done: 169 errors to zero, 33 unit tests, 8 gametests. Kept as written above rather than
+tidied, because the estimate is only useful next time if its mistakes are still visible.
+
+### Where the estimate was wrong
+
+**The screen was not a rewrite.** §4 called it "the whole cost of this port" and said to assume it
+was rewritten, because 26.1 "split drawing into two phases". The split is real, but
+`GuiGraphicsExtractor` kept the same verbs — `fill`, `blit`, text — so all 97 draw calls migrated by
+renaming. The drawer animation, which §4 named as "exactly the shape the new model removes", needed
+no change at all: extraction runs every frame, so reading a clock and interpolating a width works
+as it always did. I read more into one line of a primer summary than the line said.
+
+**Datagen was worse.** §4 listed two providers; all four broke, plus the entry point, plus a trap
+the analysis never suspected — see below.
+
+**Gametests were a rearchitecture, not a migration.** §4 marked them "unknown", which was honest,
+and unknown turned out to mean the `@GameTest` annotation no longer exists.
+
+### What the analysis could not have predicted
+
+Three of the hardest bugs were invisible to a compiler and to every test:
+
+- **The two datagen runs deleted each other's output.** The generator purges anything under its
+  output folder that the providers it just ran did not write. Pointed at one folder, whichever run
+  went second wiped the other half — the mod had models and no recipes, then recipes and no models.
+  Separate output folders, separate caches.
+- **Every label on the screen was invisible.** Text colours are strict ARGB now, and the two text
+  constants had no alpha channel — `0x404040` is alpha 0. The accent colours all carried `0xFF`
+  already, so the tab glyphs and buttons looked right and hid how wide the problem was.
+- **Vanilla unpacked the beacon's slots into its tooltip**, unprompted, because
+  `ItemContainerContents` is a tooltip provider now.
+
+None of these fail a build. All three needed the game running and someone looking at it.
+
+### What held
+
+`core/` came through with three errors, all one rename. The two files that differ from the 1.21.1
+branch differ by six lines and two — the same arithmetic, character for character, across ten
+primers. That is the whole argument for the layer, and it is the one prediction in this document
+that was not just right but underclaimed.
+
+## 10. Branches
 
 One branch per game version, since each one keeps getting files rather than being replaced.
 
