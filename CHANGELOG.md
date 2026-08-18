@@ -3,6 +3,104 @@
 All notable changes to this project are documented here, newest first.
 Versions follow `{mod version}+{minecraft version}`.
 
+## 1.1.0
+
+### Added
+- **Seven augments, and four new levers to build them from.**
+
+  The mod had seven operations and seven augments — one each — so the vocabulary was saturated and
+  anything new was a recombination. These four operations are the first additions to it:
+
+  | | |
+  |---|---|
+  | `mul_aura_cost` | scales the sharing surcharge **alone** |
+  | `free_effect_slot` | runs the dearest N effects for nothing |
+  | `mul_cost_moving` | while the carrier is travelling |
+  | `mul_cost_still` | while holding a position |
+
+  Four augments spend them, and three combine several gains across different axes for one cost — so
+  what they buy back is a **slot**, which is the scarcest thing a beacon has:
+
+  | | Gains | Pays |
+  |---|---|---|
+  | **Communion** | sharing surcharge ×0.5 / ×0.3 | all fuel ×1.35 / ×1.5 |
+  | **Wellspring** | one effect free | everything else ×1.6 |
+  | **Wayfarer** | ×0.5 / ×0.35 while moving | ×1.6 / ×1.9 standing still |
+  | **Sentinel** | ×0.5 / ×0.35 standing still | ×1.6 / ×1.9 while moving |
+  | **Vanguard** | +12 range, +1 aura rank | fuel ×1.9 |
+  | **Prism** | +1 effect slot, +1 level ceiling | fuel ×2.2 |
+  | **Recluse** | fuel ×0.35, buffer ×3, no particles | −2 aura ranks |
+
+  `mul_aura_cost` is the one that opens the most ground: sharing became the central mechanic in this
+  release and nothing modulated its price.
+
+- **Beacon IV: three effect slots and four augment slots.**
+
+### Changed
+- **Fuel moved to container slot 0**, with augments after it. It used to sit *after* the augments, so
+  its index was derived from the augment count — meaning any future slot added by the mod would shift
+  it and turn the fuel in every saved beacon into an augment. Doing this now costs nothing, since the
+  id rename already breaks saves, and it means the layout is stable under the change this mod is
+  most likely to make again.
+
+  To be clear, since it is easy to confuse the two: a **datapack** moving `augment_slots` was never
+  dangerous and still is not. That field says how many slots are *usable*; the container's size is
+  fixed by the mod. Lowering it locks augments in place rather than losing them.
+- The sharing surcharge is computed separately from an effect's own cost, so an augment can discount
+  one without the other. Every existing price is unchanged, and a test pins them there — a refactor
+  of that shape moves the whole balance without failing anything.
+
+### Fixed
+- `effect_slots` accepted up to 9 while the screen laid out 5, and nothing connected them. A sixth
+  effect would have been resolved, charged and kept — paid for and invisible. One ceiling now, in
+  the place the number is decided.
+- The effect cases were drawn from the background texture, which held exactly three, so a beacon
+  with more slots showed its fourth and fifth floating with no frame.
+- An effect covered by Wellspring reported "Drain 375%": its share compared a gross cost against a
+  total it had been excluded from. It says *free* now.
+- The advancement tab drew as missing texture. `ClientAsset.ResourceTexture` builds its own path, so
+  passing a full one asked for `textures/textures/….png.png`.
+
+## 1.1.0+26.1.2 — the port
+
+Everything in 1.1.0 above, built for **Minecraft 26.1.2** on NeoForge 26.1.2.95 and Java 25.
+
+Ten primers separate 1.21.1 from 26.1 — 1.21.1 was the modding anchor for a year, so nothing moved
+and then everything did at once. `core/`, the layer with no dependency on components, packets or
+rendering, came through the whole port with **three errors, all one rename**; the two files that
+differ from the 1.21.1 branch differ by six lines and two.
+
+### Changed
+- Item handling moved to NeoForge's resource transfer API. `IItemHandler` is deprecated for removal,
+  and a bridge existed, but this plan already commits to 26.2 and 26.3 — the wrapper would have come
+  due inside work already scheduled. Fuel is now drawn inside a transaction, so a slot that refuses
+  to give up its item cannot credit fuel that was never burned.
+- The augment glyph is chosen by the model, keyed on the augment's **registry key**. The old
+  `model_data` integer had to match an array's order in the model generator, and when the two
+  drifted an augment simply rendered as the wrong glyph with nothing reporting it. The field is gone
+  from `AugmentDef`; existing datapacks still load, because a record codec ignores what it does not
+  know.
+- Item colours are tint sources declared by the model rather than handlers registered in code, so
+  the augment tint travels with the model it tints.
+- Tooltips are assembled from registered appenders instead of an override on the item.
+- Gametests are registered functions plus `test_instance` data files; the `@GameTest` annotation is
+  gone.
+
+### Fixed
+- Vanilla unpacked the beacon's own slots into its tooltip, on every hover, shift or not:
+  `ItemContainerContents` is a tooltip provider now and the beacon stores its augments and fuel in
+  `minecraft:container`. Hidden through `TOOLTIP_DISPLAY` — the beacon already says what it holds,
+  in its own words and only when asked.
+- Every label on the beacon screen was invisible. Text colours are strict ARGB now, and a bare
+  `0xRRGGBB` is alpha 0 — it draws nothing rather than defaulting to opaque. The stats drawer read
+  as an empty panel because it is nothing but text.
+
+### Notes
+- **EMI is not included.** No 26.x NeoForge build exists to compile against, on either platform. The
+  plugin stays in the source tree and returns in one commit when one appears. JEI covers the same
+  ground meanwhile.
+- Curios 15.0.0+26.1.2 and JEI 29.29.0.76 are the versions this was built against.
+
 ## 1.0.1
 
 Finishes the rename. 1.0.0 changed the mod id and left the item ids alone, so the beacons were still

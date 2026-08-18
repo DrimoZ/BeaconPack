@@ -22,7 +22,7 @@ strong, and what it costs are all configured through its own screen.
 | I | 1 | I | you | — | 0 |
 | II | 1 | I | you | 8 blocks | 1 |
 | III | 2 | I | your team | 12 blocks | 2 |
-| IV | 2 | II | your team | 16 blocks | 3 |
+| IV | 3 | II | your team | 16 blocks | 4 |
 
 Ranges are far below the vanilla beacon's 20–50 blocks on purpose: a beacon that follows you is
 worth much more than a fixed one at equal reach.
@@ -42,9 +42,24 @@ comes from a datapack registry entry, so a datapack can add new ones without any
 | Attunement | +1 / +2 sharing ranks, which is how most beacons share at all |
 | Discretion | hides effect particles, and the status icon at tier II |
 
+Those seven are pure gains — the only cost is the slot. Seven more give something up, and those are
+where the decisions are:
+
+| Augment | Gains | Pays |
+|---|---|---|
+| Communion | sharing surcharge ×0.5 / ×0.3 | all fuel ×1.35 / ×1.5 |
+| Wellspring | your dearest effect runs free | everything else ×1.6 |
+| Wayfarer | ×0.5 / ×0.35 while moving | ×1.6 / ×1.9 standing still |
+| Sentinel | ×0.5 / ×0.35 standing still | ×1.6 / ×1.9 while moving |
+| Vanguard | +12 blocks, +1 sharing rank | fuel ×1.9 |
+| Prism | +1 effect slot, +1 level ceiling | fuel ×2.2 |
+| Recluse | fuel ×0.35, buffer ×3, no particles | −2 sharing ranks |
+
+Fourteen augments, at most four slots. The question is never which you want but which four.
+
 Sharing is earned rather than given: Beacons I and II keep everything to the carrier, III and IV
-reach your team, and anything wider needs Attunement. Each tier's starting point is a datapack
-field, so a datapack can hand it all out from the start or lock it all behind the augment.
+reach your team, and anything wider needs Attunement or Vanguard. Each tier's starting point is a
+datapack field, so a pack can hand it all out from the start or lock it all behind an augment.
 
 ### Themed beacons
 

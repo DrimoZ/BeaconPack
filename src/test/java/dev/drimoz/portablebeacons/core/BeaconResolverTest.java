@@ -32,10 +32,21 @@ class BeaconResolverTest {
     private static final AugmentDef ATTUNEMENT_DEF = new AugmentDef(2, 0, 0, List.of(
             new AugmentDef.Operation(AugmentDef.Type.UNLOCK_AURA, List.of(1.0, 2.0))));
 
+    private static final ResourceKey<AugmentDef> COMMUNION = augmentKey("communion");
+    private static final AugmentDef COMMUNION_DEF = new AugmentDef(1, 0, 0, List.of(
+            new AugmentDef.Operation(AugmentDef.Type.MUL_AURA_COST, List.of(0.5))));
+
+    private static final ResourceKey<AugmentDef> WELLSPRING = augmentKey("wellspring");
+    private static final AugmentDef WELLSPRING_DEF = new AugmentDef(1, 0, 0, List.of(
+            new AugmentDef.Operation(AugmentDef.Type.FREE_EFFECT_SLOT, List.of(1.0)),
+            new AugmentDef.Operation(AugmentDef.Type.MUL_FUEL, List.of(1.6))));
+
     private static final BeaconResolver.Lookup<AugmentDef> AUGMENTS = lookup(Map.of(
             RANGE, RANGE_DEF,
             FOCUS, FOCUS_DEF,
-            ATTUNEMENT, ATTUNEMENT_DEF));
+            ATTUNEMENT, ATTUNEMENT_DEF,
+            COMMUNION, COMMUNION_DEF,
+            WELLSPRING, WELLSPRING_DEF));
 
     @Test
     void augmentsStackAcrossTypes() {
@@ -92,6 +103,66 @@ class BeaconResolverTest {
         BeaconStats fully = BeaconResolver.resolve(TIER_4,
                 List.of(new AugmentInstance(ATTUNEMENT, 2)), AUGMENTS);
         assertTrue(fully.allows(AuraMode.ALLIES_AND_PETS), "Attunement II reaches pets too");
+    }
+
+    /**
+     * The sharing surcharge was folded into the effect's own cost until Communion needed to discount
+     * it alone. Splitting it out must leave every existing beacon charging exactly what it did.
+     */
+    @Test
+    void separatingTheSharingSurchargeDidNotChangeAnyPrice() {
+        BeaconStats stats = BeaconResolver.resolve(TIER_4, List.of(), AUGMENTS);
+        BeaconResolver.Lookup<BeaconEffectDef> effects =
+                lookup(Map.of(effectKey("speed"), new BeaconEffectDef(null, 1.0, 2, 1, 2.0)));
+
+        // 1.0 base, level II doubles it, allies multiplies by 2.0, range 16 adds 1 + 16/64.
+        double allies = BeaconResolver.fuelPerSecond(
+                new EffectSlotConfig(effectKey("speed"), 1, true, AuraMode.ALLIES), stats, effects);
+        assertEquals(1.0 * 2.0 * 2.0 * 1.25, allies, 1e-9);
+
+        // Self pays neither the surcharge nor the range factor.
+        double self = BeaconResolver.fuelPerSecond(
+                new EffectSlotConfig(effectKey("speed"), 1, true, AuraMode.SELF), stats, effects);
+        assertEquals(2.0, self, 1e-9);
+    }
+
+    @Test
+    void communionDiscountsTheSurchargeAndNotTheEffect() {
+        BeaconStats stats = BeaconResolver.resolve(TIER_4,
+                List.of(new AugmentInstance(COMMUNION, 1)), AUGMENTS);
+        BeaconResolver.Lookup<BeaconEffectDef> effects =
+                lookup(Map.of(effectKey("speed"), new BeaconEffectDef(null, 1.0, 2, 1, 2.0)));
+
+        // Allies costs +100%; halving the surcharge leaves +50%, so 1.5 rather than 2.0.
+        double allies = BeaconResolver.fuelPerSecond(
+                new EffectSlotConfig(effectKey("speed"), 0, true, AuraMode.ALLIES), stats, effects);
+        assertEquals(1.0 * 1.5 * 1.25, allies, 1e-9);
+
+        // What you keep to yourself is untouched by it.
+        double self = BeaconResolver.fuelPerSecond(
+                new EffectSlotConfig(effectKey("speed"), 0, true, AuraMode.SELF), stats, effects);
+        assertEquals(1.0, self, 1e-9);
+    }
+
+    /**
+     * The free slot must land on the dearest effect, not the first one configured — otherwise the
+     * augment is worth whatever order the player happened to set things up in.
+     */
+    @Test
+    void aFreeSlotIsSpentOnTheMostExpensiveEffect() {
+        BeaconStats stats = BeaconResolver.resolve(TIER_4,
+                List.of(new AugmentInstance(WELLSPRING, 1)), AUGMENTS);
+        BeaconResolver.Lookup<BeaconEffectDef> effects = lookup(Map.of(
+                effectKey("speed"), new BeaconEffectDef(null, 1.0, 0, 1, 2.0),
+                effectKey("haste"), new BeaconEffectDef(null, 5.0, 0, 1, 2.0)));
+
+        BeaconState cheapFirst = new BeaconState(List.of(
+                new EffectSlotConfig(effectKey("speed"), 0, true, AuraMode.SELF),
+                new EffectSlotConfig(effectKey("haste"), 0, true, AuraMode.SELF)),
+                1000, true, 12000);
+
+        // Wellspring frees the 5.0 one and charges the 1.0, then its own x1.6 applies.
+        assertEquals(1.0 * 1.6, BeaconResolver.fuelPerSecond(cheapFirst, stats, effects), 1e-9);
     }
 
     @Test

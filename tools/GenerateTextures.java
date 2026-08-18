@@ -44,10 +44,8 @@ public final class GenerateTextures {
 
         panel(image, 0, 0, WIDTH, HEIGHT);
 
-        // Effect cases: 24x24 so the level indicator has room in the corner.
-        for (int i = 0; i < 3; i++) {
-            recess(image, 16 + i * 30, 44, 26, 26);
-        }
+        // No effect cases here: the screen draws them, because how many there are depends on the
+        // beacon and its augments and a baked texture can only ever hold one answer.
         // Info panel.
         recess(image, 16, 78, 162, 68);
         // Player inventory + hotbar.
@@ -85,7 +83,8 @@ public final class GenerateTextures {
         // One glyph per built-in augment, selected by a model override. A datapack-added augment
         // declares no model_data and falls back to the plain gem above.
         String[] glyphs = {"range", "focus", "amplification", "efficiency", "capacity", "attunement",
-                "discretion"};
+                "discretion",
+                "communion", "wellspring", "wayfarer", "sentinel", "vanguard", "prism", "recluse"};
         for (String glyph : glyphs) {
             ImageIO.write(augmentIcon(glyph), "PNG",
                     new File(ITEM_DIR + "/augment_" + glyph + ".png"));
@@ -250,6 +249,105 @@ public final class GenerateTextures {
                 fill(image, 7, 5, 2, 1, ink);
                 fill(image, 4, 5, 2, 1, ink);
                 fill(image, 10, 5, 2, 1, ink);
+            }
+            // Double chevron up: Amplification's one, doubled - it goes further and costs more.
+            case "overdrive" -> {
+                fill(image, 7, 3, 2, 2, ink);
+                fill(image, 5, 5, 2, 2, ink);
+                fill(image, 9, 5, 2, 2, ink);
+                fill(image, 7, 7, 2, 2, ink);
+                fill(image, 5, 9, 2, 2, ink);
+                fill(image, 9, 9, 2, 2, ink);
+            }
+            // A widening beam: reach bought at the cost of everything behind it.
+            case "projector" -> {
+                fill(image, 4, 7, 2, 2, ink);
+                fill(image, 7, 6, 1, 4, ink);
+                fill(image, 9, 5, 1, 6, ink);
+                fill(image, 11, 4, 1, 8, ink);
+            }
+            // A closed purse: it spends little and holds little.
+            case "miser" -> {
+                fill(image, 5, 6, 6, 1, ink);
+                fill(image, 5, 7, 1, 4, ink);
+                fill(image, 10, 7, 1, 4, ink);
+                fill(image, 6, 11, 4, 1, ink);
+                fill(image, 7, 4, 2, 2, ink);
+            }
+            // A tall tank with the level near the top.
+            case "reservoir" -> {
+                fill(image, 5, 3, 6, 1, ink);
+                fill(image, 5, 4, 1, 8, ink);
+                fill(image, 10, 4, 1, 8, ink);
+                fill(image, 6, 11, 4, 1, ink);
+                fill(image, 6, 6, 4, 4, ink);
+            }
+            // A horn, sounding outward: the aura carried further than the beacon can manage alone.
+            case "herald" -> {
+                fill(image, 4, 6, 2, 4, ink);
+                fill(image, 6, 5, 1, 6, ink);
+                fill(image, 7, 4, 1, 8, ink);
+                fill(image, 10, 6, 1, 1, ink);
+                fill(image, 11, 8, 1, 1, ink);
+                fill(image, 10, 10, 1, 1, ink);
+            }
+            // Three points joined: sharing, made cheap.
+            case "communion" -> {
+                fill(image, 7, 3, 2, 2, ink);
+                fill(image, 4, 9, 2, 2, ink);
+                fill(image, 10, 9, 2, 2, ink);
+                fill(image, 6, 5, 1, 4, ink);
+                fill(image, 9, 5, 1, 4, ink);
+                fill(image, 6, 11, 4, 1, ink);
+            }
+            // A source with ripples spreading below it: one effect that costs nothing.
+            case "wellspring" -> {
+                fill(image, 7, 3, 2, 3, ink);
+                fill(image, 5, 7, 6, 1, ink);
+                fill(image, 4, 9, 8, 1, ink);
+                fill(image, 3, 11, 10, 1, ink);
+            }
+            // A boot in motion: cheap while travelling.
+            case "wayfarer" -> {
+                fill(image, 6, 3, 3, 6, ink);
+                fill(image, 6, 9, 6, 2, ink);
+                fill(image, 3, 5, 2, 1, ink);
+                fill(image, 3, 8, 2, 1, ink);
+            }
+            // A tower: cheap while holding a position.
+            case "sentinel" -> {
+                fill(image, 5, 3, 6, 1, ink);
+                fill(image, 5, 5, 1, 1, ink);
+                fill(image, 7, 5, 2, 1, ink);
+                fill(image, 10, 5, 1, 1, ink);
+                fill(image, 6, 4, 4, 8, ink);
+            }
+            // An arrow breaking out of a ring: reach and audience in one slot.
+            case "vanguard" -> {
+                fill(image, 4, 6, 1, 4, ink);
+                fill(image, 5, 4, 1, 2, ink);
+                fill(image, 5, 10, 1, 2, ink);
+                fill(image, 6, 3, 3, 1, ink);
+                fill(image, 6, 12, 3, 1, ink);
+                fill(image, 6, 7, 6, 2, ink);
+                fill(image, 10, 5, 2, 2, ink);
+                fill(image, 10, 9, 2, 2, ink);
+            }
+            // A wedge splitting one beam into three.
+            case "prism" -> {
+                fill(image, 3, 7, 3, 2, ink);
+                fill(image, 6, 4, 2, 8, ink);
+                fill(image, 9, 4, 3, 1, ink);
+                fill(image, 9, 7, 3, 1, ink);
+                fill(image, 9, 10, 3, 1, ink);
+            }
+            // A shut door: everything kept in, nothing given out.
+            case "recluse" -> {
+                fill(image, 4, 3, 8, 1, ink);
+                fill(image, 4, 4, 1, 9, ink);
+                fill(image, 11, 4, 1, 9, ink);
+                fill(image, 5, 12, 6, 1, ink);
+                fill(image, 9, 7, 1, 2, ink);
             }
             default -> { }
         }

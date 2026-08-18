@@ -43,7 +43,7 @@ provides costs nothing. The block stays the better choice for a base; this is wh
 | Portable Beacon I | 1 | I | you | — | — |
 | Portable Beacon II | 1 | I | you | 8 blocks | 1 |
 | Portable Beacon III | 2 | I | your team | 12 blocks | 2 |
-| Portable Beacon IV | 2 | II | your team | 16 blocks | 3 |
+| Portable Beacon IV | 3 | II | your team | 16 blocks | 4 |
 
 **Cinder**, **Void** and **Tidal** beacons branch off tier II with narrow pools drawn from effects
 the vanilla beacon never offered — Fire Resistance, Slow Falling, Water Breathing, Conduit Power,
@@ -51,11 +51,18 @@ Dolphin's Grace. Carrying one instead of a Beacon IV is a trade, not a downgrade
 
 Both ceilings above can be raised by augments, and both are datapack fields.
 
-### Seven augments
+### Fourteen augments, four slots
 
-Range, Focus, Amplification, Efficiency, Capacity, Attunement and Discretion — one of each type per
-beacon, most with three tiers. More reach, more effects at once, higher levels, cheaper fuel, a
-bigger buffer, wider sharing, or no particles at all.
+Seven are pure gains: more reach, more effects at once, higher levels, cheaper fuel, a bigger
+buffer, wider sharing, or no particles at all. One of each type per beacon, most with three tiers.
+
+The other seven give something up, and those are the interesting ones. **Wellspring** runs your most
+expensive effect for nothing and charges more for the rest. **Communion** makes sharing cheap and
+everything else dearer. **Wayfarer** and **Sentinel** are opposites — one is cheap while you travel,
+the other while you hold a position. **Recluse** halves your costs, triples your buffer and hides
+your particles, in exchange for sharing with nobody at all.
+
+With at most four slots, the question is never which augment you want. It is which four.
 
 **Sharing is earned, not given.** Reaching beyond your own team costs an Attunement augment, and
 therefore an augment slot — which is the decision, since the slot could have held more range or

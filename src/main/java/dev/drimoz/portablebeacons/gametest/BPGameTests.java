@@ -290,7 +290,7 @@ public final class BPGameTests {
             IItemHandler slots = beacon.getCapability(Capabilities.ItemHandler.ITEM);
             ItemStack augment = new ItemStack(BPItems.AUGMENT.get());
             augment.set(BPComponents.AUGMENT.get(), new AugmentInstance(ATTUNEMENT, needed));
-            ((IItemHandlerModifiable) slots).setStackInSlot(0, augment);
+            ((IItemHandlerModifiable) slots).setStackInSlot(PortableBeaconItem.augmentSlot(0), augment);
             // Re-set: writing the augment put the container component on the same stack, and the
             // state above was captured before it existed.
             PortableBeaconItem.setState(beacon, state);

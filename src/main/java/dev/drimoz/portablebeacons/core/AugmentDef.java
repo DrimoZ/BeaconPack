@@ -73,7 +73,25 @@ public record AugmentDef(int maxTier, int color, int modelData, List<Operation> 
          * <p>The first operation that is not an amount: the value picks a behaviour rather than
          * scaling one, which is why the resolver reads it as a threshold.
          */
-        HIDE_EFFECTS("hide_effects");
+        HIDE_EFFECTS("hide_effects"),
+        /**
+         * Multiplies the sharing surcharge only, leaving what an effect costs you unchanged.
+         *
+         * <p>The first operation that touches the economy rather than a stat: every other one makes
+         * a number bigger, this one makes a strategy affordable.
+         */
+        MUL_AURA_COST("mul_aura_cost"),
+        /**
+         * Runs this many effects for nothing - the most expensive ones, so the value does not
+         * depend on the order the player happened to configure them in.
+         */
+        FREE_EFFECT_SLOT("free_effect_slot"),
+        /**
+         * Multiplies cost while the carrier is moving. Its counterpart applies while standing
+         * still, so an augment can favour either travelling or holding a position.
+         */
+        MUL_COST_MOVING("mul_cost_moving"),
+        MUL_COST_STILL("mul_cost_still");
 
         public static final Codec<Type> CODEC = StringRepresentable.fromEnum(Type::values);
 

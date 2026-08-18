@@ -30,15 +30,9 @@ class TranslationsTest {
 
     private static final Pattern PLACEHOLDER = Pattern.compile("%%|%s");
 
-    private static final Path LANG = resourceRoot();
-
-    private static Path resourceRoot() {
-        try {
-            return Path.of(TranslationsTest.class.getResource("/assets/portablebeacons/lang").toURI());
-        } catch (Exception e) {
-            throw new IllegalStateException("lang files not on the test classpath", e);
-        }
-    }
+    /** Read from the source tree — see {@link ProjectFiles}. */
+    private static final Path LANG = ProjectFiles.resources()
+            .resolve(Path.of("assets", "portablebeacons", "lang"));
 
     @Test
     void everyLocaleMatchesEnglish() throws IOException {

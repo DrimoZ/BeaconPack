@@ -20,7 +20,8 @@ public class BPItemModelProvider extends ItemModelProvider {
 
     /** Order defines the model_data values, which the registry entries must match. */
     private static final String[] AUGMENTS = {
-            "range", "focus", "amplification", "efficiency", "capacity", "attunement", "discretion"
+            "range", "focus", "amplification", "efficiency", "capacity", "attunement", "discretion",
+            "communion", "wellspring", "wayfarer", "sentinel", "vanguard", "prism", "recluse"
     };
 
     public BPItemModelProvider(PackOutput output, ExistingFileHelper helper) {

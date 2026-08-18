@@ -28,18 +28,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
  */
 class BuiltinDataTest {
 
-    /** Resolved through the classpath: the test's working directory is the run folder, not the
-     *  project root, so a relative source path finds nothing. */
-    private static final Path DATA = resourceRoot();
-
-    private static Path resourceRoot() {
-        try {
-            return Path.of(BuiltinDataTest.class
-                    .getResource("/data/portablebeacons/portablebeacons").toURI());
-        } catch (Exception e) {
-            throw new IllegalStateException("built-in data not on the test classpath", e);
-        }
-    }
+    /** Read from the source tree — see {@link ProjectFiles}. */
+    private static final Path DATA = ProjectFiles.resources()
+            .resolve(Path.of("data", "portablebeacons", "portablebeacons"));
 
     // No bootstrap here: ModDevGradle's junit run type already brings Minecraft up, and calling
     // SharedConstants.setVersion a second time throws.

@@ -42,6 +42,48 @@
       "predicate": {
         "portablebeacons:augment_type": 7.0
       }
+    },
+    {
+      "model": "portablebeacons:item/augment_communion",
+      "predicate": {
+        "portablebeacons:augment_type": 8.0
+      }
+    },
+    {
+      "model": "portablebeacons:item/augment_wellspring",
+      "predicate": {
+        "portablebeacons:augment_type": 9.0
+      }
+    },
+    {
+      "model": "portablebeacons:item/augment_wayfarer",
+      "predicate": {
+        "portablebeacons:augment_type": 10.0
+      }
+    },
+    {
+      "model": "portablebeacons:item/augment_sentinel",
+      "predicate": {
+        "portablebeacons:augment_type": 11.0
+      }
+    },
+    {
+      "model": "portablebeacons:item/augment_vanguard",
+      "predicate": {
+        "portablebeacons:augment_type": 12.0
+      }
+    },
+    {
+      "model": "portablebeacons:item/augment_prism",
+      "predicate": {
+        "portablebeacons:augment_type": 13.0
+      }
+    },
+    {
+      "model": "portablebeacons:item/augment_recluse",
+      "predicate": {
+        "portablebeacons:augment_type": 14.0
+      }
     }
   ],
   "textures": {

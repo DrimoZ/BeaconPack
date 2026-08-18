@@ -22,10 +22,23 @@ public record BeaconStats(
         int fuelCapacity,
         int maxAmplifier,
         double fuelMultiplier,
+        double auraCostMultiplier,
+        int freeEffectSlots,
+        double movingCostMultiplier,
+        double stillCostMultiplier,
         Set<AuraMode> allowedAuraModes,
         boolean hideParticles,
         boolean hideIcon
 ) {
+    /**
+     * The most effect slots a beacon can ever have, however generous the tier and the augments.
+     *
+     * <p>Lives here rather than in the screen because it is not only a drawing limit: an effect
+     * beyond what the screen lays out would still be resolved, charged and kept by sanitize — paid
+     * for and invisible. The cap belongs where the number is decided, so the two cannot disagree.
+     */
+    public static final int MAX_EFFECT_SLOTS = 5;
+
     public boolean allows(AuraMode mode) {
         return allowedAuraModes.contains(mode);
     }

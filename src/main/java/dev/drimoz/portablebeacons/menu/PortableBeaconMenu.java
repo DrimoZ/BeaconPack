@@ -110,7 +110,7 @@ public class PortableBeaconMenu extends AbstractContainerMenu {
 
         IItemHandler handler = new LiveBeaconHandler();
         for (int i = 0; i < PortableBeaconItem.AUGMENT_SLOTS; i++) {
-            addSlot(new AugmentSlot(handler, i, FIRST_AUGMENT_SLOT_X + i * 18, AUGMENT_SLOT_Y));
+            addSlot(new AugmentSlot(handler, PortableBeaconItem.augmentSlot(i), FIRST_AUGMENT_SLOT_X + i * 18, AUGMENT_SLOT_Y));
         }
         // No fuel slot at all when fuel is switched off, rather than a slot that refuses
         // everything. Both sides read the same synced config, so the slot counts agree.
@@ -177,7 +177,7 @@ public class PortableBeaconMenu extends AbstractContainerMenu {
         RegistryAccess access = player.level().registryAccess();
         BeaconTierDef tier = tierDef();
         if (tier == null) {
-            return new BeaconStats(0, 0, 0.0, 0, 0, 1.0,
+            return new BeaconStats(0, 0, 0.0, 0, 0, 1.0, 1.0, 0, 1.0, 1.0,
                     java.util.EnumSet.of(AuraMode.SELF), false, false);
         }
         return BeaconResolver.resolve(
@@ -461,7 +461,8 @@ public class PortableBeaconMenu extends AbstractContainerMenu {
             if (instance == null) {
                 return false;
             }
-            if (getSlotIndex() >= stats().augmentSlots()) {
+            // getSlotIndex() is a container index; augmentSlots() is a count. Fuel occupies index 0.
+            if (getSlotIndex() - 1 >= stats().augmentSlots()) {
                 return false;
             }
             return BPLookups.installedAugments(beacon()).stream()

@@ -82,8 +82,10 @@ public final class BPLookups {
             return List.of();
         }
         List<AugmentInstance> found = new ArrayList<>(PortableBeaconItem.AUGMENT_SLOTS);
-        for (int slot = 0; slot < Math.min(PortableBeaconItem.AUGMENT_SLOTS, handler.getSlots()); slot++) {
-            AugmentInstance instance = AugmentItem.instanceOf(handler.getStackInSlot(slot));
+        int slots = Math.min(PortableBeaconItem.AUGMENT_SLOTS, handler.getSlots() - 1);
+        for (int slot = 0; slot < slots; slot++) {
+            AugmentInstance instance = AugmentItem.instanceOf(
+                    handler.getStackInSlot(PortableBeaconItem.augmentSlot(slot)));
             if (instance != null) {
                 found.add(instance);
             }

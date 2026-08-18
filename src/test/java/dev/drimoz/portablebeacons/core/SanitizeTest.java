@@ -103,7 +103,7 @@ class SanitizeTest {
 
     private static BeaconStats stats(BeaconTierDef tier, int effectSlots, int maxAmplifier) {
         return new BeaconStats(effectSlots, tier.augmentSlots(), tier.baseRange(), 12000,
-                maxAmplifier, 1.0,
+                maxAmplifier, 1.0, 1.0, 0, 1.0, 1.0,
                 java.util.EnumSet.of(AuraMode.SELF), false, false);
     }
 
