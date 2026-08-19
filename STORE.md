@@ -45,7 +45,7 @@ provides costs nothing. The block stays the better choice for a base; this is wh
 | Portable Beacon III | 2 | I | your team | 12 blocks | 2 |
 | Portable Beacon IV | 3 | II | your team | 16 blocks | 4 |
 
-**Cinder**, **Void** and **Tidal** beacons branch off tier II with narrow pools drawn from effects
+**Cinder**, **Void** and **Tidal** beacons sit alongside tier III with narrow pools drawn from effects
 the vanilla beacon never offered — Fire Resistance, Slow Falling, Water Breathing, Conduit Power,
 Dolphin's Grace. Carrying one instead of a Beacon IV is a trade, not a downgrade.
 
@@ -59,8 +59,8 @@ buffer, wider sharing, or no particles at all. One of each type per beacon, most
 The other seven give something up, and those are the interesting ones. **Wellspring** runs your most
 expensive effect for nothing and charges more for the rest. **Communion** makes sharing cheap and
 everything else dearer. **Wayfarer** and **Sentinel** are opposites — one is cheap while you travel,
-the other while you hold a position. **Recluse** halves your costs, triples your buffer and hides
-your particles, in exchange for sharing with nobody at all.
+the other while you hold a position. **Recluse** cuts your fuel to roughly a
+third, triples your buffer and hides your particles, in exchange for sharing with nobody at all.
 
 With at most four slots, the question is never which augment you want. It is which four.
 
